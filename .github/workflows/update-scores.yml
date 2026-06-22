@@ -1,18 +1,19 @@
 # Auto-updates World Cup scores into Firestore on a schedule.
-# Repo path: .github/workflows/update-scores.yml
+# Repo path: .github/workflows/update-scores.yml   (must be on the main branch)
 #
 # Secrets required (repo Settings -> Secrets and variables -> Actions):
 #   FIREBASE_SERVICE_ACCOUNT  = the full JSON of a Firebase service-account key
 #   FOOTBALL_TOKEN            = your football-data.org API token
 #
 # Note: GitHub's scheduled runs are best-effort and can be delayed several
-# minutes; treat this as ~10-15 min updates, not real-time.
+# minutes. */15 is more reliable than */5 (high-frequency schedules get
+# throttled). Treat this as ~15 min updates, not real-time.
 
 name: Update scores
 
-"on":
+on:
   schedule:
-    - cron: "*/5 * * * *"   # every 10 minutes
+    - cron: "*/15 * * * *"   # every 15 minutes
   workflow_dispatch:          # lets you run it manually from the Actions tab
 
 jobs:
@@ -23,7 +24,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "24"
+          node-version: "22"
 
       - run: npm install firebase-admin@12
 
