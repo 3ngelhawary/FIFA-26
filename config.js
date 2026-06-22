@@ -51,12 +51,12 @@ window.CONFIG = {
   // screen instead of running.
   storage: {
     firebase: {
-      apiKey: "",
-      authDomain: "",
-      projectId: "",
-      storageBucket: "",
-      messagingSenderId: "",
-      appId: ""
+      apiKey: "AIzaSyCGnZ1hgam5OkYoh0jF7moa3h4h7b1czfg",
+      authDomain: "egec-world-cup.firebaseapp.com",
+      projectId: "egec-world-cup",
+      storageBucket: "egec-world-cup.firebasestorage.app",
+      messagingSenderId: "280867142554",
+      appId: "1:280867142554:web:895cdc3ac8e99d33bdd823"
     }
   },
 
