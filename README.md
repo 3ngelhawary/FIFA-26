@@ -97,8 +97,9 @@ This commits new scores on a schedule; the live site reflects them automatically
 ## 3. Make it multiplayer (shared picks + real leaderboard)
 
 Out of the box the app runs in **local mode**: each person's picks are saved in their
-own browser, and the leaderboard shows demo colleagues plus the current user. That's
-great for trying it out, but picks aren't shared.
+own browser, and the leaderboard shows only that person. Picks aren't shared between
+colleagues — there's no shared database in local mode, so nobody can see anyone else.
+It's fine for trying the app out, but for a real office game you'll want shared mode.
 
 To run a real office-wide game where everyone's picks and standings are shared, switch
 to **Firebase** (free tier is plenty):
@@ -119,6 +120,20 @@ storage: {
 
 Everyone who enters their name now writes to a shared `predictions` collection, and the
 leaderboard becomes the real office standings, updating live.
+
+### Hidden predictions
+
+Whatever the mode, **a colleague's pick for a match is never shown until that match
+locks** (1 hour before kickoff). Before lock you only ever see your own pick; once a
+match locks, each card gets an **"Everyone's picks"** panel revealing what everyone
+predicted (and, after full-time, how many points each pick earned). That's what keeps
+the game fair — no copying.
+
+> Security note: the app hides colleagues' picks in the interface, which stops casual
+> peeking. For a tamper-proof game (where picks can't be read out of the database early
+> at all), add Firestore security rules — or a small Cloud Function — that only return
+> another player's pick for a match after its kickoff time. The client-side hiding here
+> is enough for a friendly office pool; the rules are for when there's a prize on the line.
 
 > Note: the simple version trusts people to enter their own name. For a locked-down
 > game, add Firebase Auth (e.g. Google sign-in restricted to your company domain) and

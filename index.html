@@ -152,6 +152,24 @@
   .saved{color:var(--green);font-weight:600;opacity:0;transition:opacity .25s}
   .saved.show{opacity:1}
   .locked-note{display:flex;align-items:center;justify-content:center;gap:8px;color:var(--muted);font-size:12.5px;margin-top:11px}
+  .hint{text-align:center;color:var(--faint);font-size:11.5px;margin-top:9px}
+
+  /* reveal everyone's picks (post-lock) */
+  .reveal{border-top:1px solid var(--line)}
+  .reveal-btn{
+    width:100%;background:transparent;border:0;color:var(--muted);cursor:pointer;font-family:inherit;
+    font-size:12.5px;font-weight:600;padding:11px 16px;display:flex;align-items:center;justify-content:center;gap:8px;
+  }
+  .reveal-btn:hover{color:var(--ink)}
+  .reveal-btn .chev{transition:transform .2s;display:inline-block}
+  .reveal-btn.open .chev{transform:rotate(90deg)}
+  .reveal-panel{padding:2px 16px 14px}
+  .pick-row{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:9px;font-size:13px}
+  .pick-row:nth-child(odd){background:rgba(255,255,255,.025)}
+  .pick-row.you{background:rgba(242,193,78,.08)}
+  .pick-row .pn{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:flex;align-items:center;gap:7px}
+  .pick-row .pp{font-family:"Oswald";font-weight:700;font-size:15px;font-variant-numeric:tabular-nums;color:var(--ink)}
+  .pick-empty{color:var(--faint);font-size:13px;text-align:center;padding:6px}
 
   .result-line{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:12px;flex-wrap:wrap}
   .yourpick{font-size:13px;color:var(--muted)}
@@ -174,7 +192,6 @@
   .rank.gold{color:var(--gold)} .rank.silver{color:#cfd8dc} .rank.bronze{color:#cd8b5b}
   .lb-name{font-weight:600;display:flex;align-items:center;gap:8px;min-width:0}
   .lb-name .you{font-size:10px;background:var(--gold);color:#1a1206;border-radius:5px;padding:1px 6px;font-weight:700}
-  .lb-name .demo{font-size:10px;color:var(--faint);border:1px solid var(--line-strong);border-radius:5px;padding:1px 6px}
   .lb-played{font-size:12px;color:var(--muted);white-space:nowrap}
   .lb-pts{font-family:"Oswald";font-weight:700;font-size:20px;color:var(--gold);font-variant-numeric:tabular-nums;text-align:right;min-width:42px}
 
@@ -272,8 +289,6 @@ const CFG = Object.assign({}, DEFAULT_CONFIG, (window.CONFIG||{}));
 CFG.scoring = Object.assign({}, DEFAULT_CONFIG.scoring, (window.CONFIG&&window.CONFIG.scoring)||{});
 CFG.storage = Object.assign({}, DEFAULT_CONFIG.storage, (window.CONFIG&&window.CONFIG.storage)||{});
 
-const DEMO_PLAYERS = ["Mona","Karim","Hany","Salma","Tarek","Nour","Amir","Dina"];
-
 /* ---------------- State ---------------- */
 let MATCHES = [];
 let USER = localStorage.getItem("egec_wc_user") || "";
@@ -317,30 +332,15 @@ const Store = {
       const p=this.localGet(); p[matchId]={h,a}; this.localSet(p);
     }
   },
-  /* all players for leaderboard */
+  /* all players (for leaderboard + locked-pick reveal) */
   allPlayers(){
     if(this.mode==="firebase"){
-      return Object.entries(this.allCache).map(([id,d])=>({name:d.name||id, picks:d.picks||{}, demo:false}));
+      return Object.entries(this.allCache).map(([id,d])=>({name:d.name||id, picks:d.picks||{}}));
     }
-    // local: the real user + deterministic demo colleagues so the board looks alive
-    const players=[];
-    if(USER) players.push({name:USER, picks:this.localGet(), demo:false});
-    DEMO_PLAYERS.forEach(n=> players.push({name:n, picks:demoPicks(n), demo:true}));
-    return players;
+    // local mode: only this browser's user exists
+    return USER ? [{name:USER, picks:this.localGet()}] : [];
   }
 };
-
-/* deterministic demo predictions so the demo leaderboard is consistent */
-function hashStr(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0;}
-function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;}}
-function demoPicks(name){
-  const out={};
-  MATCHES.forEach(m=>{
-    const r=mulberry32(hashStr(name+m.id));
-    out[m.id]={h:Math.floor(r()*4), a:Math.floor(r()*4)};
-  });
-  return out;
-}
 
 /* ---------------- Time / state helpers ---------------- */
 const now = ()=>Date.now();
@@ -386,6 +386,23 @@ function totalFor(picks){
     }
   });
   return {total, played};
+}
+
+/* Picks visible for a match. Others are revealed ONLY once the match is locked;
+   your own pick is always visible to you. */
+function picksForMatch(m){
+  const locked=isLocked(m), out=[];
+  Store.allPlayers().forEach(p=>{
+    const pk=p.picks[m.id];
+    if(!pk || pk.h==null) return;
+    const isYou = p.name===USER;
+    if(!locked && !isYou) return;            // keep colleagues' picks secret pre-lock
+    out.push({name:p.name, pick:pk, isYou, score: m.status==="finished"? scorePick(pk,m) : null});
+  });
+  out.sort((a,b)=> (b.isYou-a.isYou)
+                 || ((b.score?b.score.pts:0)-(a.score?a.score.pts:0))
+                 || a.name.localeCompare(b.name));
+  return out;
 }
 
 /* ---------------- Data loading ---------------- */
@@ -464,8 +481,8 @@ async function render(){
     `<span><b>${CFG.scoring.correctOutcome}</b> correct result</span>`+
     `<span><b>+${CFG.scoring.correctGoalsBonus}</b> per exact goals</span>`;
   $("#storageNote").innerHTML = Store.mode==="firebase"
-    ? "Shared mode: everyone's picks &amp; leaderboard are live."
-    : "Local mode: picks saved in this browser. Leaderboard shows demo colleagues until shared mode is enabled.";
+    ? "Shared mode: everyone appears on one leaderboard. Picks are hidden from colleagues until each match locks, then revealed."
+    : "Local mode: picks are saved only in this browser, so colleagues can't see each other yet. Enable shared mode (see README) for an office-wide game.";
 
   // tabs
   const tabsEl=$("#tabs"); tabsEl.innerHTML="";
@@ -601,8 +618,44 @@ function renderCard(m){
                    `<span class="lock-clock" data-countdown="${m.id}">--:--:--</span>`+
                    `<span class="saved" data-saved="${m.id}">Saved ✓</span>`;
     pred.appendChild(lock);
+
+    const hint=el("div","hint");
+    hint.innerHTML=`🔒 Your pick stays hidden from colleagues until it locks.`;
+    pred.appendChild(hint);
   }
   card.appendChild(pred);
+
+  // reveal everyone's picks — only after the match locks
+  if(locked){
+    const picks=picksForMatch(m);
+    const reveal=el("div","reveal");
+    const btn=el("button","reveal-btn");
+    btn.type="button";
+    btn.innerHTML=`<span>👁 Everyone's picks (${picks.length})</span><span class="chev">›</span>`;
+    const panel=el("div","reveal-panel"); panel.style.display="none";
+    if(!picks.length){
+      panel.innerHTML=`<div class="pick-empty">No picks were made for this match.</div>`;
+    } else {
+      picks.forEach(pp=>{
+        const r=el("div","pick-row"+(pp.isYou?" you":""));
+        let right="";
+        if(pp.score){
+          const cls=pp.score.kind==="hit"?"hit":pp.score.kind==="part"?"part":"miss";
+          right=`<span class="pts-badge ${cls}" style="font-size:12px;padding:2px 9px">${pp.score.kind==="hit"?"Exact +"+pp.score.pts:pp.score.pts>0?"+"+pp.score.pts:"0"}</span>`;
+        }
+        r.innerHTML=`<span class="pn">${escapeHtml(pp.name)}${pp.isYou?' <span class="you">YOU</span>':''}</span>`+
+                    `<span class="pp">${pp.pick.h}-${pp.pick.a}</span>${right}`;
+        panel.appendChild(r);
+      });
+    }
+    btn.onclick=()=>{
+      const open=panel.style.display!=="none";
+      panel.style.display=open?"none":"";
+      btn.classList.toggle("open",!open);
+    };
+    reveal.appendChild(btn); reveal.appendChild(panel);
+    card.appendChild(reveal);
+  }
   return card;
 }
 
@@ -650,23 +703,22 @@ function renderBoard(){
   const board=el("div","board");
   const players=Store.allPlayers().map(p=>{
     const t=totalFor(p.picks);
-    return {name:p.name, demo:p.demo, pts:t.total, played:t.played};
+    return {name:p.name, pts:t.total, played:t.played};
   }).sort((a,b)=> b.pts-a.pts || b.played-a.played || a.name.localeCompare(b.name));
 
   const h=el("h2");
-  h.innerHTML=`<span>🏆 Leaderboard</span><span class="mode">${Store.mode==="firebase"?"Shared":"Demo + you"}</span>`;
+  h.innerHTML=`<span>🏆 Leaderboard</span><span class="mode">${Store.mode==="firebase"?"Shared · live":"This browser only"}</span>`;
   board.appendChild(h);
 
   if(!players.length){ const e=el("div","empty");e.innerHTML='<div class="big">No players yet</div><div>Enter your name and start predicting.</div>';board.appendChild(e);return board; }
 
   players.forEach((p,i)=>{
-    const row=el("div","lb-row"+(p.name===USER&&!p.demo?" me":""));
+    const row=el("div","lb-row"+(p.name===USER?" me":""));
     const rk=el("div","rank"+(i===0?" gold":i===1?" silver":i===2?" bronze":""));
     rk.textContent=i+1;
     const nm=el("div","lb-name");
     nm.innerHTML=`<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(p.name)}</span>`+
-      (p.name===USER&&!p.demo?`<span class="you">YOU</span>`:"")+
-      (p.demo?`<span class="demo">demo</span>`:"");
+      (p.name===USER?`<span class="you">YOU</span>`:"");
     const pl=el("div","lb-played"); pl.textContent=p.played+" scored";
     const pt=el("div","lb-pts"); pt.textContent=p.pts;
     row.appendChild(rk);row.appendChild(nm);row.appendChild(pl);row.appendChild(pt);
