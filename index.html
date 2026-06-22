@@ -148,6 +148,7 @@
   .status.live{color:var(--lose)} .status.live .dot{background:var(--lose);animation:pulse 1.2s infinite}
   .status.ft{color:var(--win)} .status.ft .dot{background:var(--win)}
   .status.locked{color:var(--draw)} .status.locked .dot{background:var(--draw)}
+  .status.pending{color:var(--draw)} .status.pending .dot{background:var(--draw);opacity:.8}
   @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,45,85,.6)}70%{box-shadow:0 0 0 8px rgba(255,45,85,0)}100%{box-shadow:0 0 0 0 rgba(255,45,85,0)}}
 
   .scoreboard{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;padding:18px 14px 10px}
@@ -248,6 +249,12 @@
   .org-save{border:1px solid var(--line-2);background:rgba(43,255,136,.1);color:var(--win);border-radius:8px;
     padding:8px 12px;font-family:inherit;font-weight:700;cursor:pointer;font-size:12.5px}
   .org-save:hover{background:rgba(43,255,136,.2)}
+  .org-live{border:1px solid var(--line-2);background:rgba(255,45,85,.1);color:var(--lose);border-radius:8px;
+    padding:8px 11px;font-family:inherit;font-weight:700;cursor:pointer;font-size:12.5px}
+  .org-live:hover{background:rgba(255,45,85,.22)}
+  .org-clear{width:34px;height:36px;border:1px solid var(--line-2);background:rgba(255,255,255,.04);color:var(--muted);
+    border-radius:8px;cursor:pointer;font-size:18px;line-height:1}
+  .org-clear:hover{color:var(--ink);border-color:var(--muted)}
   .org-add{display:flex;gap:8px;padding:14px 15px;border-bottom:1px solid var(--line)}
   .org-add input{flex:1;background:#070912;border:1px solid var(--line-2);color:var(--ink);border-radius:10px;padding:11px;font-family:inherit;outline:none}
 
@@ -411,6 +418,10 @@ const Store={
     await this.fs.setDoc(this.fs.doc(this.db,"results",matchId),{homeScore:h,awayScore:a,status});
   },
 
+  async clearResult(matchId){
+    try{ await this.fs.deleteDoc(this.fs.doc(this.db,"results",matchId)); }catch(e){}
+  },
+
   async deletePick(code,name,matchId){
     const cur=Object.assign({},(this.cache.preds[code]&&this.cache.preds[code].picks)||{});
     delete cur[matchId];
@@ -429,6 +440,21 @@ function genCode(){
   return s;
 }
 
+/* Sign-up name rule: exactly two names, letters only, single space between
+   (e.g. "Mohamed Salah"). Latin + accented + Arabic letters allowed. */
+const NAME_LETTERS="A-Za-z\\u00C0-\\u024F\\u0600-\\u06FF";
+const NAME_FILTER=new RegExp("[^"+NAME_LETTERS+" ]","g");
+const NAME_RE=new RegExp("^["+NAME_LETTERS+"]{2,} ["+NAME_LETTERS+"]{2,}$");
+function validateFullName(raw){
+  const name=String(raw||"").trim().replace(/\s+/g," ");
+  if(!NAME_RE.test(name)) return {ok:false,error:"Enter exactly two names with a space — e.g. Mohamed Salah."};
+  return {ok:true,value:name};
+}
+function nameTaken(name){
+  const lc=name.toLowerCase();
+  return Object.values(Store.players()).some(p=>String(p.name||"").trim().toLowerCase()===lc);
+}
+
 /* ---------------- Effective match (apply organizer results) ---------------- */
 function eff(m){
   const r=Store.resultsAll()[m.id];
@@ -440,7 +466,7 @@ function eff(m){
 const now=()=>Date.now();
 const ko=m=>new Date(m.kickoff).getTime();
 const lockAt=m=>ko(m)-CFG.lockOffsetMinutes*60000;
-function liveState(m){if(m.status==="finished")return"finished";if(m.status==="live")return"live";if(now()>=ko(m))return"live";return"upcoming";}
+function liveState(m){if(m.status==="finished")return"finished";if(m.status==="live")return"live";if(now()>=ko(m))return"pending";return"upcoming";}
 const isLocked=m=>liveState(m)!=="upcoming"||now()>=lockAt(m);
 function outcome(m){if(m.homeScore==null||m.awayScore==null)return null;if(m.homeScore>m.awayScore)return"home";if(m.awayScore>m.homeScore)return"away";return"draw";}
 
@@ -587,14 +613,16 @@ function drawAuth(){
   const body=$("#authBody");
   if(authMode==="register"){
     body.innerHTML=`
-      <label class="fld">Your name</label>
-      <input id="regName" class="input" placeholder="e.g. Mohamed Salah" autocomplete="off" />
+      <label class="fld">Your full name</label>
+      <input id="regName" class="input" placeholder="e.g. Mohamed Salah" autocomplete="off" maxlength="40" />
       <button class="btn" id="regBtn">Create my code</button>
       <div class="err" id="regErr"></div>
-      <div class="hint-sm">You'll get a unique 6-character code. Save it — it's how you log in from any device.</div>`;
+      <div class="hint-sm">Use <b>two names</b> with a space between (first &amp; last), e.g. <span class="neon-cyan">Mohamed Salah</span>. Letters only.</div>`;
+    const rn=$("#regName");
+    rn.addEventListener("input",()=>{const c=rn.selectionStart;rn.value=rn.value.replace(NAME_FILTER,"");try{rn.setSelectionRange(c,c);}catch(e){}});
     $("#regBtn").onclick=doRegister;
-    $("#regName").addEventListener("keydown",e=>{if(e.key==="Enter")doRegister();});
-    setTimeout(()=>$("#regName").focus(),50);
+    rn.addEventListener("keydown",e=>{if(e.key==="Enter")doRegister();});
+    setTimeout(()=>rn.focus(),50);
   }else{
     body.innerHTML=`
       <label class="fld">Your login code</label>
@@ -610,12 +638,18 @@ function drawAuth(){
   }
 }
 async function doRegister(){
-  const name=$("#regName").value.trim();
-  if(name.length<2){$("#regErr").textContent="Enter your name (at least 2 letters).";return;}
-  $("#regBtn").disabled=true;
-  const code=await Store.addPlayer(name);
-  ME={name,code};SESSION=code;localStorage.setItem("egec_session",code);
-  showCodeReveal(name,code);
+  const v=validateFullName($("#regName").value);
+  if(!v.ok){$("#regErr").textContent=v.error;return;}
+  if(!Store.loaded.players){$("#regErr").textContent="Still connecting — try again in a second.";return;}
+  if(nameTaken(v.value)){$("#regErr").textContent="That name is already taken. Add your middle name, or ask your organizer for your code.";return;}
+  const btn=$("#regBtn");btn.disabled=true;$("#regErr").textContent="";
+  try{
+    const code=await Store.addPlayer(v.value);
+    ME={name:v.value,code};SESSION=code;localStorage.setItem("egec_session",code);
+    showCodeReveal(v.value,code);
+  }catch(e){
+    btn.disabled=false;$("#regErr").textContent="Couldn't save — check your connection and try again.";
+  }
 }
 function showCodeReveal(name,code){
   const ac=$("#ac");
@@ -744,8 +778,11 @@ function renderCard(m){
 
   const head=el("div","card-head");
   const grp=el("span","grp");grp.textContent="Group "+m.group+(m.venue?" · "+m.venue:"");
-  const st=el("span","status "+(state==="live"?"live":state==="finished"?"ft":locked?"locked":""));
-  st.innerHTML=`<span class="dot"></span>${state==="live"?"LIVE":state==="finished"?"FULL TIME":locked?"LOCKED":"UPCOMING"}`;
+  const hasScore=m.homeScore!=null&&m.awayScore!=null;
+  const label=state==="live"?"LIVE":state==="finished"?"FULL TIME":state==="pending"?"RESULT PENDING":locked?"LOCKED":"UPCOMING";
+  const stCls=state==="live"?"live":state==="finished"?"ft":state==="pending"?"pending":locked?"locked":"";
+  const st=el("span","status "+stCls);
+  st.innerHTML=`<span class="dot"></span>${label}`;
   head.appendChild(grp);head.appendChild(st);card.appendChild(head);
 
   // result colour classes
@@ -758,6 +795,7 @@ function renderCard(m){
   const hn=el("span","tname");hn.textContent=m.home;home.appendChild(hn);
   const center=el("div","center");
   if(state==="upcoming"){center.innerHTML=`<div class="vs">VS</div><div class="ko">${fmtKO(m)}</div>`;}
+  else if(state==="pending"&&!hasScore){center.innerHTML=`<div class="score" style="color:var(--faint)">–<span class="sep">-</span>–</div><div class="ko">awaiting result</div>`;}
   else{center.innerHTML=`<div class="score"><span class="${out==='home'?'s-win':out==='draw'?'s-draw':out?'s-lose':''}">${m.homeScore??0}</span><span class="sep">-</span><span class="${out==='away'?'s-win':out==='draw'?'s-draw':out?'s-lose':''}">${m.awayScore??0}</span></div>`;}
   const away=el("div","team away "+aC);
   const an=el("span","tname");an.textContent=m.away;away.appendChild(an);
@@ -971,18 +1009,25 @@ function renderOrg(){
     const ctrl=el("div","org-controls");
     ctrl.innerHTML=`<input class="mini" id="oh-${m.id}" type="number" min="0" value="${m.homeScore??""}" placeholder="-"/>
       <input class="mini" id="oa-${m.id}" type="number" min="0" value="${m.awayScore??""}" placeholder="-"/>
-      <button class="org-save" data-save="${m.id}">${m.status==="finished"?"Update":"Set FT"}</button>`;
+      <button class="org-live" data-live="${m.id}">Live</button>
+      <button class="org-save" data-final="${m.id}">Final</button>
+      <button class="org-clear" data-clear="${m.id}" title="Clear result">×</button>`;
     row.appendChild(t);row.appendChild(ctrl);rPanel.appendChild(row);
   });
   wrap.appendChild(rPanel);
 
   setTimeout(()=>{
-    $("#orgAddBtn").onclick=async()=>{const n=$("#orgName").value.trim();if(n.length<2){toast("Enter a name");return;}const code=await Store.addPlayer(n);toast(n+" added · code "+code);$("#orgName").value="";renderApp();};
-    wrap.querySelectorAll("[data-save]").forEach(b=>{
-      b.onclick=async()=>{const id=b.getAttribute("data-save");const h=parseInt($("#oh-"+id).value,10),a=parseInt($("#oa-"+id).value,10);
-        if(isNaN(h)||isNaN(a)){toast("Enter both scores");return;}
-        await Store.setResult(id,h,a,"finished");toast("Result saved");renderApp();};
-    });
+    $("#orgAddBtn").onclick=async()=>{
+      const v=validateFullName($("#orgName").value);
+      if(!v.ok){toast(v.error);return;}
+      if(nameTaken(v.value)){toast("That name is already taken");return;}
+      const code=await Store.addPlayer(v.value);toast(v.value+" added · code "+code);$("#orgName").value="";renderApp();
+    };
+    const on=$("#orgName");if(on)on.addEventListener("input",()=>on.value=on.value.replace(NAME_FILTER,""));
+    const rd=(id)=>{const h=parseInt($("#oh-"+id).value,10),a=parseInt($("#oa-"+id).value,10);return{h,a,ok:!(isNaN(h)||isNaN(a))};};
+    wrap.querySelectorAll("[data-live]").forEach(b=>b.onclick=async()=>{const id=b.getAttribute("data-live");const s=rd(id);if(!s.ok){toast("Enter both scores");return;}await Store.setResult(id,s.h,s.a,"live");toast("Live score updated");renderApp();});
+    wrap.querySelectorAll("[data-final]").forEach(b=>b.onclick=async()=>{const id=b.getAttribute("data-final");const s=rd(id);if(!s.ok){toast("Enter both scores");return;}await Store.setResult(id,s.h,s.a,"finished");toast("Final result saved");renderApp();});
+    wrap.querySelectorAll("[data-clear]").forEach(b=>b.onclick=async()=>{const id=b.getAttribute("data-clear");await Store.clearResult(id);toast("Result cleared");renderApp();});
   },0);
   return wrap;
 }
