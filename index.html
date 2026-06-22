@@ -251,6 +251,15 @@
   .org-add{display:flex;gap:8px;padding:14px 15px;border-bottom:1px solid var(--line)}
   .org-add input{flex:1;background:#070912;border:1px solid var(--line-2);color:var(--ink);border-radius:10px;padding:11px;font-family:inherit;outline:none}
 
+  .org-prow{display:flex;align-items:center;gap:12px;padding:11px 15px;border-bottom:1px solid var(--line)}
+  .org-prow:last-child{border-bottom:0}
+  .op-info{flex:1;min-width:0}
+  .op-info .n{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .op-code{font-size:12px;color:var(--muted);margin-top:2px}
+  .op-actions{display:flex;align-items:center;gap:7px;flex:0 0 auto}
+  .op-copy{width:38px;height:38px;border-radius:10px;border:1px solid var(--line-2);background:rgba(0,229,255,.08);color:var(--cyan);cursor:pointer;font-size:15px}
+  .op-copy:hover{background:rgba(0,229,255,.2)}
+
   .empty{text-align:center;color:var(--muted);padding:44px 20px;border:1px dashed var(--line-2);border-radius:var(--radius)}
   .empty .big{font-family:"Oswald";font-size:20px;color:var(--ink);margin-bottom:6px}
 
@@ -406,6 +415,11 @@ const Store={
     const cur=Object.assign({},(this.cache.preds[code]&&this.cache.preds[code].picks)||{});
     delete cur[matchId];
     await this.fs.setDoc(this.fs.doc(this.db,"predictions",code),{name,picks:cur});
+  },
+
+  async deletePlayer(code){
+    await this.fs.deleteDoc(this.fs.doc(this.db,"players",code));
+    try{ await this.fs.deleteDoc(this.fs.doc(this.db,"predictions",code)); }catch(e){}
   }
 };
 
@@ -908,15 +922,48 @@ function renderRoster(){
 }
 
 function renderOrg(){
-  const panel=el("div","panel");
-  const h=el("h2");h.innerHTML=`<span>⚙ Organizer</span><span class="meta">enter scores · add players</span>`;panel.appendChild(h);
+  const wrap=el("div");
 
-  // add player
+  /* ---- Players management ---- */
+  const pPanel=el("div","panel");
+  const ph=el("h2");ph.innerHTML=`<span>⚙ Players</span><span class="meta">add · codes · remove</span>`;pPanel.appendChild(ph);
+
   const add=el("div","org-add");
   add.innerHTML=`<input id="orgName" placeholder="Add a player by name" autocomplete="off"/><button class="org-save" id="orgAddBtn">Add</button>`;
-  panel.appendChild(add);
+  pPanel.appendChild(add);
 
-  // score editors (upcoming/live/finished — anything kicked off or you want to pre-set)
+  const players=Object.values(Store.players()).sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
+  const preds=Store.predsAll();
+  if(!players.length){
+    const e=el("div","empty");e.style.margin="14px";e.innerHTML='<div class="big">No players yet</div><div>Add colleagues above, or share the site so they register.</div>';
+    pPanel.appendChild(e);
+  }else{
+    players.forEach(p=>{
+      const n=Object.values((preds[p.code]&&preds[p.code].picks)||{}).filter(x=>x&&x.h!=null).length;
+      const row=el("div","org-prow");
+      const av=el("div","av");av.textContent=(p.name[0]||"?").toUpperCase();
+      const info=el("div","op-info");
+      info.innerHTML=`<div class="n">${esc(p.name)}${ME&&p.code===ME.code?' <span class="tag you">YOU</span>':''}</div>
+        <div class="op-code">code <b class="mycode">${p.code}</b> · ${n} pick${n===1?"":"s"}</div>`;
+      const actions=el("div","op-actions");
+      const copy=el("button","op-copy");copy.type="button";copy.title="Copy code";copy.textContent="📋";
+      copy.onclick=()=>{navigator.clipboard&&navigator.clipboard.writeText(p.code);toast("Copied "+p.name+"'s code");};
+      const del=el("button","mp-remove");del.type="button";del.title="Remove player";del.textContent="🗑";
+      del.onclick=async()=>{
+        if(!confirm(`Remove ${p.name}? This deletes their account, code and predictions. This can't be undone.`))return;
+        await Store.deletePlayer(p.code);
+        if(ME&&p.code===ME.code){logout();return;}
+        toast(p.name+" removed");renderApp();
+      };
+      actions.appendChild(copy);actions.appendChild(del);
+      row.appendChild(av);row.appendChild(info);row.appendChild(actions);pPanel.appendChild(row);
+    });
+  }
+  wrap.appendChild(pPanel);
+
+  /* ---- Match results ---- */
+  const rPanel=el("div","panel");rPanel.style.marginTop="16px";
+  const rh=el("h2");rh.innerHTML=`<span>⚙ Match results</span><span class="meta">enter final scores</span>`;rPanel.appendChild(rh);
   const arr=MATCHES.map(eff).sort((a,b)=>ko(a)-ko(b));
   arr.forEach(m=>{
     const row=el("div","org-row");
@@ -925,18 +972,19 @@ function renderOrg(){
     ctrl.innerHTML=`<input class="mini" id="oh-${m.id}" type="number" min="0" value="${m.homeScore??""}" placeholder="-"/>
       <input class="mini" id="oa-${m.id}" type="number" min="0" value="${m.awayScore??""}" placeholder="-"/>
       <button class="org-save" data-save="${m.id}">${m.status==="finished"?"Update":"Set FT"}</button>`;
-    row.appendChild(t);row.appendChild(ctrl);panel.appendChild(row);
+    row.appendChild(t);row.appendChild(ctrl);rPanel.appendChild(row);
   });
+  wrap.appendChild(rPanel);
 
   setTimeout(()=>{
     $("#orgAddBtn").onclick=async()=>{const n=$("#orgName").value.trim();if(n.length<2){toast("Enter a name");return;}const code=await Store.addPlayer(n);toast(n+" added · code "+code);$("#orgName").value="";renderApp();};
-    panel.querySelectorAll("[data-save]").forEach(b=>{
+    wrap.querySelectorAll("[data-save]").forEach(b=>{
       b.onclick=async()=>{const id=b.getAttribute("data-save");const h=parseInt($("#oh-"+id).value,10),a=parseInt($("#oa-"+id).value,10);
         if(isNaN(h)||isNaN(a)){toast("Enter both scores");return;}
         await Store.setResult(id,h,a,"finished");toast("Result saved");renderApp();};
     });
   },0);
-  return panel;
+  return wrap;
 }
 
 function toggleAdmin(){
