@@ -241,6 +241,30 @@
   .empty{text-align:center;color:var(--muted);padding:44px 20px;border:1px dashed var(--line-2);border-radius:var(--radius)}
   .empty .big{font-family:"Oswald";font-size:20px;color:var(--ink);margin-bottom:6px}
 
+  /* local-mode banner */
+  .banner{display:flex;gap:11px;align-items:flex-start;border:1px solid rgba(255,230,0,.35);background:rgba(255,230,0,.07);
+    color:#ffe9a3;border-radius:14px;padding:12px 14px;margin:18px 0 2px;font-size:13px;line-height:1.5}
+  .banner code{background:rgba(255,255,255,.1);padding:1px 6px;border-radius:5px;font-size:12px;color:#fff}
+  .banner .bdot{width:9px;height:9px;border-radius:50%;background:var(--draw);box-shadow:0 0 10px var(--draw);margin-top:4px;flex:0 0 auto}
+
+  /* My Picks rows */
+  .mp-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 15px;border-bottom:1px solid var(--line)}
+  .mp-row:last-child{border-bottom:0}
+  .mp-info{flex:1 1 190px;min-width:0}
+  .mp-teams{display:flex;align-items:center;gap:8px;font-family:"Oswald";font-weight:600;font-size:15px}
+  .mp-teams .flag{width:26px;height:19px}
+  .mp-teams .vmid{color:var(--faint);font-size:12px}
+  .mpt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px}
+  .mp-sub{font-size:11.5px;color:var(--muted);margin-top:3px}
+  .mp-ctrl{display:flex;align-items:center;gap:10px}
+  .mp-steppers{display:flex;align-items:center;gap:8px}
+  .mp-steppers .stepper button{width:30px;height:36px;font-size:18px}
+  .mp-steppers .stepper input{width:36px;height:36px;font-size:18px}
+  .mp-remove{width:38px;height:38px;border-radius:10px;border:1px solid var(--line-2);background:rgba(255,45,85,.08);color:var(--lose);cursor:pointer;font-size:15px}
+  .mp-remove:hover{background:rgba(255,45,85,.2)}
+  .mp-pick{display:flex;align-items:center;gap:9px}
+  .mp-val{font-family:"Oswald";font-weight:700;font-size:20px;color:var(--ink)}
+
   .foot{margin-top:24px;text-align:center;color:var(--faint);font-size:12px;line-height:1.7}
   .scoring-key{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:8px;color:var(--muted)}
   .scoring-key b{color:var(--cyan);font-family:"Oswald"}
@@ -378,6 +402,16 @@ const Store={
     const rec={homeScore:h,awayScore:a,status};
     if(this.mode==="firebase"){await this.fs.setDoc(this.fs.doc(this.db,"results",matchId),rec);}
     else{const o=this.L.results();o[matchId]=rec;this.L.setResults(o);}
+  },
+
+  async deletePick(code,name,matchId){
+    if(this.mode==="firebase"){
+      const cur=Object.assign({},(this.cache.preds[code]&&this.cache.preds[code].picks)||{});
+      delete cur[matchId];
+      await this.fs.setDoc(this.fs.doc(this.db,"predictions",code),{name,picks:cur});
+    }else{
+      const all=this.L.preds();if(all[code]&&all[code].picks){delete all[code].picks[matchId];this.L.setPreds(all);}
+    }
   }
 };
 
@@ -545,7 +579,7 @@ async function doLogin(){
 function logout(){ME=null;SESSION="";localStorage.removeItem("egec_session");isAdmin=false;sessionStorage.removeItem("egec_admin");activeTab="today";render();}
 
 /* ---- App shell ---- */
-const TABS=[{id:"today",label:"Today"},{id:"upcoming",label:"Upcoming"},{id:"finished",label:"Finished"},{id:"players",label:"Players"},{id:"board",label:"Leaderboard"}];
+const TABS=[{id:"today",label:"Today"},{id:"upcoming",label:"Upcoming"},{id:"finished",label:"Finished"},{id:"mine",label:"My Picks"},{id:"players",label:"Players"},{id:"board",label:"Leaderboard"}];
 function startToday(){const d=new Date();d.setHours(0,0,0,0);return d.getTime();}
 function endToday(){const d=new Date();d.setHours(23,59,59,999);return d.getTime();}
 function listFor(tab){
@@ -573,6 +607,10 @@ function renderApp(){
     </div>
   </div></header>
   <div class="wrap">
+    ${Store.mode!=="firebase"?`<div class="banner" id="localBanner">
+      <span class="bdot"></span>
+      <div><b>Local mode</b> — accounts &amp; picks are saved only on <u>this device</u>. Other PCs won't see these players or this leaderboard.
+      Turn on shared mode in <code>config.js</code> to sync everyone.</div></div>`:""}
     <section class="hero" id="hero" style="display:none"><div class="hero-in" id="heroIn"></div></section>
     <nav class="tabs" id="tabs"></nav>
     <main id="view"></main>
@@ -604,6 +642,7 @@ function renderApp(){
   if(activeTab==="board"){view.appendChild(renderBoard());return;}
   if(activeTab==="players"){view.appendChild(renderRoster());return;}
   if(activeTab==="org"){view.appendChild(renderOrg());return;}
+  if(activeTab==="mine"){view.appendChild(renderMyPicks());tick();return;}
 
   const list=listFor(activeTab);
   if(!list.length){view.appendChild(emptyState(activeTab));return;}
@@ -734,6 +773,55 @@ async function savePick(m,side,v){
   const s=document.querySelector(`[data-saved="${m.id}"]`);
   if(s){s.classList.add("show");clearTimeout(savedTimer);savedTimer=setTimeout(()=>s.classList.remove("show"),1300);}
   $(".me-chip .pts").innerHTML=totalFor(Store.myPicks(ME.code)).total+'<small> PTS</small>';
+}
+
+function renderMyPicks(){
+  const wrap=el("div");
+  const picks=Store.myPicks(ME.code);
+  const list=MATCHES.map(eff).filter(m=>picks[m.id]&&picks[m.id].h!=null).sort((a,b)=>ko(a)-ko(b));
+  if(!list.length){const e=el("div","empty");e.innerHTML='<div class="big">No predictions yet</div><div>Open Today or Upcoming and predict a scoreline.</div>';wrap.appendChild(e);return wrap;}
+  const editable=list.filter(m=>!isLocked(m)).length;
+  const panel=el("div","panel");
+  const h=el("h2");h.innerHTML=`<span>📝 My Picks</span><span class="meta">${list.length} total · ${editable} editable</span>`;panel.appendChild(h);
+  list.forEach(m=>{
+    const pick=picks[m.id],locked=isLocked(m);
+    const row=el("div","mp-row");
+    const info=el("div","mp-info");
+    const teams=el("div","mp-teams");
+    teams.appendChild(flagEl(m.home,m.homeFlag));
+    const hn=el("span","mpt");hn.textContent=m.home;teams.appendChild(hn);
+    const vm=el("span","vmid");vm.textContent="v";teams.appendChild(vm);
+    const an=el("span","mpt");an.textContent=m.away;teams.appendChild(an);
+    teams.appendChild(flagEl(m.away,m.awayFlag));
+    const sub=el("div","mp-sub");
+    sub.textContent="Group "+m.group+" · "+(m.status==="finished"?("Full time "+(m.homeScore??0)+"-"+(m.awayScore??0)):locked?"Locked":fmtKO(m));
+    info.appendChild(teams);info.appendChild(sub);row.appendChild(info);
+
+    const ctrl=el("div","mp-ctrl");
+    if(!locked){
+      const st=el("div","mp-steppers");
+      st.appendChild(stepper(m,"h",pick.h));
+      const d=el("span","pred-mid");d.textContent="–";st.appendChild(d);
+      st.appendChild(stepper(m,"a",pick.a));
+      ctrl.appendChild(st);
+      const rm=el("button","mp-remove");rm.type="button";rm.title="Remove this prediction";rm.textContent="🗑";
+      rm.onclick=()=>removePick(m);
+      ctrl.appendChild(rm);
+    }else{
+      const pv=el("div","mp-pick");
+      const val=el("span","mp-val");val.textContent=pick.h+"-"+pick.a;pv.appendChild(val);
+      if(m.status==="finished"){const sc=scorePick(pick,m);const b=el("span","pts-badge "+sc.kind);b.textContent=sc.kind==="hit"?"+"+sc.pts:sc.pts>0?"+"+sc.pts:"0";pv.appendChild(b);}
+      ctrl.appendChild(pv);
+    }
+    row.appendChild(ctrl);panel.appendChild(row);
+  });
+  wrap.appendChild(panel);
+  return wrap;
+}
+async function removePick(m){
+  await Store.deletePick(ME.code,ME.name,m.id);
+  toast("Prediction removed");
+  renderApp();
 }
 
 function renderBoard(){
