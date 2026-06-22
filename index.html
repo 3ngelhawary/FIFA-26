@@ -72,6 +72,19 @@
   .err{color:var(--lose);font-size:13px;margin-top:10px;min-height:18px;text-align:center}
   .hint-sm{color:var(--faint);font-size:12px;margin-top:14px;text-align:center;line-height:1.6}
 
+  .spinner{width:34px;height:34px;border-radius:50%;margin:18px auto 0;
+    border:3px solid rgba(255,255,255,.12);border-top-color:var(--cyan);animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .setup-title{font-family:"Oswald";font-weight:600;font-size:20px;margin:18px 0 6px}
+  .setup-lead{color:var(--muted);font-size:13.5px;line-height:1.6;margin:0 0 14px}
+  .setup-steps{margin:0 0 14px;padding-left:20px;color:var(--ink);font-size:13.5px;line-height:1.8}
+  .setup-steps li{margin-bottom:2px}
+  .mono{font-family:"Oswald";letter-spacing:.4px;color:var(--cyan);background:rgba(0,229,255,.08);padding:1px 6px;border-radius:5px}
+  pre.rules{background:#070912;border:1px solid var(--line-2);border-radius:11px;padding:12px;font-size:11.5px;line-height:1.5;
+    color:#bfe9ff;overflow-x:auto;white-space:pre;margin:0 0 14px}
+  .errd{color:var(--lose);font-size:12px;background:rgba(255,45,85,.08);border:1px solid rgba(255,45,85,.3);
+    border-radius:9px;padding:9px 11px;margin-bottom:12px;word-break:break-word}
+
   .code-reveal{text-align:center}
   .code-reveal .big-code{
     font-family:"Oswald";font-weight:700;font-size:40px;letter-spacing:8px;margin:14px 0 6px;
@@ -343,75 +356,56 @@ let activeTab="today";
 let authMode="register";
 let savedTimer=null;
 
-/* ---------------- Storage (local | firebase) ---------------- */
+/* ---------------- Storage (shared / Firebase only) ---------------- */
 const Store={
-  mode:(CFG.storage.mode==="firebase"&&CFG.storage.firebase&&CFG.storage.firebase.apiKey)?"firebase":"local",
-  db:null,fs:null,
+  ready:false, error:"", errDetail:"",
+  db:null, fs:null,
   cache:{players:{},preds:{},results:{}},
-
-  /* local helpers */
-  L:{
-    players:()=>JSON.parse(localStorage.getItem("egec_players")||"{}"),
-    setPlayers:o=>localStorage.setItem("egec_players",JSON.stringify(o)),
-    preds:()=>JSON.parse(localStorage.getItem("egec_preds")||"{}"),
-    setPreds:o=>localStorage.setItem("egec_preds",JSON.stringify(o)),
-    results:()=>JSON.parse(localStorage.getItem("egec_results")||"{}"),
-    setResults:o=>localStorage.setItem("egec_results",JSON.stringify(o))
-  },
+  loaded:{players:false,preds:false,results:false},
 
   async init(){
-    if(this.mode!=="firebase")return;
+    const cfg=CFG.storage.firebase||{};
+    if(!cfg.apiKey||!cfg.projectId){ this.error="config"; return; }
     try{
       const a=await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
       const f=await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
-      const app=a.initializeApp(CFG.storage.firebase);this.db=f.getFirestore(app);this.fs=f;
-      const sub=(col,key)=>f.onSnapshot(f.collection(this.db,col),s=>{this.cache[key]={};s.forEach(d=>this.cache[key][d.id]=d.data());render();});
-      sub("players","players");sub("predictions","preds");sub("results","results");
-    }catch(e){console.warn("Firebase failed -> local",e);this.mode="local";}
+      const app=a.initializeApp(cfg); this.db=f.getFirestore(app); this.fs=f;
+      this.ready=true;
+      const sub=(col,key)=>f.onSnapshot(f.collection(this.db,col),
+        s=>{ this.cache[key]={}; s.forEach(d=>this.cache[key][d.id]=d.data()); this.loaded[key]=true; render(); },
+        err=>{ this.error="rules"; this.errDetail=err.message||String(err); render(); });
+      sub("players","players"); sub("predictions","preds"); sub("results","results");
+    }catch(e){ this.error="init"; this.errDetail=(e&&e.message)||String(e); }
   },
 
-  players(){return this.mode==="firebase"?this.cache.players:this.L.players();},
-  predsAll(){return this.mode==="firebase"?this.cache.preds:this.L.preds();},
-  resultsAll(){return this.mode==="firebase"?this.cache.results:this.L.results();},
-
+  players(){return this.cache.players;},
+  predsAll(){return this.cache.preds;},
+  resultsAll(){return this.cache.results;},
   getByCode(code){const p=this.players();return p[code]?{name:p[code].name,code}:null;},
 
   async addPlayer(name){
-    const existing=this.players();
-    let code; do{code=genCode();}while(existing[code]);
+    let code; do{code=genCode();}while(this.players()[code]);
     const rec={name,code,createdAt:Date.now()};
-    if(this.mode==="firebase"){await this.fs.setDoc(this.fs.doc(this.db,"players",code),rec);}
-    else{const o=this.L.players();o[code]=rec;this.L.setPlayers(o);}
+    await this.fs.setDoc(this.fs.doc(this.db,"players",code),rec);
     return code;
   },
 
   myPicks(code){const all=this.predsAll();return (all[code]&&all[code].picks)||{};},
 
   async savePick(code,name,matchId,h,a){
-    if(this.mode==="firebase"){
-      const cur=(this.cache.preds[code]&&this.cache.preds[code].picks)||{};
-      cur[matchId]={h,a};
-      await this.fs.setDoc(this.fs.doc(this.db,"predictions",code),{name,picks:cur},{merge:true});
-    }else{
-      const all=this.L.preds();all[code]=all[code]||{name,picks:{}};all[code].name=name;
-      all[code].picks[matchId]={h,a};this.L.setPreds(all);
-    }
+    const cur=(this.cache.preds[code]&&this.cache.preds[code].picks)||{};
+    cur[matchId]={h,a};
+    await this.fs.setDoc(this.fs.doc(this.db,"predictions",code),{name,picks:cur},{merge:true});
   },
 
   async setResult(matchId,h,a,status){
-    const rec={homeScore:h,awayScore:a,status};
-    if(this.mode==="firebase"){await this.fs.setDoc(this.fs.doc(this.db,"results",matchId),rec);}
-    else{const o=this.L.results();o[matchId]=rec;this.L.setResults(o);}
+    await this.fs.setDoc(this.fs.doc(this.db,"results",matchId),{homeScore:h,awayScore:a,status});
   },
 
   async deletePick(code,name,matchId){
-    if(this.mode==="firebase"){
-      const cur=Object.assign({},(this.cache.preds[code]&&this.cache.preds[code].picks)||{});
-      delete cur[matchId];
-      await this.fs.setDoc(this.fs.doc(this.db,"predictions",code),{name,picks:cur});
-    }else{
-      const all=this.L.preds();if(all[code]&&all[code].picks){delete all[code].picks[matchId];this.L.setPreds(all);}
-    }
+    const cur=Object.assign({},(this.cache.preds[code]&&this.cache.preds[code].picks)||{});
+    delete cur[matchId];
+    await this.fs.setDoc(this.fs.doc(this.db,"predictions",code),{name,picks:cur});
   }
 };
 
@@ -496,9 +490,64 @@ async function mergeLive(){
    RENDER
    ========================================================================= */
 function render(){
-  if(SESSION&&!ME){ME=Store.getByCode(SESSION);if(!ME){SESSION="";localStorage.removeItem("egec_session");}}
+  if(Store.error){ renderSetup(); return; }
+  if(!Store.ready){ renderLoading("Connecting to the shared game…"); return; }
+  if(SESSION&&!ME){
+    if(!Store.loaded.players){ renderLoading("Loading your account…"); return; }
+    const p=Store.getByCode(SESSION);
+    if(p) ME=p; else { SESSION=""; localStorage.removeItem("egec_session"); }
+  }
   if(!ME){renderAuth();return;}
   renderApp();
+}
+
+function renderLoading(msg){
+  $("#root").innerHTML=`
+  <div class="auth"><div class="auth-card" style="text-align:center">
+    <div class="logo" style="justify-content:center"><div class="bolt">⚡</div></div>
+    <div class="spinner"></div>
+    <div style="color:var(--muted);margin-top:14px;font-size:14px">${esc(msg||"Loading…")}</div>
+  </div></div>`;
+}
+
+function renderSetup(){
+  const e=Store.error;
+  let title,lead,extra="";
+  const rules=`rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{doc=**} { allow read, write: if true; }
+  }
+}`;
+  if(e==="config"){
+    title="Add your Firebase config";
+    lead="This app runs in shared mode only, so it needs a Firebase project to store accounts, picks and the leaderboard.";
+    extra=`<ol class="setup-steps">
+      <li>Create a free project at <span class="mono">console.firebase.google.com</span> and add a <b>Web app</b>.</li>
+      <li>Enable <b>Firestore Database</b>.</li>
+      <li>Copy the web config into <span class="mono">config.js</span> → <span class="mono">storage.firebase</span> (all six fields).</li>
+      <li>Set Firestore <b>Rules</b> to allow access, then reload:</li>
+    </ol><pre class="rules">${esc(rules)}</pre>`;
+  }else if(e==="rules"){
+    title="Firestore is blocking access";
+    lead="Firebase connected, but its security rules are denying reads/writes. Open Firebase console → Firestore → Rules, paste the rules below, Publish, then reload.";
+    extra=`<pre class="rules">${esc(rules)}</pre><div class="errd">${esc(Store.errDetail||"")}</div>`;
+  }else{
+    title="Couldn't reach the shared game";
+    lead="Firebase failed to initialise. Double-check the config values in config.js, then reload.";
+    extra=`<div class="errd">${esc(Store.errDetail||"")}</div>`;
+  }
+  $("#root").innerHTML=`
+  <div class="auth"><div class="auth-card">
+    <div class="logo"><div class="bolt">⚡</div>
+      <div><h1>${esc(CFG.orgName)} <span class="neon-mag">Predictor</span></h1>
+      <div class="s">Shared mode setup</div></div></div>
+    <div class="setup-title">${title}</div>
+    <p class="setup-lead">${lead}</p>
+    ${extra}
+    <button class="btn" id="retryBtn">Reload</button>
+  </div></div>`;
+  $("#retryBtn").onclick=()=>location.reload();
 }
 
 /* ---- Auth ---- */
@@ -607,10 +656,6 @@ function renderApp(){
     </div>
   </div></header>
   <div class="wrap">
-    ${Store.mode!=="firebase"?`<div class="banner" id="localBanner">
-      <span class="bdot"></span>
-      <div><b>Local mode</b> — accounts &amp; picks are saved only on <u>this device</u>. Other PCs won't see these players or this leaderboard.
-      Turn on shared mode in <code>config.js</code> to sync everyone.</div></div>`:""}
     <section class="hero" id="hero" style="display:none"><div class="hero-in" id="heroIn"></div></section>
     <nav class="tabs" id="tabs"></nav>
     <main id="view"></main>
@@ -620,7 +665,7 @@ function renderApp(){
         <span><b>${CFG.scoring.correctOutcome}</b> result</span>
         <span><b>+${CFG.scoring.correctGoalsBonus}</b> per exact goals</span>
       </div>
-      <div style="margin-top:9px">Picks lock <b>${CFG.lockOffsetMinutes} min</b> before kickoff · ${Store.mode==="firebase"?"Shared across all devices":"Saved on this device"}</div>
+      <div style="margin-top:9px">Picks lock <b>${CFG.lockOffsetMinutes} min</b> before kickoff · Shared across all devices</div>
       <div style="margin-top:7px">${isAdmin?'Organizer mode is on. ':''}<button class="link" id="orgLink">${isAdmin?"Exit organizer":"Organizer login"}</button></div>
     </div>
   </div>`;

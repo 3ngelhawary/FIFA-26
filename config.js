@@ -30,16 +30,33 @@ window.CONFIG = {
   // auto-pull live scores. Organizer-entered scores always take priority.
   liveScores: { provider: "football-data", apiToken: "", competitionId: "WC" },
 
-  // --- Storage --------------------------------------------------------------
-  // mode "local"    -> everything saved in THIS browser (good for testing /
-  //                    single-device, and for the preview).
-  // mode "firebase" -> shared across all devices: real accounts, real roster,
-  //                    real office leaderboard. Paste your project config.
+  // --- Shared storage (REQUIRED) -------------------------------------------
+  // This app runs in SHARED mode only: all accounts, predictions and the
+  // leaderboard live in one Firebase project, so every device sees the same
+  // game. Paste your Firebase web-app config below (all six fields).
+  //
+  // Setup (one time, free, no card):
+  //   1. console.firebase.google.com -> create project -> add a Web app
+  //   2. Build -> Firestore Database -> Create database
+  //   3. Paste the config values here
+  //   4. Firestore -> Rules -> allow read, write -> Publish:
+  //        rules_version = '2';
+  //        service cloud.firestore {
+  //          match /databases/{database}/documents {
+  //            match /{doc=**} { allow read, write: if true; }
+  //          }
+  //        }
+  //
+  // Until these are filled in (and rules allow access), the app shows a setup
+  // screen instead of running.
   storage: {
-    mode: "local", // "local" | "firebase"
     firebase: {
-      apiKey: "", authDomain: "", projectId: "",
-      storageBucket: "", messagingSenderId: "", appId: ""
+      apiKey: "",
+      authDomain: "",
+      projectId: "",
+      storageBucket: "",
+      messagingSenderId: "",
+      appId: ""
     }
   },
 
