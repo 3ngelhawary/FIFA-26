@@ -1,31 +1,176 @@
-{
-  "updated": "2026-06-22T12:00:00Z",
-  "note": "Edit this file to add fixtures or update scores. Kickoffs are in UTC (Z). status: scheduled | live | finished. The page derives live/locked state automatically from kickoff time.",
-  "matches": [
-    { "id": "g20-ned-swe", "group": "F", "home": "Netherlands", "away": "Sweden", "homeFlag": "🇳🇱", "awayFlag": "🇸🇪", "kickoff": "2026-06-20T16:00:00Z", "venue": "Houston Stadium", "status": "finished", "homeScore": 5, "awayScore": 1 },
-    { "id": "g20-ger-civ", "group": "E", "home": "Germany", "away": "Ivory Coast", "homeFlag": "🇩🇪", "awayFlag": "🇨🇮", "kickoff": "2026-06-20T20:00:00Z", "venue": "MetLife Stadium", "status": "finished", "homeScore": 2, "awayScore": 1 },
-    { "id": "g20-ecu-cuw", "group": "E", "home": "Ecuador", "away": "Curaçao", "homeFlag": "🇪🇨", "awayFlag": "🇨🇼", "kickoff": "2026-06-20T23:00:00Z", "venue": "Lincoln Financial Field", "status": "finished", "homeScore": 0, "awayScore": 0 },
+/* =============================================================================
+   Auto score updater for the EGEC World Cup Predictor.
 
-    { "id": "g21-tun-jpn", "group": "F", "home": "Tunisia", "away": "Japan", "homeFlag": "🇹🇳", "awayFlag": "🇯🇵", "kickoff": "2026-06-21T17:00:00Z", "venue": "Arrowhead Stadium", "status": "finished", "homeScore": 0, "awayScore": 4 },
-    { "id": "g21-esp-ksa", "group": "H", "home": "Spain", "away": "Saudi Arabia", "homeFlag": "🇪🇸", "awayFlag": "🇸🇦", "kickoff": "2026-06-21T19:00:00Z", "venue": "Mercedes-Benz Stadium", "status": "finished", "homeScore": 4, "awayScore": 0 },
-    { "id": "g21-bel-irn", "group": "G", "home": "Belgium", "away": "IR Iran", "homeFlag": "🇧🇪", "awayFlag": "🇮🇷", "kickoff": "2026-06-21T21:00:00Z", "venue": "SoFi Stadium", "status": "finished", "homeScore": 1, "awayScore": 1 },
-    { "id": "g21-uru-cpv", "group": "H", "home": "Uruguay", "away": "Cabo Verde", "homeFlag": "🇺🇾", "awayFlag": "🇨🇻", "kickoff": "2026-06-21T23:00:00Z", "venue": "Hard Rock Stadium", "status": "finished", "homeScore": 2, "awayScore": 2 },
-    { "id": "g21-egy-nzl", "group": "G", "home": "Egypt", "away": "New Zealand", "homeFlag": "🇪🇬", "awayFlag": "🇳🇿", "kickoff": "2026-06-22T01:00:00Z", "venue": "BC Place, Vancouver", "status": "finished", "homeScore": 3, "awayScore": 1 },
+   Repo path: scripts/update-scores.mjs
 
-    { "id": "g22-arg-aut", "group": "J", "home": "Argentina", "away": "Austria", "homeFlag": "🇦🇷", "awayFlag": "🇦🇹", "kickoff": "2026-06-22T17:00:00Z", "venue": "AT&T Stadium, Arlington", "status": "scheduled", "homeScore": null, "awayScore": null },
-    { "id": "g22-fra-irq", "group": "I", "home": "France", "away": "Iraq", "homeFlag": "🇫🇷", "awayFlag": "🇮🇶", "kickoff": "2026-06-22T21:00:00Z", "venue": "Lincoln Financial Field", "status": "scheduled", "homeScore": null, "awayScore": null },
-    { "id": "g22-nor-sen", "group": "I", "home": "Norway", "away": "Senegal", "homeFlag": "🇳🇴", "awayFlag": "🇸🇳", "kickoff": "2026-06-23T00:00:00Z", "venue": "New York / New Jersey Stadium", "status": "scheduled", "homeScore": null, "awayScore": null },
-    { "id": "g22-jor-alg", "group": "J", "home": "Jordan", "away": "Algeria", "homeFlag": "🇯🇴", "awayFlag": "🇩🇿", "kickoff": "2026-06-23T03:00:00Z", "venue": "San Francisco Bay Area Stadium", "status": "scheduled", "homeScore": null, "awayScore": null },
+   Requires:
+   - matches.json in repo root
+   - FIREBASE_SERVICE_ACCOUNT secret
+   - FOOTBALL_TOKEN secret, or temporary fallback token below
+   ========================================================================== */
 
-    { "id": "g23-por-uzb", "group": "K", "home": "Portugal", "away": "Uzbekistan", "homeFlag": "🇵🇹", "awayFlag": "🇺🇿", "kickoff": "2026-06-23T17:00:00Z", "venue": "Houston Stadium", "status": "scheduled", "homeScore": null, "awayScore": null },
-    { "id": "g23-eng-gha", "group": "L", "home": "England", "away": "Ghana", "homeFlag": "🏴󠁧󠁢󠁥󠁮󠁧󠁿", "awayFlag": "🇬🇭", "kickoff": "2026-06-23T20:00:00Z", "venue": "Boston Stadium", "status": "scheduled", "homeScore": null, "awayScore": null },
-    { "id": "g23-pan-cro", "group": "L", "home": "Panama", "away": "Croatia", "homeFlag": "🇵🇦", "awayFlag": "🇭🇷", "kickoff": "2026-06-23T23:00:00Z", "venue": "Toronto Stadium", "status": "scheduled", "homeScore": null, "awayScore": null },
-    { "id": "g23-col-cod", "group": "K", "home": "Colombia", "away": "Congo DR", "homeFlag": "🇨🇴", "awayFlag": "🇨🇩", "kickoff": "2026-06-24T02:00:00Z", "venue": "Guadalajara Stadium", "status": "scheduled", "homeScore": null, "awayScore": null },
+import fs from "fs";
+import admin from "firebase-admin";
 
-    { "id": "g24-sui-can", "group": "B", "home": "Switzerland", "away": "Canada", "homeFlag": "🇨🇭", "awayFlag": "🇨🇦", "kickoff": "2026-06-24T19:00:00Z", "venue": "BC Place, Vancouver", "status": "scheduled", "homeScore": null, "awayScore": null },
-    { "id": "g24-sco-bra", "group": "C", "home": "Scotland", "away": "Brazil", "homeFlag": "🏴󠁧󠁢󠁳󠁣󠁴󠁿", "awayFlag": "🇧🇷", "kickoff": "2026-06-24T22:00:00Z", "venue": "Hard Rock Stadium, Miami", "status": "scheduled", "homeScore": null, "awayScore": null },
+const SA = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT || "{}");
 
-    { "id": "g26-egy-irn", "group": "G", "home": "Egypt", "away": "IR Iran", "homeFlag": "🇪🇬", "awayFlag": "🇮🇷", "kickoff": "2026-06-27T03:00:00Z", "venue": "Seattle Stadium", "status": "scheduled", "homeScore": null, "awayScore": null },
-    { "id": "g26-nzl-bel", "group": "G", "home": "New Zealand", "away": "Belgium", "homeFlag": "🇳🇿", "awayFlag": "🇧🇪", "kickoff": "2026-06-27T03:00:00Z", "venue": "BC Place, Vancouver", "status": "scheduled", "homeScore": null, "awayScore": null }
-  ]
+// Uses GitHub secret first.
+// If secret is broken/missing, uses your pasted token temporarily.
+const TOKEN = (
+  process.env.FOOTBALL_TOKEN ||
+  "062dd9d5f4f04baab9ffac84d510befb"
+).trim().replace(/\s+/g, "");
+
+const COMP = process.env.COMPETITION || "WC";
+
+if (!SA.project_id) {
+  console.error("Missing or invalid FIREBASE_SERVICE_ACCOUNT secret");
+  process.exit(1);
 }
+
+if (!TOKEN) {
+  console.error("Missing FOOTBALL_TOKEN");
+  process.exit(1);
+}
+
+admin.initializeApp({
+  credential: admin.credential.cert(SA)
+});
+
+const db = admin.firestore();
+
+const ALIAS = {
+  iriran: "iran",
+  iran: "iran",
+
+  congodr: "drcongo",
+  drcongo: "drcongo",
+  congodemocraticrepublic: "drcongo",
+  democraticrepublicofcongo: "drcongo",
+
+  caboverde: "capeverde",
+  capeverde: "capeverde",
+
+  curacao: "curacao",
+  curaçao: "curacao",
+
+  turkiye: "turkey",
+  turkey: "turkey",
+
+  korearepublic: "southkorea",
+  republicofkorea: "southkorea",
+  southkorea: "southkorea",
+
+  unitedstates: "usa",
+  unitedstatesofamerica: "usa",
+  usa: "usa",
+
+  cotedivoire: "ivorycoast",
+  ivorycoast: "ivorycoast",
+
+  bosniaandherzegovina: "bosnia",
+  bosnia: "bosnia"
+};
+
+function norm(value) {
+  const clean = String(value || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z]/g, "");
+
+  return ALIAS[clean] || clean;
+}
+
+async function main() {
+  if (!fs.existsSync("matches.json")) {
+    console.error("matches.json not found in repo root");
+    process.exit(1);
+  }
+
+  const localData = JSON.parse(fs.readFileSync("matches.json", "utf8"));
+  const ours = localData.matches || [];
+
+  const res = await fetch(
+    `https://api.football-data.org/v4/competitions/${COMP}/matches`,
+    {
+      headers: {
+        "X-Auth-Token": TOKEN
+      }
+    }
+  );
+
+  if (!res.ok) {
+    console.error("API error", res.status, await res.text());
+    process.exit(1);
+  }
+
+  const data = await res.json();
+  const api = data.matches || [];
+
+  console.log(`API returned ${api.length} matches for ${COMP}`);
+
+  const byPair = {};
+
+  for (const am of api) {
+    const home = norm(am.homeTeam?.name);
+    const away = norm(am.awayTeam?.name);
+
+    byPair[`${home}|${away}`] = am;
+  }
+
+  let writes = 0;
+  let skipped = 0;
+
+  for (const m of ours) {
+    const key = `${norm(m.home)}|${norm(m.away)}`;
+    const am = byPair[key];
+
+    if (!am) {
+      skipped++;
+      console.log(`Skipped: ${m.home} vs ${m.away} - no API match`);
+      continue;
+    }
+
+    let status = null;
+
+    if (am.status === "FINISHED") {
+      status = "finished";
+    } else if (am.status === "IN_PLAY" || am.status === "PAUSED") {
+      status = "live";
+    } else {
+      console.log(`Not started: ${m.home} vs ${m.away}`);
+      continue;
+    }
+
+    const score = am.score?.fullTime || {};
+    const homeScore = score.home;
+    const awayScore = score.away;
+
+    if (homeScore == null || awayScore == null) {
+      console.log(`No score yet: ${m.home} vs ${m.away}`);
+      continue;
+    }
+
+    await db.collection("results").doc(m.id).set(
+      {
+        homeScore,
+        awayScore,
+        status,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp()
+      },
+      { merge: true }
+    );
+
+    writes++;
+    console.log(`Updated: ${m.home} ${homeScore}-${awayScore} ${m.away} [${status}]`);
+  }
+
+  console.log(`Updated ${writes} result(s).`);
+  console.log(`Skipped ${skipped} unmatched match(es).`);
+}
+
+main().catch((error) => {
+  console.error(error);
+  process.exit(1);
+});
