@@ -10,768 +10,839 @@
 <script src="config.js"></script>
 <style>
   :root{
-    --bg:#0B1512; --surface:#122019; --surface-2:#16271F; --surface-3:#1c3327;
-    --line:rgba(255,255,255,.08); --line-strong:rgba(255,255,255,.16);
-    --ink:#EAF2ED; --muted:#8AA89A; --faint:#5d7568;
-    --gold:#F2C14E; --gold-dim:#b8924f;
-    --live:#FF4D4D; --green:#34D17A; --blue:#4EA8F2;
-    --radius:16px; --radius-sm:10px;
-    --shadow:0 10px 30px rgba(0,0,0,.35);
+    --bg:#05060c;
+    --panel:#0c0e1a; --panel-2:#11142400; --card:#0b0d18; --card-2:#0e1122;
+    --line:rgba(255,255,255,.08); --line-2:rgba(255,255,255,.16);
+    --ink:#eef1ff; --muted:#8b90b5; --faint:#565c83;
+    --cyan:#00e5ff; --magenta:#ff2e97; --purple:#b14eff;
+    --win:#2bff88; --draw:#ffe600; --lose:#ff2d55;
+    --radius:18px; --radius-sm:11px;
   }
   *{box-sizing:border-box}
   html,body{margin:0}
   body{
     background:
-      radial-gradient(1200px 600px at 80% -10%, rgba(52,209,122,.07), transparent 60%),
-      radial-gradient(900px 500px at -10% 10%, rgba(242,193,78,.06), transparent 55%),
+      radial-gradient(900px 480px at 82% -8%, rgba(255,46,151,.16), transparent 60%),
+      radial-gradient(820px 460px at -8% 4%, rgba(0,229,255,.14), transparent 58%),
+      radial-gradient(700px 700px at 50% 120%, rgba(177,78,255,.12), transparent 60%),
       var(--bg);
     color:var(--ink);
     font-family:"Inter",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-    line-height:1.5; min-height:100vh;
-    -webkit-font-smoothing:antialiased;
+    line-height:1.5; min-height:100vh; -webkit-font-smoothing:antialiased;
   }
-  .wrap{max-width:920px;margin:0 auto;padding:0 18px 80px}
+  ::selection{background:var(--magenta);color:#fff}
+  .wrap{max-width:940px;margin:0 auto;padding:0 16px 90px}
+  .neon-cyan{color:var(--cyan);text-shadow:0 0 8px rgba(0,229,255,.55)}
+  .neon-mag{color:var(--magenta);text-shadow:0 0 8px rgba(255,46,151,.55)}
 
-  /* ---------- Header ---------- */
-  header.app{
-    position:sticky;top:0;z-index:40;
-    backdrop-filter:blur(10px);
-    background:linear-gradient(180deg, rgba(11,21,18,.92), rgba(11,21,18,.72));
-    border-bottom:1px solid var(--line);
+  /* ===== Auth ===== */
+  .auth{min-height:100vh;display:grid;place-items:center;padding:30px 16px}
+  .auth-card{
+    width:100%;max-width:420px;border:1px solid var(--line-2);border-radius:24px;
+    background:linear-gradient(180deg,rgba(20,22,40,.85),rgba(10,11,22,.9));
+    box-shadow:0 0 0 1px rgba(255,46,151,.08),0 30px 80px rgba(0,0,0,.6),0 0 60px rgba(0,229,255,.08);
+    padding:30px 26px;backdrop-filter:blur(8px);
   }
-  .head-inner{max-width:920px;margin:0 auto;padding:12px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
-  .brand{display:flex;align-items:center;gap:11px;min-width:0}
-  .crest{
-    width:38px;height:38px;border-radius:10px;flex:0 0 auto;
-    background:linear-gradient(150deg,var(--gold),var(--gold-dim));
-    display:grid;place-items:center;color:#1a1206;font-family:"Oswald";font-weight:700;font-size:18px;
-    box-shadow:0 4px 14px rgba(242,193,78,.25);
+  .logo{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+  .bolt{
+    width:46px;height:46px;border-radius:13px;display:grid;place-items:center;font-size:24px;
+    background:linear-gradient(135deg,var(--magenta),var(--purple));
+    box-shadow:0 0 24px rgba(255,46,151,.5);
   }
-  .brand h1{font-family:"Oswald";font-weight:600;font-size:18px;margin:0;letter-spacing:.3px;line-height:1.1}
-  .brand .sub{font-size:11px;color:var(--muted);letter-spacing:.4px;text-transform:uppercase}
-  .head-spacer{flex:1 1 auto}
-  .identity{display:flex;align-items:center;gap:8px}
-  .identity input{
-    background:var(--surface-2);border:1px solid var(--line-strong);color:var(--ink);
-    border-radius:999px;padding:8px 14px;font-size:13px;font-family:inherit;width:150px;outline:none;
+  .logo h1{font-family:"Oswald";font-weight:700;font-size:24px;margin:0;letter-spacing:.5px;line-height:1}
+  .logo .s{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--cyan)}
+  .seg{display:flex;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:12px;padding:4px;margin:22px 0 18px}
+  .seg button{flex:1;border:0;background:transparent;color:var(--muted);font-family:inherit;font-weight:700;
+    padding:10px;border-radius:9px;cursor:pointer;font-size:14px;transition:.15s}
+  .seg button.on{background:linear-gradient(135deg,var(--cyan),var(--magenta));color:#04060e;box-shadow:0 0 18px rgba(0,229,255,.35)}
+  label.fld{display:block;font-size:12px;text-transform:uppercase;letter-spacing:1.4px;color:var(--muted);margin:0 0 7px}
+  .input{
+    width:100%;background:#070912;border:1px solid var(--line-2);color:var(--ink);border-radius:12px;
+    padding:14px 15px;font-size:16px;font-family:inherit;outline:none;transition:.15s;
   }
-  .identity input:focus{border-color:var(--gold)}
-  .pts-chip{
-    display:flex;align-items:center;gap:7px;background:var(--surface-2);
-    border:1px solid var(--line-strong);border-radius:999px;padding:7px 13px;white-space:nowrap;
+  .input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,229,255,.18)}
+  .input.code{font-family:"Oswald";font-weight:700;letter-spacing:5px;text-transform:uppercase;text-align:center;font-size:22px}
+  .btn{
+    width:100%;margin-top:16px;border:0;border-radius:12px;cursor:pointer;font-family:"Oswald";font-weight:600;
+    font-size:17px;letter-spacing:.5px;padding:14px;color:#04060e;
+    background:linear-gradient(135deg,var(--cyan),var(--magenta));box-shadow:0 0 22px rgba(255,46,151,.35);transition:.15s;
   }
-  .pts-chip b{font-family:"Oswald";font-size:18px;color:var(--gold);line-height:1}
-  .pts-chip span{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+  .btn:hover{filter:brightness(1.08)}
+  .btn.ghost{background:transparent;color:var(--muted);border:1px solid var(--line-2);box-shadow:none}
+  .err{color:var(--lose);font-size:13px;margin-top:10px;min-height:18px;text-align:center}
+  .hint-sm{color:var(--faint);font-size:12px;margin-top:14px;text-align:center;line-height:1.6}
 
-  /* ---------- Hero / matchday ---------- */
-  .hero{
-    margin:22px 0 8px;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;
-    background:
-      repeating-linear-gradient(90deg, rgba(255,255,255,.018) 0 38px, transparent 38px 76px),
-      linear-gradient(160deg,var(--surface-2),var(--surface));
-    box-shadow:var(--shadow);
+  .code-reveal{text-align:center}
+  .code-reveal .big-code{
+    font-family:"Oswald";font-weight:700;font-size:40px;letter-spacing:8px;margin:14px 0 6px;
+    color:var(--cyan);text-shadow:0 0 18px rgba(0,229,255,.6)
   }
-  .hero-top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 18px 0}
-  .eyebrow{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);font-weight:600}
-  .hero-body{padding:6px 18px 18px}
-  .hero-cta{font-family:"Oswald";font-weight:600;font-size:clamp(20px,4.4vw,30px);letter-spacing:.3px;margin:2px 0 2px}
-  .hero-cta .t{color:var(--ink)}
-  .hero-clock{
-    font-family:"Oswald";font-weight:700;font-variant-numeric:tabular-nums;
-    color:var(--gold);
-  }
-  .hero-clock.urgent{color:var(--live)}
+  .copy-btn{border:1px solid var(--line-2);background:rgba(255,255,255,.04);color:var(--ink);
+    border-radius:10px;padding:9px 14px;font-family:inherit;font-weight:600;cursor:pointer;font-size:13px}
+  .warn{background:rgba(255,230,0,.08);border:1px solid rgba(255,230,0,.3);color:var(--draw);
+    border-radius:12px;padding:11px 13px;font-size:13px;margin:16px 0;line-height:1.5}
+
+  /* ===== Header ===== */
+  header.app{position:sticky;top:0;z-index:40;backdrop-filter:blur(12px);
+    background:linear-gradient(180deg,rgba(5,6,12,.92),rgba(5,6,12,.6));border-bottom:1px solid var(--line)}
+  .head-inner{max-width:940px;margin:0 auto;padding:11px 16px;display:flex;align-items:center;gap:12px}
+  .brand{display:flex;align-items:center;gap:10px;min-width:0}
+  .brand .bolt{width:34px;height:34px;border-radius:10px;font-size:18px}
+  .brand h1{font-family:"Oswald";font-weight:600;font-size:17px;margin:0;letter-spacing:.4px;line-height:1.05}
+  .brand .s{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--cyan)}
+  .head-spacer{flex:1}
+  .me-chip{display:flex;align-items:center;gap:10px;border:1px solid var(--line-2);border-radius:999px;padding:5px 6px 5px 13px;background:rgba(255,255,255,.03)}
+  .me-chip .nm{font-weight:700;font-size:13px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .me-chip .pts{font-family:"Oswald";font-weight:700;color:var(--cyan);font-size:16px;text-shadow:0 0 8px rgba(0,229,255,.5)}
+  .me-chip .pts small{color:var(--muted);font-size:9px;letter-spacing:.5px;text-shadow:none}
+  .icon-btn{width:30px;height:30px;border-radius:50%;border:1px solid var(--line-2);background:transparent;color:var(--muted);cursor:pointer;font-size:14px}
+  .icon-btn:hover{color:var(--ink);border-color:var(--magenta)}
+
+  /* ===== Hero ===== */
+  .hero{margin:20px 0 6px;border:1px solid var(--line-2);border-radius:var(--radius);overflow:hidden;
+    background:linear-gradient(120deg,rgba(255,46,151,.1),rgba(0,229,255,.07));position:relative}
+  .hero:before{content:"";position:absolute;inset:0;background:
+    repeating-linear-gradient(90deg,rgba(255,255,255,.02) 0 40px,transparent 40px 80px);pointer-events:none}
+  .hero-in{position:relative;padding:16px 18px}
+  .eyebrow{font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:var(--magenta);font-weight:700}
+  .hero-cta{font-family:"Oswald";font-weight:600;font-size:clamp(19px,4.4vw,28px);margin:4px 0 2px;letter-spacing:.3px}
+  .hero-clock{font-family:"Oswald";font-weight:700;font-variant-numeric:tabular-nums;color:var(--cyan);text-shadow:0 0 12px rgba(0,229,255,.55)}
+  .hero-clock.urgent{color:var(--lose);text-shadow:0 0 12px rgba(255,45,85,.6)}
   .hero-sub{color:var(--muted);font-size:13px}
   .live-ticker{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-  .live-pill{
-    display:inline-flex;align-items:center;gap:8px;background:rgba(255,77,77,.1);
-    border:1px solid rgba(255,77,77,.4);border-radius:999px;padding:6px 12px;font-size:13px
-  }
-  .live-pill .sc{font-family:"Oswald";font-weight:700;font-variant-numeric:tabular-nums}
+  .live-pill{display:inline-flex;align-items:center;gap:8px;background:rgba(255,45,85,.12);border:1px solid rgba(255,45,85,.45);
+    border-radius:999px;padding:5px 11px;font-size:12.5px}
+  .live-pill .sc{font-family:"Oswald";font-weight:700}
 
-  /* ---------- Tabs ---------- */
-  .tabs{display:flex;gap:6px;overflow-x:auto;padding:18px 0 14px;position:sticky;top:63px;z-index:30;
-        background:linear-gradient(180deg,var(--bg) 70%,transparent)}
-  .tab{
-    flex:0 0 auto;border:1px solid var(--line-strong);background:transparent;color:var(--muted);
-    padding:8px 15px;border-radius:999px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;
-    transition:.15s;
-  }
-  .tab:hover{color:var(--ink);border-color:var(--gold-dim)}
-  .tab.active{background:var(--gold);color:#1a1206;border-color:var(--gold)}
-  .tab .badge{margin-left:6px;font-size:11px;opacity:.7}
+  /* ===== Tabs ===== */
+  .tabs{display:flex;gap:7px;overflow-x:auto;padding:18px 0 14px;position:sticky;top:58px;z-index:30;
+    background:linear-gradient(180deg,var(--bg) 72%,transparent);scrollbar-width:none}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{flex:0 0 auto;border:1px solid var(--line-2);background:rgba(255,255,255,.02);color:var(--muted);
+    padding:8px 16px;border-radius:999px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:.15s;white-space:nowrap}
+  .tab:hover{color:var(--ink)}
+  .tab.active{color:#04060e;background:linear-gradient(135deg,var(--cyan),var(--magenta));border-color:transparent;box-shadow:0 0 16px rgba(0,229,255,.3)}
+  .tab .badge{margin-left:6px;font-size:11px;opacity:.8}
 
-  /* ---------- Match card ---------- */
-  .card{
-    border:1px solid var(--line);background:linear-gradient(180deg,var(--surface),var(--surface) );
-    border-radius:var(--radius);margin-bottom:14px;overflow:hidden;transition:.2s;
-  }
-  .card.live{border-color:rgba(255,77,77,.45);box-shadow:0 0 0 1px rgba(255,77,77,.15),var(--shadow)}
-  .card-head{display:flex;align-items:center;justify-content:space-between;
-             padding:10px 16px;border-bottom:1px solid var(--line);font-size:12px;color:var(--muted)}
+  /* ===== Match card ===== */
+  .card{border:1px solid var(--line);border-radius:var(--radius);margin-bottom:14px;overflow:hidden;
+    background:linear-gradient(180deg,var(--card),var(--card-2));position:relative;transition:.2s}
+  .card.live{border-color:rgba(255,45,85,.5);box-shadow:0 0 22px rgba(255,45,85,.14)}
+  .card-head{display:flex;align-items:center;justify-content:space-between;padding:10px 15px;border-bottom:1px solid var(--line);font-size:11.5px;color:var(--muted)}
   .grp{font-family:"Oswald";letter-spacing:.5px;text-transform:uppercase}
-  .status{display:inline-flex;align-items:center;gap:7px;font-weight:600;font-size:12px}
+  .status{display:inline-flex;align-items:center;gap:7px;font-weight:700;font-size:11.5px;letter-spacing:.6px}
   .dot{width:8px;height:8px;border-radius:50%;background:var(--muted)}
-  .status.live .dot{background:var(--live);animation:pulse 1.3s infinite}
-  .status.live{color:var(--live)}
-  .status.ft{color:var(--green)} .status.ft .dot{background:var(--green)}
-  .status.locked{color:var(--gold)} .status.locked .dot{background:var(--gold)}
-  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,77,77,.6)}70%{box-shadow:0 0 0 7px rgba(255,77,77,0)}100%{box-shadow:0 0 0 0 rgba(255,77,77,0)}}
+  .status.live{color:var(--lose)} .status.live .dot{background:var(--lose);animation:pulse 1.2s infinite}
+  .status.ft{color:var(--win)} .status.ft .dot{background:var(--win)}
+  .status.locked{color:var(--draw)} .status.locked .dot{background:var(--draw)}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,45,85,.6)}70%{box-shadow:0 0 0 8px rgba(255,45,85,0)}100%{box-shadow:0 0 0 0 rgba(255,45,85,0)}}
 
-  .scoreboard{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;padding:18px 16px 8px}
+  .scoreboard{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;padding:18px 14px 10px}
   .team{display:flex;align-items:center;gap:11px;min-width:0}
   .team.away{justify-content:flex-end;text-align:right}
-  .flag{font-size:30px;line-height:1;flex:0 0 auto;filter:drop-shadow(0 2px 4px rgba(0,0,0,.4))}
+  .flag{width:34px;height:25px;border-radius:4px;object-fit:cover;flex:0 0 auto;border:1px solid rgba(255,255,255,.18);
+    box-shadow:0 2px 8px rgba(0,0,0,.5)}
+  .flag-emo{font-size:28px;line-height:1;flex:0 0 auto}
   .tname{font-family:"Oswald";font-weight:600;font-size:18px;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .center{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:88px}
-  .score{font-family:"Oswald";font-weight:700;font-size:34px;font-variant-numeric:tabular-nums;letter-spacing:1px;line-height:1}
-  .score .sep{color:var(--faint);margin:0 4px}
-  .vs{font-family:"Oswald";font-size:15px;color:var(--faint);letter-spacing:2px}
+  .center{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:92px}
+  .score{font-family:"Oswald";font-weight:700;font-size:36px;font-variant-numeric:tabular-nums;line-height:1;display:flex;align-items:center;gap:6px}
+  .score .sep{color:var(--faint)}
+  .vs{font-family:"Oswald";font-size:15px;color:var(--faint);letter-spacing:3px}
   .ko{font-size:11px;color:var(--muted);text-align:center}
+  /* result colors */
+  .win .tname,.s-win{color:var(--win);text-shadow:0 0 10px rgba(43,255,136,.45)}
+  .lose .tname,.s-lose{color:var(--lose);text-shadow:0 0 10px rgba(255,45,85,.4)}
+  .draw .tname,.s-draw{color:var(--draw);text-shadow:0 0 10px rgba(255,230,0,.4)}
 
   /* prediction zone */
-  .pred{padding:6px 16px 16px}
-  .pred-row{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap}
-  .pred-label{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);width:100%;text-align:center;margin-bottom:2px}
-  .stepper{display:flex;align-items:center;gap:0;border:1px solid var(--line-strong);border-radius:10px;overflow:hidden;background:var(--surface-2)}
-  .stepper button{width:34px;height:38px;border:0;background:transparent;color:var(--ink);font-size:18px;cursor:pointer;font-family:"Oswald"}
-  .stepper button:hover:not(:disabled){background:var(--surface-3)}
-  .stepper input{
-    width:40px;height:38px;border:0;background:transparent;color:var(--ink);text-align:center;
-    font-family:"Oswald";font-weight:700;font-size:20px;outline:none;font-variant-numeric:tabular-nums;
-    border-left:1px solid var(--line);border-right:1px solid var(--line);
-    -moz-appearance:textfield;
-  }
+  .pred{padding:4px 15px 15px}
+  .pred-label{font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);text-align:center;margin-bottom:7px}
+  .pred-row{display:flex;align-items:center;justify-content:center;gap:12px}
+  .stepper{display:flex;align-items:center;border:1px solid var(--line-2);border-radius:11px;overflow:hidden;background:#070912}
+  .stepper button{width:34px;height:40px;border:0;background:transparent;color:var(--ink);font-size:19px;cursor:pointer;font-family:"Oswald"}
+  .stepper button:hover{background:rgba(0,229,255,.12);color:var(--cyan)}
+  .stepper input{width:42px;height:40px;border:0;background:transparent;color:var(--cyan);text-align:center;
+    font-family:"Oswald";font-weight:700;font-size:21px;outline:none;text-shadow:0 0 8px rgba(0,229,255,.5);
+    border-left:1px solid var(--line);border-right:1px solid var(--line);-moz-appearance:textfield}
   .stepper input::-webkit-outer-spin-button,.stepper input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
-  .stepper:disabled,.stepper.disabled{opacity:.55}
-  .stepper.disabled button{cursor:not-allowed}
   .pred-mid{font-family:"Oswald";color:var(--faint);font-size:18px}
-  .lock-row{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:11px;font-size:12.5px}
-  .lock-clock{font-family:"Oswald";font-weight:600;font-variant-numeric:tabular-nums;color:var(--muted)}
-  .lock-clock.urgent{color:var(--live)}
-  .saved{color:var(--green);font-weight:600;opacity:0;transition:opacity .25s}
+  .lock-row{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:11px;font-size:12.5px;color:var(--muted)}
+  .lock-clock{font-family:"Oswald";font-weight:600;font-variant-numeric:tabular-nums;color:var(--draw)}
+  .lock-clock.urgent{color:var(--lose);animation:blink 1s infinite}
+  @keyframes blink{50%{opacity:.45}}
+  .saved{color:var(--win);font-weight:700;opacity:0;transition:opacity .25s}
   .saved.show{opacity:1}
-  .locked-note{display:flex;align-items:center;justify-content:center;gap:8px;color:var(--muted);font-size:12.5px;margin-top:11px}
-  .hint{text-align:center;color:var(--faint);font-size:11.5px;margin-top:9px}
+  .hint{text-align:center;color:var(--faint);font-size:11.5px;margin-top:8px}
+  .locked-note{display:flex;align-items:center;justify-content:center;gap:8px;color:var(--muted);font-size:12.5px;margin-top:6px}
+  .locked-note b{font-family:"Oswald";color:var(--ink)}
 
-  /* reveal everyone's picks (post-lock) */
-  .reveal{border-top:1px solid var(--line)}
-  .reveal-btn{
-    width:100%;background:transparent;border:0;color:var(--muted);cursor:pointer;font-family:inherit;
-    font-size:12.5px;font-weight:600;padding:11px 16px;display:flex;align-items:center;justify-content:center;gap:8px;
-  }
-  .reveal-btn:hover{color:var(--ink)}
-  .reveal-btn .chev{transition:transform .2s;display:inline-block}
-  .reveal-btn.open .chev{transform:rotate(90deg)}
-  .reveal-panel{padding:2px 16px 14px}
-  .pick-row{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:9px;font-size:13px}
-  .pick-row:nth-child(odd){background:rgba(255,255,255,.025)}
-  .pick-row.you{background:rgba(242,193,78,.08)}
-  .pick-row .pn{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:flex;align-items:center;gap:7px}
-  .pick-row .pp{font-family:"Oswald";font-weight:700;font-size:15px;font-variant-numeric:tabular-nums;color:var(--ink)}
-  .pick-empty{color:var(--faint);font-size:13px;text-align:center;padding:6px}
-
-  .result-line{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:12px;flex-wrap:wrap}
-  .yourpick{font-size:13px;color:var(--muted)}
-  .yourpick b{color:var(--ink);font-family:"Oswald";font-weight:600}
+  .result-line{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:8px;flex-wrap:wrap}
+  .yourpick{font-size:13px;color:var(--muted)} .yourpick b{color:var(--ink);font-family:"Oswald"}
   .pts-badge{font-family:"Oswald";font-weight:700;font-size:13px;border-radius:999px;padding:4px 11px}
-  .pts-badge.hit{background:rgba(52,209,122,.14);color:var(--green);border:1px solid rgba(52,209,122,.4)}
-  .pts-badge.part{background:rgba(242,193,78,.14);color:var(--gold);border:1px solid rgba(242,193,78,.4)}
+  .pts-badge.hit{background:rgba(43,255,136,.14);color:var(--win);border:1px solid rgba(43,255,136,.45)}
+  .pts-badge.part{background:rgba(255,230,0,.14);color:var(--draw);border:1px solid rgba(255,230,0,.45)}
   .pts-badge.miss{background:rgba(255,255,255,.05);color:var(--muted);border:1px solid var(--line)}
-  .pts-badge.none{background:transparent;color:var(--faint);border:1px dashed var(--line-strong)}
+  .pts-badge.none{background:transparent;color:var(--faint);border:1px dashed var(--line-2)}
 
-  /* ---------- Leaderboard ---------- */
-  .board{border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:var(--surface)}
-  .board h2{font-family:"Oswald";font-weight:600;margin:0;padding:16px 18px;font-size:17px;border-bottom:1px solid var(--line);
-            display:flex;align-items:center;justify-content:space-between}
-  .board h2 .mode{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-family:"Inter";font-weight:600}
-  .lb-row{display:grid;grid-template-columns:38px 1fr auto auto;gap:12px;align-items:center;padding:12px 18px;border-bottom:1px solid var(--line)}
+  /* predictions reveal panel */
+  .reveal{border-top:1px solid var(--line)}
+  .reveal-btn{width:100%;background:transparent;border:0;color:var(--muted);cursor:pointer;font-family:inherit;
+    font-size:12.5px;font-weight:700;padding:11px 15px;display:flex;align-items:center;justify-content:center;gap:8px}
+  .reveal-btn:hover{color:var(--cyan)}
+  .reveal-btn .chev{transition:transform .2s} .reveal-btn.open .chev{transform:rotate(90deg)}
+  .reveal-panel{padding:0 13px 13px}
+  .reveal-cap{font-size:11px;color:var(--faint);text-align:center;padding:2px 0 9px}
+  .pick-row{display:flex;align-items:center;gap:10px;padding:8px 11px;border-radius:9px;font-size:13px}
+  .pick-row:nth-child(odd){background:rgba(255,255,255,.025)}
+  .pick-row.you{background:rgba(0,229,255,.08)}
+  .pick-row .pn{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:flex;align-items:center;gap:7px}
+  .pick-row .pp{font-family:"Oswald";font-weight:700;font-size:15px;color:var(--ink)}
+  .pick-row .hidden-sc{color:var(--faint);font-size:12px;font-style:italic}
+  .tag{font-size:9.5px;border-radius:5px;padding:1px 6px;font-weight:700;letter-spacing:.4px}
+  .tag.you{background:var(--cyan);color:#04060e} .tag.me-tag{background:var(--magenta);color:#fff}
+
+  /* ===== Roster / Leaderboard ===== */
+  .panel{border:1px solid var(--line-2);border-radius:var(--radius);overflow:hidden;background:linear-gradient(180deg,var(--card),var(--card-2))}
+  .panel h2{font-family:"Oswald";font-weight:600;margin:0;padding:15px 17px;font-size:17px;border-bottom:1px solid var(--line);
+    display:flex;align-items:center;justify-content:space-between}
+  .panel h2 .meta{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;font-family:"Inter";font-weight:700}
+  .lb-row{display:grid;grid-template-columns:36px 1fr auto auto;gap:12px;align-items:center;padding:12px 17px;border-bottom:1px solid var(--line)}
   .lb-row:last-child{border-bottom:0}
-  .lb-row.me{background:rgba(242,193,78,.07)}
+  .lb-row.me{background:rgba(255,46,151,.07)}
   .rank{font-family:"Oswald";font-weight:700;font-size:18px;color:var(--muted);text-align:center}
-  .rank.gold{color:var(--gold)} .rank.silver{color:#cfd8dc} .rank.bronze{color:#cd8b5b}
-  .lb-name{font-weight:600;display:flex;align-items:center;gap:8px;min-width:0}
-  .lb-name .you{font-size:10px;background:var(--gold);color:#1a1206;border-radius:5px;padding:1px 6px;font-weight:700}
-  .lb-played{font-size:12px;color:var(--muted);white-space:nowrap}
-  .lb-pts{font-family:"Oswald";font-weight:700;font-size:20px;color:var(--gold);font-variant-numeric:tabular-nums;text-align:right;min-width:42px}
+  .rank.g1{color:var(--draw);text-shadow:0 0 10px rgba(255,230,0,.5)} .rank.g2{color:#d6def0} .rank.g3{color:#ff9d5c}
+  .lb-name{font-weight:700;display:flex;align-items:center;gap:8px;min-width:0}
+  .lb-name span.n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .lb-sub{font-size:12px;color:var(--muted);white-space:nowrap}
+  .lb-pts{font-family:"Oswald";font-weight:700;font-size:20px;color:var(--cyan);text-shadow:0 0 8px rgba(0,229,255,.45);text-align:right;min-width:42px}
 
-  .empty{text-align:center;color:var(--muted);padding:46px 20px;border:1px dashed var(--line-strong);border-radius:var(--radius)}
+  .roster-row{display:flex;align-items:center;gap:12px;padding:12px 17px;border-bottom:1px solid var(--line)}
+  .roster-row:last-child{border-bottom:0}
+  .av{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-family:"Oswald";font-weight:700;
+    background:linear-gradient(135deg,rgba(0,229,255,.25),rgba(255,46,151,.25));color:var(--ink);flex:0 0 auto}
+  .roster-row .info{flex:1;min-width:0}
+  .roster-row .info .n{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .roster-row .info .s{font-size:12px;color:var(--muted)}
+  .mycode{font-family:"Oswald";letter-spacing:2px;color:var(--cyan)}
+
+  /* ===== Organizer ===== */
+  .org-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:12px 15px;border-bottom:1px solid var(--line)}
+  .org-row .ot{font-family:"Oswald";font-size:14px;min-width:0}
+  .org-controls{display:flex;align-items:center;gap:6px}
+  .mini{width:46px;height:36px;background:#070912;border:1px solid var(--line-2);color:var(--cyan);border-radius:8px;
+    text-align:center;font-family:"Oswald";font-weight:700;font-size:17px;outline:none}
+  .mini:focus{border-color:var(--cyan)}
+  .org-save{border:1px solid var(--line-2);background:rgba(43,255,136,.1);color:var(--win);border-radius:8px;
+    padding:8px 12px;font-family:inherit;font-weight:700;cursor:pointer;font-size:12.5px}
+  .org-save:hover{background:rgba(43,255,136,.2)}
+  .org-add{display:flex;gap:8px;padding:14px 15px;border-bottom:1px solid var(--line)}
+  .org-add input{flex:1;background:#070912;border:1px solid var(--line-2);color:var(--ink);border-radius:10px;padding:11px;font-family:inherit;outline:none}
+
+  .empty{text-align:center;color:var(--muted);padding:44px 20px;border:1px dashed var(--line-2);border-radius:var(--radius)}
   .empty .big{font-family:"Oswald";font-size:20px;color:var(--ink);margin-bottom:6px}
 
-  .foot{margin-top:26px;text-align:center;color:var(--faint);font-size:12px;line-height:1.7}
-  .foot a{color:var(--muted)}
-  .scoring-key{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:8px;color:var(--muted);font-size:12px}
-  .scoring-key b{color:var(--gold);font-family:"Oswald"}
+  .foot{margin-top:24px;text-align:center;color:var(--faint);font-size:12px;line-height:1.7}
+  .scoring-key{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:8px;color:var(--muted)}
+  .scoring-key b{color:var(--cyan);font-family:"Oswald"}
+  .link{color:var(--muted);text-decoration:underline;cursor:pointer;background:none;border:0;font:inherit}
+
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);opacity:0;
+    background:#0c0e1a;border:1px solid var(--line-2);color:var(--ink);padding:11px 18px;border-radius:12px;
+    font-size:13.5px;font-weight:600;z-index:90;transition:.25s;box-shadow:0 10px 30px rgba(0,0,0,.5),0 0 22px rgba(0,229,255,.15)}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
   @media (max-width:560px){
-    .identity input{width:118px}
-    .tname{font-size:16px}
-    .score{font-size:28px}
-    .tabs{top:60px}
+    .me-chip .nm{max-width:74px}
+    .tname{font-size:16px}.score{font-size:30px}.tabs{top:55px}
   }
   @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
-<header class="app">
-  <div class="head-inner">
-    <div class="brand">
-      <div class="crest" id="crest">EG</div>
-      <div>
-        <h1 id="brandTitle">EGEC World Cup Predictor</h1>
-        <div class="sub" id="brandSub">Office Pick'Em · 2026</div>
-      </div>
-    </div>
-    <div class="head-spacer"></div>
-    <div class="identity">
-      <input id="nameInput" placeholder="Your name" autocomplete="off" spellcheck="false" />
-      <div class="pts-chip"><b id="myPts">0</b><span>pts</span></div>
-    </div>
-  </div>
-</header>
-
-<div class="wrap">
-  <section class="hero" id="hero" style="display:none">
-    <div class="hero-top"><span class="eyebrow" id="heroEyebrow">Matchday</span><span class="eyebrow" id="heroDate"></span></div>
-    <div class="hero-body" id="heroBody"></div>
-  </section>
-
-  <nav class="tabs" id="tabs"></nav>
-  <main id="view"></main>
-
-  <div class="foot">
-    <div class="scoring-key" id="scoringKey"></div>
-    <div style="margin-top:10px">Picks lock <b id="lockMins">60</b> minutes before kickoff. Scores refresh automatically.</div>
-    <div id="storageNote" style="margin-top:6px"></div>
-  </div>
-</div>
+<div id="root"></div>
+<div class="toast" id="toast"></div>
 
 <script>
 /* =========================================================================
-   EGEC World Cup Predictor — app logic (vanilla JS, no build step)
+   EGEC World Cup Predictor — accounts, roster, neon UI (vanilla JS)
    ========================================================================= */
 
-/* ---- Embedded fallback data (used if matches.json can't be fetched) ---- */
-const EMBEDDED = {
-  matches: [
-    {id:"g20-ned-swe",group:"F",home:"Netherlands",away:"Sweden",homeFlag:"🇳🇱",awayFlag:"🇸🇪",kickoff:"2026-06-20T16:00:00Z",venue:"Houston Stadium",status:"finished",homeScore:5,awayScore:1},
-    {id:"g20-ger-civ",group:"E",home:"Germany",away:"Ivory Coast",homeFlag:"🇩🇪",awayFlag:"🇨🇮",kickoff:"2026-06-20T20:00:00Z",venue:"MetLife Stadium",status:"finished",homeScore:2,awayScore:1},
-    {id:"g20-ecu-cuw",group:"E",home:"Ecuador",away:"Curaçao",homeFlag:"🇪🇨",awayFlag:"🇨🇼",kickoff:"2026-06-20T23:00:00Z",venue:"Lincoln Financial Field",status:"finished",homeScore:0,awayScore:0},
-    {id:"g21-tun-jpn",group:"F",home:"Tunisia",away:"Japan",homeFlag:"🇹🇳",awayFlag:"🇯🇵",kickoff:"2026-06-21T17:00:00Z",venue:"Arrowhead Stadium",status:"finished",homeScore:0,awayScore:4},
-    {id:"g21-esp-ksa",group:"H",home:"Spain",away:"Saudi Arabia",homeFlag:"🇪🇸",awayFlag:"🇸🇦",kickoff:"2026-06-21T19:00:00Z",venue:"Mercedes-Benz Stadium",status:"finished",homeScore:4,awayScore:0},
-    {id:"g21-bel-irn",group:"G",home:"Belgium",away:"IR Iran",homeFlag:"🇧🇪",awayFlag:"🇮🇷",kickoff:"2026-06-21T21:00:00Z",venue:"SoFi Stadium",status:"finished",homeScore:1,awayScore:1},
-    {id:"g21-uru-cpv",group:"H",home:"Uruguay",away:"Cabo Verde",homeFlag:"🇺🇾",awayFlag:"🇨🇻",kickoff:"2026-06-21T23:00:00Z",venue:"Hard Rock Stadium",status:"finished",homeScore:2,awayScore:2},
-    {id:"g21-egy-nzl",group:"G",home:"Egypt",away:"New Zealand",homeFlag:"🇪🇬",awayFlag:"🇳🇿",kickoff:"2026-06-22T01:00:00Z",venue:"BC Place, Vancouver",status:"finished",homeScore:3,awayScore:1},
-    {id:"g22-arg-aut",group:"J",home:"Argentina",away:"Austria",homeFlag:"🇦🇷",awayFlag:"🇦🇹",kickoff:"2026-06-22T17:00:00Z",venue:"AT&T Stadium, Arlington",status:"scheduled",homeScore:null,awayScore:null},
-    {id:"g22-fra-irq",group:"I",home:"France",away:"Iraq",homeFlag:"🇫🇷",awayFlag:"🇮🇶",kickoff:"2026-06-22T21:00:00Z",venue:"Lincoln Financial Field",status:"scheduled",homeScore:null,awayScore:null},
-    {id:"g22-nor-sen",group:"I",home:"Norway",away:"Senegal",homeFlag:"🇳🇴",awayFlag:"🇸🇳",kickoff:"2026-06-23T00:00:00Z",venue:"New York / New Jersey Stadium",status:"scheduled",homeScore:null,awayScore:null},
-    {id:"g22-jor-alg",group:"J",home:"Jordan",away:"Algeria",homeFlag:"🇯🇴",awayFlag:"🇩🇿",kickoff:"2026-06-23T03:00:00Z",venue:"San Francisco Bay Area Stadium",status:"scheduled",homeScore:null,awayScore:null},
-    {id:"g23-por-uzb",group:"K",home:"Portugal",away:"Uzbekistan",homeFlag:"🇵🇹",awayFlag:"🇺🇿",kickoff:"2026-06-23T17:00:00Z",venue:"Houston Stadium",status:"scheduled",homeScore:null,awayScore:null},
-    {id:"g23-eng-gha",group:"L",home:"England",away:"Ghana",homeFlag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",awayFlag:"🇬🇭",kickoff:"2026-06-23T20:00:00Z",venue:"Boston Stadium",status:"scheduled",homeScore:null,awayScore:null},
-    {id:"g23-pan-cro",group:"L",home:"Panama",away:"Croatia",homeFlag:"🇵🇦",awayFlag:"🇭🇷",kickoff:"2026-06-23T23:00:00Z",venue:"Toronto Stadium",status:"scheduled",homeScore:null,awayScore:null},
-    {id:"g23-col-cod",group:"K",home:"Colombia",away:"Congo DR",homeFlag:"🇨🇴",awayFlag:"🇨🇩",kickoff:"2026-06-24T02:00:00Z",venue:"Guadalajara Stadium",status:"scheduled",homeScore:null,awayScore:null},
-    {id:"g24-sui-can",group:"B",home:"Switzerland",away:"Canada",homeFlag:"🇨🇭",awayFlag:"🇨🇦",kickoff:"2026-06-24T19:00:00Z",venue:"BC Place, Vancouver",status:"scheduled",homeScore:null,awayScore:null},
-    {id:"g24-sco-bra",group:"C",home:"Scotland",away:"Brazil",homeFlag:"🏴󠁧󠁢󠁳󠁣󠁴󠁿",awayFlag:"🇧🇷",kickoff:"2026-06-24T22:00:00Z",venue:"Hard Rock Stadium, Miami",status:"scheduled",homeScore:null,awayScore:null},
-    {id:"g26-egy-irn",group:"G",home:"Egypt",away:"IR Iran",homeFlag:"🇪🇬",awayFlag:"🇮🇷",kickoff:"2026-06-27T03:00:00Z",venue:"Seattle Stadium",status:"scheduled",homeScore:null,awayScore:null},
-    {id:"g26-nzl-bel",group:"G",home:"New Zealand",away:"Belgium",homeFlag:"🇳🇿",awayFlag:"🇧🇪",kickoff:"2026-06-27T03:00:00Z",venue:"BC Place, Vancouver",status:"scheduled",homeScore:null,awayScore:null}
-  ]
+/* ---- Team -> ISO2 (for real flag images via flagcdn) ---- */
+const ISO = {
+  "Netherlands":"nl","Sweden":"se","Germany":"de","Ivory Coast":"ci","Ecuador":"ec","Curaçao":"cw",
+  "Tunisia":"tn","Japan":"jp","Spain":"es","Saudi Arabia":"sa","Belgium":"be","IR Iran":"ir","Iran":"ir",
+  "Uruguay":"uy","Cabo Verde":"cv","Egypt":"eg","New Zealand":"nz","Argentina":"ar","Austria":"at",
+  "France":"fr","Iraq":"iq","Norway":"no","Senegal":"sn","Jordan":"jo","Algeria":"dz","Portugal":"pt",
+  "Uzbekistan":"uz","England":"gb-eng","Ghana":"gh","Panama":"pa","Croatia":"hr","Colombia":"co",
+  "Congo DR":"cd","Switzerland":"ch","Canada":"ca","Scotland":"gb-sct","Brazil":"br","Qatar":"qa",
+  "Bosnia and Herzegovina":"ba","Mexico":"mx","South Africa":"za","Korea Republic":"kr","Czechia":"cz",
+  "United States":"us","Paraguay":"py","Australia":"au","Türkiye":"tr","Morocco":"ma","Scotland ":"gb-sct"
 };
 
-const DEFAULT_CONFIG = {
-  orgName:"EGEC", seasonLabel:"World Cup 2026 — Office Predictor",
-  lockOffsetMinutes:60,
-  scoring:{exactScore:5, correctOutcome:3, correctGoalsBonus:1},
-  liveScores:{provider:"football-data", apiToken:"", competitionId:"WC"},
-  storage:{mode:"local", firebase:{}},
-  refreshMs:30000
-};
-const CFG = Object.assign({}, DEFAULT_CONFIG, (window.CONFIG||{}));
-CFG.scoring = Object.assign({}, DEFAULT_CONFIG.scoring, (window.CONFIG&&window.CONFIG.scoring)||{});
-CFG.storage = Object.assign({}, DEFAULT_CONFIG.storage, (window.CONFIG&&window.CONFIG.storage)||{});
+/* ---- Embedded fallback fixtures (used if matches.json can't be fetched) ---- */
+const EMBEDDED={matches:[
+{id:"g20-ned-swe",group:"F",home:"Netherlands",away:"Sweden",homeFlag:"🇳🇱",awayFlag:"🇸🇪",kickoff:"2026-06-20T16:00:00Z",venue:"Houston",status:"finished",homeScore:5,awayScore:1},
+{id:"g20-ger-civ",group:"E",home:"Germany",away:"Ivory Coast",homeFlag:"🇩🇪",awayFlag:"🇨🇮",kickoff:"2026-06-20T20:00:00Z",venue:"MetLife",status:"finished",homeScore:2,awayScore:1},
+{id:"g20-ecu-cuw",group:"E",home:"Ecuador",away:"Curaçao",homeFlag:"🇪🇨",awayFlag:"🇨🇼",kickoff:"2026-06-20T23:00:00Z",venue:"Philadelphia",status:"finished",homeScore:0,awayScore:0},
+{id:"g21-tun-jpn",group:"F",home:"Tunisia",away:"Japan",homeFlag:"🇹🇳",awayFlag:"🇯🇵",kickoff:"2026-06-21T17:00:00Z",venue:"Kansas City",status:"finished",homeScore:0,awayScore:4},
+{id:"g21-esp-ksa",group:"H",home:"Spain",away:"Saudi Arabia",homeFlag:"🇪🇸",awayFlag:"🇸🇦",kickoff:"2026-06-21T19:00:00Z",venue:"Atlanta",status:"finished",homeScore:4,awayScore:0},
+{id:"g21-bel-irn",group:"G",home:"Belgium",away:"IR Iran",homeFlag:"🇧🇪",awayFlag:"🇮🇷",kickoff:"2026-06-21T21:00:00Z",venue:"Los Angeles",status:"finished",homeScore:1,awayScore:1},
+{id:"g21-uru-cpv",group:"H",home:"Uruguay",away:"Cabo Verde",homeFlag:"🇺🇾",awayFlag:"🇨🇻",kickoff:"2026-06-21T23:00:00Z",venue:"Miami",status:"finished",homeScore:2,awayScore:2},
+{id:"g21-egy-nzl",group:"G",home:"Egypt",away:"New Zealand",homeFlag:"🇪🇬",awayFlag:"🇳🇿",kickoff:"2026-06-22T01:00:00Z",venue:"Vancouver",status:"finished",homeScore:3,awayScore:1},
+{id:"g22-arg-aut",group:"J",home:"Argentina",away:"Austria",homeFlag:"🇦🇷",awayFlag:"🇦🇹",kickoff:"2026-06-22T17:00:00Z",venue:"Arlington",status:"scheduled",homeScore:null,awayScore:null},
+{id:"g22-fra-irq",group:"I",home:"France",away:"Iraq",homeFlag:"🇫🇷",awayFlag:"🇮🇶",kickoff:"2026-06-22T21:00:00Z",venue:"Philadelphia",status:"scheduled",homeScore:null,awayScore:null},
+{id:"g22-nor-sen",group:"I",home:"Norway",away:"Senegal",homeFlag:"🇳🇴",awayFlag:"🇸🇳",kickoff:"2026-06-23T00:00:00Z",venue:"New York/NJ",status:"scheduled",homeScore:null,awayScore:null},
+{id:"g22-jor-alg",group:"J",home:"Jordan",away:"Algeria",homeFlag:"🇯🇴",awayFlag:"🇩🇿",kickoff:"2026-06-23T03:00:00Z",venue:"SF Bay Area",status:"scheduled",homeScore:null,awayScore:null},
+{id:"g23-por-uzb",group:"K",home:"Portugal",away:"Uzbekistan",homeFlag:"🇵🇹",awayFlag:"🇺🇿",kickoff:"2026-06-23T17:00:00Z",venue:"Houston",status:"scheduled",homeScore:null,awayScore:null},
+{id:"g23-eng-gha",group:"L",home:"England",away:"Ghana",homeFlag:"🏴",awayFlag:"🇬🇭",kickoff:"2026-06-23T20:00:00Z",venue:"Boston",status:"scheduled",homeScore:null,awayScore:null},
+{id:"g23-pan-cro",group:"L",home:"Panama",away:"Croatia",homeFlag:"🇵🇦",awayFlag:"🇭🇷",kickoff:"2026-06-23T23:00:00Z",venue:"Toronto",status:"scheduled",homeScore:null,awayScore:null},
+{id:"g23-col-cod",group:"K",home:"Colombia",away:"Congo DR",homeFlag:"🇨🇴",awayFlag:"🇨🇩",kickoff:"2026-06-24T02:00:00Z",venue:"Guadalajara",status:"scheduled",homeScore:null,awayScore:null},
+{id:"g24-sui-can",group:"B",home:"Switzerland",away:"Canada",homeFlag:"🇨🇭",awayFlag:"🇨🇦",kickoff:"2026-06-24T19:00:00Z",venue:"Vancouver",status:"scheduled",homeScore:null,awayScore:null},
+{id:"g24-sco-bra",group:"C",home:"Scotland",away:"Brazil",homeFlag:"🏴",awayFlag:"🇧🇷",kickoff:"2026-06-24T22:00:00Z",venue:"Miami",status:"scheduled",homeScore:null,awayScore:null},
+{id:"g26-egy-irn",group:"G",home:"Egypt",away:"IR Iran",homeFlag:"🇪🇬",awayFlag:"🇮🇷",kickoff:"2026-06-27T03:00:00Z",venue:"Seattle",status:"scheduled",homeScore:null,awayScore:null},
+{id:"g26-nzl-bel",group:"G",home:"New Zealand",away:"Belgium",homeFlag:"🇳🇿",awayFlag:"🇧🇪",kickoff:"2026-06-27T03:00:00Z",venue:"Vancouver",status:"scheduled",homeScore:null,awayScore:null}
+]};
+
+const DEFAULTS={orgName:"EGEC",seasonLabel:"World Cup 2026",lockOffsetMinutes:60,
+  scoring:{exactScore:5,correctOutcome:3,correctGoalsBonus:1},adminCode:"EGEC2026",
+  liveScores:{apiToken:"",competitionId:"WC"},storage:{mode:"local",firebase:{}},refreshMs:30000};
+const CFG=Object.assign({},DEFAULTS,window.CONFIG||{});
+CFG.scoring=Object.assign({},DEFAULTS.scoring,(window.CONFIG&&window.CONFIG.scoring)||{});
+CFG.storage=Object.assign({},DEFAULTS.storage,(window.CONFIG&&window.CONFIG.storage)||{});
 
 /* ---------------- State ---------------- */
-let MATCHES = [];
-let USER = localStorage.getItem("egec_wc_user") || "";
-let activeTab = "today";
-let savedTimer = null;
+let MATCHES=[];
+let SESSION=localStorage.getItem("egec_session")||"";
+let ME=null;                  // {name, code}
+let isAdmin=sessionStorage.getItem("egec_admin")==="1";
+let activeTab="today";
+let authMode="register";
+let savedTimer=null;
 
-/* ---------------- Storage adapter ---------------- */
-const Store = {
-  mode: CFG.storage.mode === "firebase" && CFG.storage.firebase && CFG.storage.firebase.apiKey ? "firebase" : "local",
-  db:null, allCache:{},
-  key(){ return "egec_wc_preds_"+(USER||"_anon"); },
-  /* local */
-  localGet(){ try{ return JSON.parse(localStorage.getItem(this.key())||"{}"); }catch(e){ return {}; } },
-  localSet(p){ localStorage.setItem(this.key(), JSON.stringify(p)); },
+/* ---------------- Storage (local | firebase) ---------------- */
+const Store={
+  mode:(CFG.storage.mode==="firebase"&&CFG.storage.firebase&&CFG.storage.firebase.apiKey)?"firebase":"local",
+  db:null,fs:null,
+  cache:{players:{},preds:{},results:{}},
+
+  /* local helpers */
+  L:{
+    players:()=>JSON.parse(localStorage.getItem("egec_players")||"{}"),
+    setPlayers:o=>localStorage.setItem("egec_players",JSON.stringify(o)),
+    preds:()=>JSON.parse(localStorage.getItem("egec_preds")||"{}"),
+    setPreds:o=>localStorage.setItem("egec_preds",JSON.stringify(o)),
+    results:()=>JSON.parse(localStorage.getItem("egec_results")||"{}"),
+    setResults:o=>localStorage.setItem("egec_results",JSON.stringify(o))
+  },
 
   async init(){
-    if(this.mode!=="firebase") return;
+    if(this.mode!=="firebase")return;
     try{
-      const appMod = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
-      const fsMod  = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
-      const app = appMod.initializeApp(CFG.storage.firebase);
-      this.db = fsMod.getFirestore(app); this._fs = fsMod;
-      // live subscription to everyone's picks
-      fsMod.onSnapshot(fsMod.collection(this.db,"predictions"),(snap)=>{
-        this.allCache = {};
-        snap.forEach(d=> this.allCache[d.id]=d.data());
-        render();
-      });
-    }catch(e){ console.warn("Firebase init failed, falling back to local:",e); this.mode="local"; }
+      const a=await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
+      const f=await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+      const app=a.initializeApp(CFG.storage.firebase);this.db=f.getFirestore(app);this.fs=f;
+      const sub=(col,key)=>f.onSnapshot(f.collection(this.db,col),s=>{this.cache[key]={};s.forEach(d=>this.cache[key][d.id]=d.data());render();});
+      sub("players","players");sub("predictions","preds");sub("results","results");
+    }catch(e){console.warn("Firebase failed -> local",e);this.mode="local";}
   },
-  async getMine(){
-    if(this.mode==="firebase" && USER){ const u=this.allCache[USER]; return (u&&u.picks)||{}; }
-    return this.localGet();
+
+  players(){return this.mode==="firebase"?this.cache.players:this.L.players();},
+  predsAll(){return this.mode==="firebase"?this.cache.preds:this.L.preds();},
+  resultsAll(){return this.mode==="firebase"?this.cache.results:this.L.results();},
+
+  getByCode(code){const p=this.players();return p[code]?{name:p[code].name,code}:null;},
+
+  async addPlayer(name){
+    const existing=this.players();
+    let code; do{code=genCode();}while(existing[code]);
+    const rec={name,code,createdAt:Date.now()};
+    if(this.mode==="firebase"){await this.fs.setDoc(this.fs.doc(this.db,"players",code),rec);}
+    else{const o=this.L.players();o[code]=rec;this.L.setPlayers(o);}
+    return code;
   },
-  async savePick(matchId, h, a){
-    if(this.mode==="firebase" && USER){
-      const fs=this._fs; const picks=Object.assign({}, (this.allCache[USER]&&this.allCache[USER].picks)||{});
-      picks[matchId]={h,a};
-      await fs.setDoc(fs.doc(this.db,"predictions",USER),{name:USER,picks},{merge:true});
-    } else {
-      const p=this.localGet(); p[matchId]={h,a}; this.localSet(p);
-    }
-  },
-  /* all players (for leaderboard + locked-pick reveal) */
-  allPlayers(){
+
+  myPicks(code){const all=this.predsAll();return (all[code]&&all[code].picks)||{};},
+
+  async savePick(code,name,matchId,h,a){
     if(this.mode==="firebase"){
-      return Object.entries(this.allCache).map(([id,d])=>({name:d.name||id, picks:d.picks||{}}));
+      const cur=(this.cache.preds[code]&&this.cache.preds[code].picks)||{};
+      cur[matchId]={h,a};
+      await this.fs.setDoc(this.fs.doc(this.db,"predictions",code),{name,picks:cur},{merge:true});
+    }else{
+      const all=this.L.preds();all[code]=all[code]||{name,picks:{}};all[code].name=name;
+      all[code].picks[matchId]={h,a};this.L.setPreds(all);
     }
-    // local mode: only this browser's user exists
-    return USER ? [{name:USER, picks:this.localGet()}] : [];
+  },
+
+  async setResult(matchId,h,a,status){
+    const rec={homeScore:h,awayScore:a,status};
+    if(this.mode==="firebase"){await this.fs.setDoc(this.fs.doc(this.db,"results",matchId),rec);}
+    else{const o=this.L.results();o[matchId]=rec;this.L.setResults(o);}
   }
 };
 
-/* ---------------- Time / state helpers ---------------- */
-const now = ()=>Date.now();
-const ko = m => new Date(m.kickoff).getTime();
-const lockAt = m => ko(m) - CFG.lockOffsetMinutes*60000;
-function liveState(m){
-  if(m.status==="finished") return "finished";
-  if(m.status==="live") return "live";
-  if(now() >= ko(m)) return "live";   // kicked off but data not yet marked finished
-  return "upcoming";
+function genCode(){
+  const A="ABCDEFGHJKMNPQRSTUVWXYZ23456789";let s="";
+  for(let i=0;i<6;i++)s+=A[Math.floor(Math.random()*A.length)];
+  return s;
 }
-const isLocked = m => liveState(m)!=="upcoming" || now() >= lockAt(m);
 
-function fmtCountdown(ms){
-  if(ms<=0) return "00:00:00";
-  const s=Math.floor(ms/1000), d=Math.floor(s/86400);
-  const h=Math.floor((s%86400)/3600), mi=Math.floor((s%3600)/60), se=s%60;
-  const pad=n=>String(n).padStart(2,"0");
-  return (d>0? d+"d " : "")+pad(h)+":"+pad(mi)+":"+pad(se);
+/* ---------------- Effective match (apply organizer results) ---------------- */
+function eff(m){
+  const r=Store.resultsAll()[m.id];
+  if(!r)return m;
+  return Object.assign({},m,{homeScore:r.homeScore,awayScore:r.awayScore,status:r.status||m.status});
 }
-function fmtKO(m){
-  const d=new Date(m.kickoff);
-  return d.toLocaleString(undefined,{weekday:"short",hour:"2-digit",minute:"2-digit"});
-}
+
+/* ---------------- Time / state ---------------- */
+const now=()=>Date.now();
+const ko=m=>new Date(m.kickoff).getTime();
+const lockAt=m=>ko(m)-CFG.lockOffsetMinutes*60000;
+function liveState(m){if(m.status==="finished")return"finished";if(m.status==="live")return"live";if(now()>=ko(m))return"live";return"upcoming";}
+const isLocked=m=>liveState(m)!=="upcoming"||now()>=lockAt(m);
+function outcome(m){if(m.homeScore==null||m.awayScore==null)return null;if(m.homeScore>m.awayScore)return"home";if(m.awayScore>m.homeScore)return"away";return"draw";}
+
+function fmtCountdown(ms){if(ms<=0)return"00:00:00";const s=Math.floor(ms/1000),d=Math.floor(s/86400),h=Math.floor((s%86400)/3600),mi=Math.floor((s%3600)/60),se=s%60,p=n=>String(n).padStart(2,"0");return(d>0?d+"d ":"")+p(h)+":"+p(mi)+":"+p(se);}
+function fmtKO(m){return new Date(m.kickoff).toLocaleString(undefined,{weekday:"short",hour:"2-digit",minute:"2-digit"});}
 
 /* ---------------- Scoring ---------------- */
-function scorePick(pick, m){
-  if(m.status!=="finished" || !pick || pick.h==null || pick.a==null) return {pts:0, kind:"none"};
-  const ph=+pick.h, pa=+pick.a, fh=m.homeScore, fa=m.awayScore;
-  if(ph===fh && pa===fa) return {pts:CFG.scoring.exactScore, kind:"hit"};
-  let pts=0;
-  const sameOutcome = Math.sign(ph-pa)===Math.sign(fh-fa);
-  if(sameOutcome) pts+=CFG.scoring.correctOutcome;
-  if(ph===fh) pts+=CFG.scoring.correctGoalsBonus;
-  if(pa===fa) pts+=CFG.scoring.correctGoalsBonus;
-  return {pts, kind: pts>0 ? "part" : "miss"};
+function scorePick(pick,m){
+  if(m.status!=="finished"||!pick||pick.h==null)return{pts:0,kind:"none"};
+  const ph=+pick.h,pa=+pick.a,fh=m.homeScore,fa=m.awayScore;
+  if(ph===fh&&pa===fa)return{pts:CFG.scoring.exactScore,kind:"hit"};
+  let pts=0;if(Math.sign(ph-pa)===Math.sign(fh-fa))pts+=CFG.scoring.correctOutcome;
+  if(ph===fh)pts+=CFG.scoring.correctGoalsBonus;if(pa===fa)pts+=CFG.scoring.correctGoalsBonus;
+  return{pts,kind:pts>0?"part":"miss"};
 }
-function totalFor(picks){
-  let total=0, played=0;
-  MATCHES.forEach(m=>{
-    if(m.status==="finished" && picks[m.id] && picks[m.id].h!=null){
-      total+=scorePick(picks[m.id],m).pts; played++;
-    }
+function totalFor(picks){let total=0,played=0;MATCHES.forEach(mm=>{const m=eff(mm);if(m.status==="finished"&&picks[m.id]&&picks[m.id].h!=null){total+=scorePick(picks[m.id],m).pts;played++;}});return{total,played};}
+
+/* predictors of a match: names always; scores only after lock (or your own) */
+function predictorsFor(mm){
+  const m=eff(mm),locked=isLocked(m),preds=Store.predsAll(),out=[];
+  Object.entries(preds).forEach(([code,d])=>{
+    const pk=d.picks&&d.picks[m.id];if(!pk||pk.h==null)return;
+    const isYou=ME&&code===ME.code;
+    out.push({name:d.name||"?",code,pick:pk,isYou,reveal:locked||isYou,score:m.status==="finished"?scorePick(pk,m):null});
   });
-  return {total, played};
+  out.sort((a,b)=>(b.isYou-a.isYou)||((b.score?b.score.pts:0)-(a.score?a.score.pts:0))||a.name.localeCompare(b.name));
+  return out;
 }
 
-/* Picks visible for a match. Others are revealed ONLY once the match is locked;
-   your own pick is always visible to you. */
-function picksForMatch(m){
-  const locked=isLocked(m), out=[];
-  Store.allPlayers().forEach(p=>{
-    const pk=p.picks[m.id];
-    if(!pk || pk.h==null) return;
-    const isYou = p.name===USER;
-    if(!locked && !isYou) return;            // keep colleagues' picks secret pre-lock
-    out.push({name:p.name, pick:pk, isYou, score: m.status==="finished"? scorePick(pk,m) : null});
-  });
-  out.sort((a,b)=> (b.isYou-a.isYou)
-                 || ((b.score?b.score.pts:0)-(a.score?a.score.pts:0))
-                 || a.name.localeCompare(b.name));
-  return out;
+/* ---------------- DOM helpers ---------------- */
+const $=s=>document.querySelector(s);
+const el=(t,c)=>{const e=document.createElement(t);if(c)e.className=c;return e;};
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1800);}
+function flagEl(name,emoji){
+  const iso=ISO[name];
+  if(iso){const img=document.createElement("img");img.className="flag";img.alt=name;img.loading="lazy";
+    img.src="https://flagcdn.com/w80/"+iso+".png";
+    img.onerror=()=>{const s=el("span","flag-emo");s.textContent=emoji||"🏳️";img.replaceWith(s);};
+    return img;}
+  const s=el("span","flag-emo");s.textContent=emoji||"🏳️";return s;
 }
 
 /* ---------------- Data loading ---------------- */
 async function loadMatches(){
-  try{
-    const res=await fetch("matches.json",{cache:"no-store"});
-    if(res.ok){ const j=await res.json(); if(j&&Array.isArray(j.matches)) MATCHES=j.matches; }
-    else MATCHES=EMBEDDED.matches;
-  }catch(e){ MATCHES=EMBEDDED.matches; }
-  await mergeLiveScores();
+  try{const r=await fetch("matches.json",{cache:"no-store"});if(r.ok){const j=await r.json();if(j&&Array.isArray(j.matches))MATCHES=j.matches;else MATCHES=EMBEDDED.matches;}else MATCHES=EMBEDDED.matches;}
+  catch(e){MATCHES=EMBEDDED.matches;}
+  await mergeLive();
 }
-async function mergeLiveScores(){
-  const ls=CFG.liveScores;
-  if(!ls || !ls.apiToken) return;       // no token -> rely on matches.json
-  try{
-    const r=await fetch(`https://api.football-data.org/v4/competitions/${ls.competitionId}/matches`,
-      {headers:{"X-Auth-Token":ls.apiToken}});
-    if(!r.ok) return;
-    const data=await r.json();
-    const byName={};
-    (data.matches||[]).forEach(am=>{
-      byName[(am.homeTeam.name+"|"+am.awayTeam.name).toLowerCase()]=am;
-    });
-    MATCHES.forEach(m=>{
-      const am=byName[(m.home+"|"+m.away).toLowerCase()];
-      if(!am) return;
-      if(am.status==="FINISHED"){ m.status="finished"; }
-      else if(am.status==="IN_PLAY"||am.status==="PAUSED"){ m.status="live"; }
-      if(am.score&&am.score.fullTime){
-        if(am.score.fullTime.home!=null) m.homeScore=am.score.fullTime.home;
-        if(am.score.fullTime.away!=null) m.awayScore=am.score.fullTime.away;
-      }
-    });
-  }catch(e){ /* silent: GitHub Pages may hit CORS; matches.json is the source of truth */ }
+async function mergeLive(){
+  const ls=CFG.liveScores;if(!ls||!ls.apiToken)return;
+  try{const r=await fetch(`https://api.football-data.org/v4/competitions/${ls.competitionId}/matches`,{headers:{"X-Auth-Token":ls.apiToken}});
+    if(!r.ok)return;const data=await r.json();const by={};(data.matches||[]).forEach(am=>by[(am.homeTeam.name+"|"+am.awayTeam.name).toLowerCase()]=am);
+    MATCHES.forEach(m=>{const am=by[(m.home+"|"+m.away).toLowerCase()];if(!am)return;
+      if(am.status==="FINISHED")m.status="finished";else if(am.status==="IN_PLAY"||am.status==="PAUSED")m.status="live";
+      if(am.score&&am.score.fullTime){if(am.score.fullTime.home!=null)m.homeScore=am.score.fullTime.home;if(am.score.fullTime.away!=null)m.awayScore=am.score.fullTime.away;}});
+  }catch(e){}
 }
 
-/* ---------------- Rendering ---------------- */
-const $ = sel => document.querySelector(sel);
-const el = (t,c)=>{const e=document.createElement(t); if(c) e.className=c; return e;};
-
-const TABS=[
-  {id:"today",label:"Today"},
-  {id:"upcoming",label:"Upcoming"},
-  {id:"finished",label:"Finished"},
-  {id:"mine",label:"My Picks"},
-  {id:"leaderboard",label:"Leaderboard"}
-];
-
-function startOfToday(){const d=new Date();d.setHours(0,0,0,0);return d.getTime();}
-function endOfToday(){const d=new Date();d.setHours(23,59,59,999);return d.getTime();}
-
-function matchesForTab(tab, picks){
-  const sorted=[...MATCHES].sort((a,b)=>ko(a)-ko(b));
-  if(tab==="today") return sorted.filter(m=> liveState(m)==="live" || (ko(m)>=startOfToday() && ko(m)<=endOfToday()));
-  if(tab==="upcoming") return sorted.filter(m=> liveState(m)==="upcoming" || liveState(m)==="live");
-  if(tab==="finished") return sorted.filter(m=> m.status==="finished").reverse();
-  if(tab==="mine") return sorted.filter(m=> picks[m.id] && picks[m.id].h!=null);
-  return [];
+/* =========================================================================
+   RENDER
+   ========================================================================= */
+function render(){
+  if(SESSION&&!ME){ME=Store.getByCode(SESSION);if(!ME){SESSION="";localStorage.removeItem("egec_session");}}
+  if(!ME){renderAuth();return;}
+  renderApp();
 }
 
-let CURRENT_PICKS={};
+/* ---- Auth ---- */
+function renderAuth(){
+  const root=$("#root");
+  root.innerHTML=`
+  <div class="auth"><div class="auth-card" id="ac"></div></div>`;
+  drawAuth();
+}
+function drawAuth(){
+  const ac=$("#ac");
+  ac.innerHTML=`
+    <div class="logo"><div class="bolt">⚡</div>
+      <div><h1>${esc(CFG.orgName)} <span class="neon-mag">Predictor</span></h1>
+      <div class="s">${esc(CFG.seasonLabel)}</div></div></div>
+    <div class="seg">
+      <button id="segReg" class="${authMode==="register"?"on":""}">Register</button>
+      <button id="segLog" class="${authMode==="login"?"on":""}">Log in</button>
+    </div>
+    <div id="authBody"></div>`;
+  $("#segReg").onclick=()=>{authMode="register";drawAuth();};
+  $("#segLog").onclick=()=>{authMode="login";drawAuth();};
+  const body=$("#authBody");
+  if(authMode==="register"){
+    body.innerHTML=`
+      <label class="fld">Your name</label>
+      <input id="regName" class="input" placeholder="e.g. Mohamed Salah" autocomplete="off" />
+      <button class="btn" id="regBtn">Create my code</button>
+      <div class="err" id="regErr"></div>
+      <div class="hint-sm">You'll get a unique 6-character code. Save it — it's how you log in from any device.</div>`;
+    $("#regBtn").onclick=doRegister;
+    $("#regName").addEventListener("keydown",e=>{if(e.key==="Enter")doRegister();});
+    setTimeout(()=>$("#regName").focus(),50);
+  }else{
+    body.innerHTML=`
+      <label class="fld">Your login code</label>
+      <input id="logCode" class="input code" placeholder="● ● ● ● ● ●" maxlength="6" autocomplete="off" />
+      <button class="btn" id="logBtn">Enter</button>
+      <div class="err" id="logErr"></div>
+      <div class="hint-sm">Lost your code? Ask your organizer — they can find you in the Players list.</div>`;
+    const inp=$("#logCode");
+    inp.addEventListener("input",()=>inp.value=inp.value.toUpperCase().replace(/[^A-Z0-9]/g,""));
+    inp.addEventListener("keydown",e=>{if(e.key==="Enter")doLogin();});
+    $("#logBtn").onclick=doLogin;
+    setTimeout(()=>inp.focus(),50);
+  }
+}
+async function doRegister(){
+  const name=$("#regName").value.trim();
+  if(name.length<2){$("#regErr").textContent="Enter your name (at least 2 letters).";return;}
+  $("#regBtn").disabled=true;
+  const code=await Store.addPlayer(name);
+  ME={name,code};SESSION=code;localStorage.setItem("egec_session",code);
+  showCodeReveal(name,code);
+}
+function showCodeReveal(name,code){
+  const ac=$("#ac");
+  ac.innerHTML=`
+    <div class="logo"><div class="bolt">⚡</div>
+      <div><h1>You're in, <span class="neon-cyan">${esc(name.split(" ")[0])}</span></h1>
+      <div class="s">Save your login code</div></div></div>
+    <div class="code-reveal">
+      <div class="big-code" id="bc">${code}</div>
+      <button class="copy-btn" id="copyCode">📋 Copy code</button>
+      <div class="warn">⚠️ This code is your login. Screenshot it or write it down — you'll need it to get back in on any device.</div>
+      <button class="btn" id="enterApp">Start predicting →</button>
+    </div>`;
+  $("#copyCode").onclick=()=>{navigator.clipboard&&navigator.clipboard.writeText(code);toast("Code copied");};
+  $("#enterApp").onclick=()=>{render();};
+}
+async function doLogin(){
+  const code=$("#logCode").value.trim().toUpperCase();
+  if(code.length<6){$("#logErr").textContent="Enter your 6-character code.";return;}
+  const p=Store.getByCode(code);
+  if(!p){$("#logErr").textContent="No player found with that code.";return;}
+  ME=p;SESSION=code;localStorage.setItem("egec_session",code);render();
+}
+function logout(){ME=null;SESSION="";localStorage.removeItem("egec_session");isAdmin=false;sessionStorage.removeItem("egec_admin");activeTab="today";render();}
 
-async function render(){
-  CURRENT_PICKS = await Store.getMine();
-  // header / brand
-  $("#brandTitle").textContent = CFG.orgName+" World Cup Predictor";
-  $("#crest").textContent = (CFG.orgName||"EG").slice(0,2).toUpperCase();
-  $("#lockMins").textContent = CFG.lockOffsetMinutes;
-  $("#nameInput").value = USER;
-  const mine=totalFor(CURRENT_PICKS);
-  $("#myPts").textContent = mine.total;
+/* ---- App shell ---- */
+const TABS=[{id:"today",label:"Today"},{id:"upcoming",label:"Upcoming"},{id:"finished",label:"Finished"},{id:"players",label:"Players"},{id:"board",label:"Leaderboard"}];
+function startToday(){const d=new Date();d.setHours(0,0,0,0);return d.getTime();}
+function endToday(){const d=new Date();d.setHours(23,59,59,999);return d.getTime();}
+function listFor(tab){
+  const arr=MATCHES.map(eff).sort((a,b)=>ko(a)-ko(b));
+  if(tab==="today")return arr.filter(m=>liveState(m)==="live"||(ko(m)>=startToday()&&ko(m)<=endToday()));
+  if(tab==="upcoming")return arr.filter(m=>liveState(m)!=="finished");
+  if(tab==="finished")return arr.filter(m=>m.status==="finished").reverse();
+  return arr;
+}
 
-  // scoring key
-  $("#scoringKey").innerHTML =
-    `<span><b>${CFG.scoring.exactScore}</b> exact score</span>`+
-    `<span><b>${CFG.scoring.correctOutcome}</b> correct result</span>`+
-    `<span><b>+${CFG.scoring.correctGoalsBonus}</b> per exact goals</span>`;
-  $("#storageNote").innerHTML = Store.mode==="firebase"
-    ? "Shared mode: everyone appears on one leaderboard. Picks are hidden from colleagues until each match locks, then revealed."
-    : "Local mode: picks are saved only in this browser, so colleagues can't see each other yet. Enable shared mode (see README) for an office-wide game.";
+function renderApp(){
+  const root=$("#root");
+  const myPicks=Store.myPicks(ME.code);const mine=totalFor(myPicks);
+  const tabs=isAdmin?TABS.concat([{id:"org",label:"⚙ Organizer"}]):TABS;
 
-  // tabs
-  const tabsEl=$("#tabs"); tabsEl.innerHTML="";
-  TABS.forEach(t=>{
+  root.innerHTML=`
+  <header class="app"><div class="head-inner">
+    <div class="brand"><div class="bolt">⚡</div>
+      <div><h1>${esc(CFG.orgName)} Predictor</h1><div class="s">${esc(CFG.seasonLabel)}</div></div></div>
+    <div class="head-spacer"></div>
+    <div class="me-chip">
+      <span class="nm">${esc(ME.name)}</span>
+      <span class="pts">${mine.total}<small> PTS</small></span>
+      <button class="icon-btn" id="logoutBtn" title="Log out">⎋</button>
+    </div>
+  </div></header>
+  <div class="wrap">
+    <section class="hero" id="hero" style="display:none"><div class="hero-in" id="heroIn"></div></section>
+    <nav class="tabs" id="tabs"></nav>
+    <main id="view"></main>
+    <div class="foot">
+      <div class="scoring-key">
+        <span><b>${CFG.scoring.exactScore}</b> exact</span>
+        <span><b>${CFG.scoring.correctOutcome}</b> result</span>
+        <span><b>+${CFG.scoring.correctGoalsBonus}</b> per exact goals</span>
+      </div>
+      <div style="margin-top:9px">Picks lock <b>${CFG.lockOffsetMinutes} min</b> before kickoff · ${Store.mode==="firebase"?"Shared across all devices":"Saved on this device"}</div>
+      <div style="margin-top:7px">${isAdmin?'Organizer mode is on. ':''}<button class="link" id="orgLink">${isAdmin?"Exit organizer":"Organizer login"}</button></div>
+    </div>
+  </div>`;
+
+  $("#logoutBtn").onclick=logout;
+  $("#orgLink").onclick=toggleAdmin;
+
+  const tabsEl=$("#tabs");
+  tabs.forEach(t=>{
     const b=el("button","tab"+(t.id===activeTab?" active":""));
     b.textContent=t.label;
-    if(t.id==="today"){const n=matchesForTab("today",CURRENT_PICKS).length; if(n){const s=el("span","badge");s.textContent=n;b.appendChild(s);}}
-    b.onclick=()=>{activeTab=t.id; render();};
+    if(t.id==="today"){const n=listFor("today").length;if(n){const s=el("span","badge");s.textContent=n;b.appendChild(s);}}
+    b.onclick=()=>{activeTab=t.id;renderApp();};
     tabsEl.appendChild(b);
   });
 
   renderHero();
+  const view=$("#view");
+  if(activeTab==="board"){view.appendChild(renderBoard());return;}
+  if(activeTab==="players"){view.appendChild(renderRoster());return;}
+  if(activeTab==="org"){view.appendChild(renderOrg());return;}
 
-  const view=$("#view"); view.innerHTML="";
-  if(activeTab==="leaderboard"){ view.appendChild(renderBoard()); return; }
-
-  const list=matchesForTab(activeTab,CURRENT_PICKS);
-  if(!list.length){ view.appendChild(emptyState(activeTab)); return; }
-  list.forEach(m=> view.appendChild(renderCard(m)));
-  tick(); // sync countdowns immediately
+  const list=listFor(activeTab);
+  if(!list.length){view.appendChild(emptyState(activeTab));return;}
+  list.forEach(m=>view.appendChild(renderCard(m)));
+  tick();
 }
 
 function emptyState(tab){
   const e=el("div","empty");
-  const msg={
-    today:["No matches today","Check Upcoming to get your picks in early."],
-    upcoming:["You're all caught up","No upcoming fixtures loaded yet."],
-    finished:["Nothing finished yet","Results will show here once matches end."],
-    mine:["No picks yet","Open Today or Upcoming and predict a scoreline."]
-  }[tab]||["Nothing here",""];
-  e.innerHTML=`<div class="big">${msg[0]}</div><div>${msg[1]}</div>`;
-  return e;
+  const M={today:["No matches today","Check Upcoming and get your picks in early."],
+    upcoming:["All caught up","No upcoming fixtures loaded."],
+    finished:["Nothing finished yet","Results appear here once matches end."]}[tab]||["Nothing here",""];
+  e.innerHTML=`<div class="big">${M[0]}</div><div>${M[1]}</div>`;return e;
 }
 
 function renderHero(){
-  const hero=$("#hero"), body=$("#heroBody");
-  const live=MATCHES.filter(m=>liveState(m)==="live");
-  // next actionable match: upcoming, not locked, soonest to lock
-  const actionable=MATCHES
-    .filter(m=> liveState(m)==="upcoming" && now()<lockAt(m))
-    .sort((a,b)=>lockAt(a)-lockAt(b))[0];
-
-  if(!live.length && !actionable){ hero.style.display="none"; return; }
-  hero.style.display="";
-  $("#heroDate").textContent = new Date().toLocaleDateString(undefined,{weekday:"long",month:"short",day:"numeric"});
-  body.innerHTML="";
-
-  if(actionable){
-    const has = CURRENT_PICKS[actionable.id] && CURRENT_PICKS[actionable.id].h!=null;
-    const cta=el("div","hero-cta");
-    cta.innerHTML=`<span class="t">${actionable.homeFlag} ${actionable.home} v ${actionable.away} ${actionable.awayFlag}</span> · `+
-                  `<span class="hero-clock" data-countdown="${actionable.id}">--:--:--</span>`;
-    const sub=el("div","hero-sub");
-    sub.innerHTML = has ? "Your pick is in — you can still change it until picks lock."
-                        : "Picks lock in the countdown above. Get your scoreline in.";
-    $("#heroEyebrow").textContent = has ? "Pick locked-in window" : "Make your pick";
-    body.appendChild(cta); body.appendChild(sub);
-  } else {
-    $("#heroEyebrow").textContent="Live now";
-    const cta=el("div","hero-cta"); cta.innerHTML=`<span class="t">Matches in progress</span>`;
-    body.appendChild(cta);
+  const hero=$("#hero"),box=$("#heroIn");
+  const live=MATCHES.map(eff).filter(m=>liveState(m)==="live");
+  const next=MATCHES.map(eff).filter(m=>liveState(m)==="upcoming"&&now()<lockAt(m)).sort((a,b)=>lockAt(a)-lockAt(b))[0];
+  if(!live.length&&!next){hero.style.display="none";return;}
+  hero.style.display="";box.innerHTML="";
+  if(next){
+    const has=Store.myPicks(ME.code)[next.id]&&Store.myPicks(ME.code)[next.id].h!=null;
+    box.innerHTML=`<div class="eyebrow">${has?"Pick is in — change it before lock":"Get your pick in"}</div>
+      <div class="hero-cta">${esc(next.home)} <span class="neon-cyan">v</span> ${esc(next.away)} · <span class="hero-clock" data-countdown="${next.id}">--:--:--</span></div>
+      <div class="hero-sub">${has?"You can edit your scoreline until picks lock.":"Predict the scoreline before the countdown hits zero."}</div>`;
+  }else{
+    box.innerHTML=`<div class="eyebrow neon-mag">Live now</div><div class="hero-cta">Matches in progress</div>`;
   }
   if(live.length){
-    const ticker=el("div","live-ticker");
-    live.forEach(m=>{
-      const p=el("span","live-pill");
-      p.innerHTML=`<span class="dot" style="background:var(--live)"></span>${m.homeFlag} ${m.home} `+
-                  `<span class="sc">${m.homeScore??0}-${m.awayScore??0}</span> ${m.away} ${m.awayFlag}`;
-      ticker.appendChild(p);
-    });
-    body.appendChild(ticker);
+    const t=el("div","live-ticker");
+    live.forEach(m=>{const p=el("span","live-pill");p.innerHTML=`<span class="dot" style="background:var(--lose)"></span>${esc(m.home)} <span class="sc">${m.homeScore??0}-${m.awayScore??0}</span> ${esc(m.away)}`;t.appendChild(p);});
+    box.appendChild(t);
   }
 }
 
 function renderCard(m){
-  const state=liveState(m), locked=isLocked(m), pick=CURRENT_PICKS[m.id];
+  const state=liveState(m),locked=isLocked(m),pick=Store.myPicks(ME.code)[m.id],out=outcome(m);
   const card=el("div","card"+(state==="live"?" live":""));
 
-  // head
   const head=el("div","card-head");
-  const grp=el("span","grp"); grp.textContent="Group "+m.group+" · "+(m.venue||"");
+  const grp=el("span","grp");grp.textContent="Group "+m.group+(m.venue?" · "+m.venue:"");
   const st=el("span","status "+(state==="live"?"live":state==="finished"?"ft":locked?"locked":""));
   st.innerHTML=`<span class="dot"></span>${state==="live"?"LIVE":state==="finished"?"FULL TIME":locked?"LOCKED":"UPCOMING"}`;
-  head.appendChild(grp); head.appendChild(st);
-  card.appendChild(head);
+  head.appendChild(grp);head.appendChild(st);card.appendChild(head);
 
-  // scoreboard
+  // result colour classes
+  const hC=out==="home"?"win":out==="draw"?"draw":out?"lose":"";
+  const aC=out==="away"?"win":out==="draw"?"draw":out?"lose":"";
+
   const sb=el("div","scoreboard");
-  const home=el("div","team home");
-  home.innerHTML=`<span class="flag">${m.homeFlag}</span><span class="tname">${m.home}</span>`;
+  const home=el("div","team home "+hC);
+  home.appendChild(flagEl(m.home,m.homeFlag));
+  const hn=el("span","tname");hn.textContent=m.home;home.appendChild(hn);
   const center=el("div","center");
-  if(state==="upcoming"){
-    center.innerHTML=`<div class="vs">VS</div><div class="ko">${fmtKO(m)}</div>`;
-  }else{
-    center.innerHTML=`<div class="score">${m.homeScore??0}<span class="sep">-</span>${m.awayScore??0}</div>`;
-  }
-  const away=el("div","team away");
-  away.innerHTML=`<span class="tname">${m.away}</span><span class="flag">${m.awayFlag}</span>`;
-  sb.appendChild(home); sb.appendChild(center); sb.appendChild(away);
-  card.appendChild(sb);
+  if(state==="upcoming"){center.innerHTML=`<div class="vs">VS</div><div class="ko">${fmtKO(m)}</div>`;}
+  else{center.innerHTML=`<div class="score"><span class="${out==='home'?'s-win':out==='draw'?'s-draw':out?'s-lose':''}">${m.homeScore??0}</span><span class="sep">-</span><span class="${out==='away'?'s-win':out==='draw'?'s-draw':out?'s-lose':''}">${m.awayScore??0}</span></div>`;}
+  const away=el("div","team away "+aC);
+  const an=el("span","tname");an.textContent=m.away;away.appendChild(an);
+  away.appendChild(flagEl(m.away,m.awayFlag));
+  sb.appendChild(home);sb.appendChild(center);sb.appendChild(away);card.appendChild(sb);
 
-  // prediction zone
   const pred=el("div","pred");
   if(m.status==="finished"){
-    const sc=scorePick(pick,m);
-    const line=el("div","result-line");
-    const yp=el("div","yourpick");
-    yp.innerHTML = pick&&pick.h!=null ? `Your pick: <b>${pick.h}-${pick.a}</b>` : `<span style="color:var(--faint)">No pick made</span>`;
-    const badge=el("span","pts-badge "+sc.kind);
-    badge.textContent = sc.kind==="none" ? "—" :
-      (sc.kind==="hit"?"Exact! +"+sc.pts : sc.pts>0?"+"+sc.pts+" pts":"0 pts");
-    line.appendChild(yp); line.appendChild(badge);
-    pred.appendChild(line);
-  } else if(locked){
+    const sc=scorePick(pick,m);const line=el("div","result-line");
+    const yp=el("div","yourpick");yp.innerHTML=pick&&pick.h!=null?`Your pick: <b>${pick.h}-${pick.a}</b>`:`<span style="color:var(--faint)">No pick made</span>`;
+    const b=el("span","pts-badge "+sc.kind);b.textContent=sc.kind==="none"?"—":sc.kind==="hit"?"Exact! +"+sc.pts:sc.pts>0?"+"+sc.pts+" pts":"0 pts";
+    line.appendChild(yp);line.appendChild(b);pred.appendChild(line);
+  }else if(locked){
     const note=el("div","locked-note");
-    note.innerHTML = pick&&pick.h!=null
-      ? `<span class="status locked"><span class="dot"></span></span> Picks closed · your pick <b style="font-family:Oswald;color:var(--ink)">${pick.h}-${pick.a}</b>`
-      : `<span class="status locked"><span class="dot"></span></span> Picks closed — no pick made`;
+    note.innerHTML=pick&&pick.h!=null?`<span class="status locked"><span class="dot"></span></span> Picks closed · your pick <b>${pick.h}-${pick.a}</b>`:`<span class="status locked"><span class="dot"></span></span> Picks closed — no pick made`;
     pred.appendChild(note);
-  } else {
-    // editable steppers
-    const label=el("div","pred-label"); label.textContent="Your scoreline prediction";
+  }else{
+    const label=el("div","pred-label");label.textContent="Your scoreline prediction";pred.appendChild(label);
     const row=el("div","pred-row");
-    row.appendChild(label);
-    const sH=stepper(m,"h",pick? pick.h:"");
-    const mid=el("span","pred-mid"); mid.textContent="–";
-    const sA=stepper(m,"a",pick? pick.a:"");
-    row.appendChild(sH); row.appendChild(mid); row.appendChild(sA);
-    pred.appendChild(row);
-
+    row.appendChild(stepper(m,"h",pick?pick.h:""));
+    const mid=el("span","pred-mid");mid.textContent="–";row.appendChild(mid);
+    row.appendChild(stepper(m,"a",pick?pick.a:""));pred.appendChild(row);
     const lock=el("div","lock-row");
-    lock.innerHTML=`<span style="color:var(--muted)">Locks in</span> `+
-                   `<span class="lock-clock" data-countdown="${m.id}">--:--:--</span>`+
-                   `<span class="saved" data-saved="${m.id}">Saved ✓</span>`;
+    lock.innerHTML=`Locks in <span class="lock-clock" data-countdown="${m.id}">--:--:--</span> <span class="saved" data-saved="${m.id}">Saved ✓</span>`;
     pred.appendChild(lock);
-
-    const hint=el("div","hint");
-    hint.innerHTML=`🔒 Your pick stays hidden from colleagues until it locks.`;
-    pred.appendChild(hint);
+    const hint=el("div","hint");hint.textContent="🔒 Colleagues see your name now, but your score only after lock.";pred.appendChild(hint);
   }
   card.appendChild(pred);
 
-  // reveal everyone's picks — only after the match locks
-  if(locked){
-    const picks=picksForMatch(m);
+  // predictors panel
+  const people=predictorsFor(m);
+  if(people.length){
     const reveal=el("div","reveal");
-    const btn=el("button","reveal-btn");
-    btn.type="button";
-    btn.innerHTML=`<span>👁 Everyone's picks (${picks.length})</span><span class="chev">›</span>`;
-    const panel=el("div","reveal-panel"); panel.style.display="none";
-    if(!picks.length){
-      panel.innerHTML=`<div class="pick-empty">No picks were made for this match.</div>`;
-    } else {
-      picks.forEach(pp=>{
-        const r=el("div","pick-row"+(pp.isYou?" you":""));
-        let right="";
-        if(pp.score){
-          const cls=pp.score.kind==="hit"?"hit":pp.score.kind==="part"?"part":"miss";
-          right=`<span class="pts-badge ${cls}" style="font-size:12px;padding:2px 9px">${pp.score.kind==="hit"?"Exact +"+pp.score.pts:pp.score.pts>0?"+"+pp.score.pts:"0"}</span>`;
-        }
-        r.innerHTML=`<span class="pn">${escapeHtml(pp.name)}${pp.isYou?' <span class="you">YOU</span>':''}</span>`+
-                    `<span class="pp">${pp.pick.h}-${pp.pick.a}</span>${right}`;
-        panel.appendChild(r);
-      });
-    }
-    btn.onclick=()=>{
-      const open=panel.style.display!=="none";
-      panel.style.display=open?"none":"";
-      btn.classList.toggle("open",!open);
-    };
-    reveal.appendChild(btn); reveal.appendChild(panel);
-    card.appendChild(reveal);
+    const btn=el("button","reveal-btn");btn.type="button";
+    btn.innerHTML=`<span>👥 ${locked?"Predictions":"Predicted by"} (${people.length})</span><span class="chev">›</span>`;
+    const panel=el("div","reveal-panel");panel.style.display="none";
+    const cap=el("div","reveal-cap");cap.textContent=locked?"Scores revealed — picks are locked.":"Names only. Scores reveal when picks lock.";
+    panel.appendChild(cap);
+    people.forEach(p=>{
+      const r=el("div","pick-row"+(p.isYou?" you":""));
+      let right="";
+      if(p.reveal){
+        if(p.score){const cls=p.score.kind==="hit"?"hit":p.score.kind==="part"?"part":"miss";
+          right=`<span class="pp">${p.pick.h}-${p.pick.a}</span><span class="pts-badge ${cls}" style="font-size:11px;padding:2px 8px">${p.score.kind==="hit"?"+"+p.score.pts:p.score.pts>0?"+"+p.score.pts:"0"}</span>`;}
+        else right=`<span class="pp">${p.pick.h}-${p.pick.a}</span>`;
+      }else right=`<span class="hidden-sc">🔒 hidden</span>`;
+      r.innerHTML=`<span class="pn">${esc(p.name)}${p.isYou?'<span class="tag me-tag">YOU</span>':''}</span>${right}`;
+      panel.appendChild(r);
+    });
+    btn.onclick=()=>{const open=panel.style.display!=="none";panel.style.display=open?"none":"";btn.classList.toggle("open",!open);};
+    reveal.appendChild(btn);reveal.appendChild(panel);card.appendChild(reveal);
   }
   return card;
 }
 
-function stepper(m, side, val){
+function stepper(m,side,val){
   const wrap=el("div","stepper");
-  const minus=el("button"); minus.type="button"; minus.textContent="–";
-  const input=document.createElement("input");
-  input.type="number"; input.min=0; input.max=20; input.inputMode="numeric";
-  input.value = val===0?0:(val||"");
-  input.placeholder="0";
-  const plus=el("button"); plus.type="button"; plus.textContent="+";
-  const commit=()=>{
-    let v=parseInt(input.value,10); if(isNaN(v)||v<0)v=0; if(v>20)v=20; input.value=v;
-    savePick(m, side, v);
-  };
+  const minus=el("button");minus.type="button";minus.textContent="–";
+  const input=document.createElement("input");input.type="number";input.min=0;input.max=20;input.inputMode="numeric";
+  input.value=val===0?0:(val||"");input.placeholder="0";
+  const plus=el("button");plus.type="button";plus.textContent="+";
+  const commit=()=>{let v=parseInt(input.value,10);if(isNaN(v)||v<0)v=0;if(v>20)v=20;input.value=v;savePick(m,side,v);};
   minus.onclick=()=>{let v=parseInt(input.value,10);if(isNaN(v))v=0;v=Math.max(0,v-1);input.value=v;commit();};
-  plus.onclick =()=>{let v=parseInt(input.value,10);if(isNaN(v))v=0;v=Math.min(20,v+1);input.value=v;commit();};
-  input.addEventListener("change",commit);
-  input.addEventListener("blur",commit);
-  wrap.appendChild(minus); wrap.appendChild(input); wrap.appendChild(plus);
-  return wrap;
+  plus.onclick=()=>{let v=parseInt(input.value,10);if(isNaN(v))v=0;v=Math.min(20,v+1);input.value=v;commit();};
+  input.addEventListener("change",commit);input.addEventListener("blur",commit);
+  wrap.appendChild(minus);wrap.appendChild(input);wrap.appendChild(plus);return wrap;
 }
-
-async function savePick(m, side, v){
-  if(!USER){ flashName(); return; }
-  const cur = CURRENT_PICKS[m.id] || {h:null,a:null};
-  cur[side]=v;
-  // require both values; default the other to 0 so a partial pick still counts
-  if(cur.h==null) cur.h=0; if(cur.a==null) cur.a=0;
-  CURRENT_PICKS[m.id]=cur;
-  await Store.savePick(m.id, cur.h, cur.a);
+async function savePick(m,side,v){
+  const cur=Object.assign({h:null,a:null},Store.myPicks(ME.code)[m.id]||{});
+  cur[side]=v;if(cur.h==null)cur.h=0;if(cur.a==null)cur.a=0;
+  await Store.savePick(ME.code,ME.name,m.id,cur.h,cur.a);
   const s=document.querySelector(`[data-saved="${m.id}"]`);
-  if(s){ s.classList.add("show"); clearTimeout(savedTimer); savedTimer=setTimeout(()=>s.classList.remove("show"),1400); }
-  $("#myPts").textContent=totalFor(CURRENT_PICKS).total;
-}
-
-function flashName(){
-  const n=$("#nameInput"); n.focus();
-  n.style.borderColor="var(--live)";
-  n.placeholder="Enter your name first";
-  setTimeout(()=>n.style.borderColor="",1200);
+  if(s){s.classList.add("show");clearTimeout(savedTimer);savedTimer=setTimeout(()=>s.classList.remove("show"),1300);}
+  $(".me-chip .pts").innerHTML=totalFor(Store.myPicks(ME.code)).total+'<small> PTS</small>';
 }
 
 function renderBoard(){
-  const board=el("div","board");
-  const players=Store.allPlayers().map(p=>{
-    const t=totalFor(p.picks);
-    return {name:p.name, pts:t.total, played:t.played};
-  }).sort((a,b)=> b.pts-a.pts || b.played-a.played || a.name.localeCompare(b.name));
-
-  const h=el("h2");
-  h.innerHTML=`<span>🏆 Leaderboard</span><span class="mode">${Store.mode==="firebase"?"Shared · live":"This browser only"}</span>`;
-  board.appendChild(h);
-
-  if(!players.length){ const e=el("div","empty");e.innerHTML='<div class="big">No players yet</div><div>Enter your name and start predicting.</div>';board.appendChild(e);return board; }
-
-  players.forEach((p,i)=>{
-    const row=el("div","lb-row"+(p.name===USER?" me":""));
-    const rk=el("div","rank"+(i===0?" gold":i===1?" silver":i===2?" bronze":""));
-    rk.textContent=i+1;
-    const nm=el("div","lb-name");
-    nm.innerHTML=`<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(p.name)}</span>`+
-      (p.name===USER?`<span class="you">YOU</span>`:"");
-    const pl=el("div","lb-played"); pl.textContent=p.played+" scored";
-    const pt=el("div","lb-pts"); pt.textContent=p.pts;
-    row.appendChild(rk);row.appendChild(nm);row.appendChild(pl);row.appendChild(pt);
-    board.appendChild(row);
+  const panel=el("div","panel");
+  const players=Object.values(Store.players());
+  const preds=Store.predsAll();
+  const rows=players.map(p=>{const t=totalFor((preds[p.code]&&preds[p.code].picks)||{});return{name:p.name,code:p.code,pts:t.total,played:t.played};})
+    .sort((a,b)=>b.pts-a.pts||b.played-a.played||a.name.localeCompare(b.name));
+  const h=el("h2");h.innerHTML=`<span>🏆 Leaderboard</span><span class="meta">${rows.length} player${rows.length===1?"":"s"}</span>`;panel.appendChild(h);
+  if(!rows.length){const e=el("div","empty");e.innerHTML='<div class="big">No players yet</div><div>Register to join the board.</div>';panel.appendChild(e);return panel;}
+  rows.forEach((p,i)=>{
+    const row=el("div","lb-row"+(ME&&p.code===ME.code?" me":""));
+    const rk=el("div","rank"+(i===0?" g1":i===1?" g2":i===2?" g3":""));rk.textContent=i+1;
+    const nm=el("div","lb-name");nm.innerHTML=`<span class="n">${esc(p.name)}</span>${ME&&p.code===ME.code?'<span class="tag you">YOU</span>':''}`;
+    const sub=el("div","lb-sub");sub.textContent=p.played+" scored";
+    const pt=el("div","lb-pts");pt.textContent=p.pts;
+    row.appendChild(rk);row.appendChild(nm);row.appendChild(sub);row.appendChild(pt);panel.appendChild(row);
   });
-  return board;
+  return panel;
 }
-function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 
-/* ---------------- Countdown tick (1s) ---------------- */
+function renderRoster(){
+  const panel=el("div","panel");
+  const players=Object.values(Store.players()).sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
+  const preds=Store.predsAll();
+  const h=el("h2");h.innerHTML=`<span>👥 Players</span><span class="meta">${players.length} registered</span>`;panel.appendChild(h);
+  if(!players.length){const e=el("div","empty");e.innerHTML='<div class="big">No players yet</div>';panel.appendChild(e);return panel;}
+  players.forEach(p=>{
+    const picks=(preds[p.code]&&preds[p.code].picks)||{};const n=Object.values(picks).filter(x=>x&&x.h!=null).length;
+    const row=el("div","roster-row");
+    const av=el("div","av");av.textContent=(p.name[0]||"?").toUpperCase();
+    const info=el("div","info");
+    const mine=ME&&p.code===ME.code;
+    info.innerHTML=`<div class="n">${esc(p.name)}${mine?' <span class="tag you">YOU</span>':''}</div>
+      <div class="s">${n} prediction${n===1?"":"s"} made${mine?` · your code <span class="mycode">${p.code}</span>`:(isAdmin?` · <span class="mycode">${p.code}</span>`:"")}</div>`;
+    row.appendChild(av);row.appendChild(info);panel.appendChild(row);
+  });
+  return panel;
+}
+
+function renderOrg(){
+  const panel=el("div","panel");
+  const h=el("h2");h.innerHTML=`<span>⚙ Organizer</span><span class="meta">enter scores · add players</span>`;panel.appendChild(h);
+
+  // add player
+  const add=el("div","org-add");
+  add.innerHTML=`<input id="orgName" placeholder="Add a player by name" autocomplete="off"/><button class="org-save" id="orgAddBtn">Add</button>`;
+  panel.appendChild(add);
+
+  // score editors (upcoming/live/finished — anything kicked off or you want to pre-set)
+  const arr=MATCHES.map(eff).sort((a,b)=>ko(a)-ko(b));
+  arr.forEach(m=>{
+    const row=el("div","org-row");
+    const t=el("div","ot");t.innerHTML=`${esc(m.home)} <span style="color:var(--faint)">v</span> ${esc(m.away)}<br><span style="font-family:Inter;font-size:11px;color:var(--muted)">${fmtKO(m)} · ${m.status}</span>`;
+    const ctrl=el("div","org-controls");
+    ctrl.innerHTML=`<input class="mini" id="oh-${m.id}" type="number" min="0" value="${m.homeScore??""}" placeholder="-"/>
+      <input class="mini" id="oa-${m.id}" type="number" min="0" value="${m.awayScore??""}" placeholder="-"/>
+      <button class="org-save" data-save="${m.id}">${m.status==="finished"?"Update":"Set FT"}</button>`;
+    row.appendChild(t);row.appendChild(ctrl);panel.appendChild(row);
+  });
+
+  setTimeout(()=>{
+    $("#orgAddBtn").onclick=async()=>{const n=$("#orgName").value.trim();if(n.length<2){toast("Enter a name");return;}const code=await Store.addPlayer(n);toast(n+" added · code "+code);$("#orgName").value="";renderApp();};
+    panel.querySelectorAll("[data-save]").forEach(b=>{
+      b.onclick=async()=>{const id=b.getAttribute("data-save");const h=parseInt($("#oh-"+id).value,10),a=parseInt($("#oa-"+id).value,10);
+        if(isNaN(h)||isNaN(a)){toast("Enter both scores");return;}
+        await Store.setResult(id,h,a,"finished");toast("Result saved");renderApp();};
+    });
+  },0);
+  return panel;
+}
+
+function toggleAdmin(){
+  if(isAdmin){isAdmin=false;sessionStorage.removeItem("egec_admin");if(activeTab==="org")activeTab="today";renderApp();return;}
+  const code=prompt("Organizer code:");
+  if(code==null)return;
+  if(code===CFG.adminCode){isAdmin=true;sessionStorage.setItem("egec_admin","1");activeTab="org";renderApp();toast("Organizer mode on");}
+  else toast("Wrong organizer code");
+}
+
+/* ---------------- Countdown tick ---------------- */
 function tick(){
   document.querySelectorAll("[data-countdown]").forEach(node=>{
-    const m=MATCHES.find(x=>x.id===node.getAttribute("data-countdown"));
-    if(!m) return;
-    const ms=lockAt(m)-now();
-    node.textContent=fmtCountdown(ms);
-    const urgent = ms<=15*60000 && ms>0;        // last 15 min before lock
-    node.classList.toggle("urgent",urgent);
-    if(ms<=0){
-      // just locked -> refresh the card next full render
-      if(!node._relocked){ node._relocked=true; setTimeout(()=>render(),400); }
-    }
+    const m=MATCHES.map(eff).find(x=>x.id===node.getAttribute("data-countdown"));if(!m)return;
+    const ms=lockAt(m)-now();node.textContent=fmtCountdown(ms);
+    node.classList.toggle("urgent",ms<=15*60000&&ms>0);
+    if(ms<=0&&!node._r){node._r=true;setTimeout(()=>renderApp(),400);}
   });
 }
 
-/* ---------------- Wiring ---------------- */
-$("#nameInput").addEventListener("input",e=>{
-  USER=e.target.value.trim();
-  localStorage.setItem("egec_wc_user",USER);
-});
-$("#nameInput").addEventListener("change",()=>render());
-$("#nameInput").addEventListener("blur",()=>render());
-
+/* ---------------- Refresh loop ---------------- */
 let refreshing=false;
 async function refresh(){
-  if(refreshing) return; refreshing=true;
-  // don't yank the DOM out from under a focused input
-  const ae=document.activeElement;
-  const typing = ae && ae.tagName==="INPUT" && ae.closest(".card");
+  if(refreshing)return;refreshing=true;
+  const ae=document.activeElement;const typing=ae&&ae.tagName==="INPUT"&&ae.closest(".card,.org-row,.org-add");
   await loadMatches();
-  if(!typing) await render();
+  if(!typing&&ME)renderApp();else if(!typing&&!ME)render();
   refreshing=false;
 }
 
-(async function init(){
-  document.title = (CFG.orgName||"EGEC")+" · World Cup Predictor";
+/* ---------------- Init ---------------- */
+(async function(){
+  document.title=(CFG.orgName||"EGEC")+" · World Cup Predictor";
   await loadMatches();
   await Store.init();
-  // pick a sensible starting tab
-  if(!matchesForTab("today",await Store.getMine()).length) activeTab="upcoming";
-  await render();
+  if(ME&&!listFor("today").length)activeTab="upcoming";
+  render();
   setInterval(tick,1000);
-  setInterval(refresh, CFG.refreshMs||30000);
+  setInterval(refresh,CFG.refreshMs||30000);
 })();
 </script>
 </body>
