@@ -1,4 +1,3 @@
-```json
 {
   "updated": "2026-06-22T12:00:00Z",
   "note": "Edit this file to add fixtures or update scores. Kickoffs are in UTC (Z). status: scheduled | live | finished. The page derives live/locked state automatically from kickoff time.",
@@ -30,4 +29,3 @@
     { "id": "g26-nzl-bel", "group": "G", "home": "New Zealand", "away": "Belgium", "homeFlag": "🇳🇿", "awayFlag": "🇧🇪", "kickoff": "2026-06-27T03:00:00Z", "venue": "BC Place, Vancouver", "status": "scheduled", "homeScore": null, "awayScore": null }
   ]
 }
-```
