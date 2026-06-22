@@ -75,6 +75,24 @@ function norm(value) {
   return ALIAS[x] || x;
 }
 
+function getLiveMinute(kickoff) {
+  if (!kickoff) return null;
+
+  const kickoffTime = new Date(kickoff).getTime();
+
+  if (Number.isNaN(kickoffTime)) return null;
+
+  const diffMinutes = Math.floor((Date.now() - kickoffTime) / 60000);
+
+  if (diffMinutes < 1) return 1;
+  if (diffMinutes <= 45) return diffMinutes;
+  if (diffMinutes <= 60) return "45+";
+  if (diffMinutes <= 105) return diffMinutes - 15;
+  if (diffMinutes <= 120) return "90+";
+
+  return null;
+}
+
 async function main() {
   const ours = JSON.parse(fs.readFileSync("matches.json", "utf8")).matches || [];
 
@@ -137,19 +155,32 @@ async function main() {
       continue;
     }
 
-    await db.collection("results").doc(m.id).set(
-      {
-        homeScore,
-        awayScore,
-        status,
-        updatedAt: admin.firestore.FieldValue.serverTimestamp()
-      },
-      { merge: true }
-    );
+    const updateData = {
+      homeScore,
+      awayScore,
+      status,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp()
+    };
+
+    if (status === "live") {
+      const liveMinute = getLiveMinute(m.kickoff);
+
+      updateData.liveMinute = liveMinute;
+      updateData.liveText = liveMinute ? `${liveMinute}'` : "LIVE";
+    } else {
+      updateData.liveMinute = null;
+      updateData.liveText = null;
+    }
+
+    await db.collection("results").doc(m.id).set(updateData, { merge: true });
 
     writes++;
 
-    console.log(`Updated: ${m.home} ${homeScore}-${awayScore} ${m.away} [${status}]`);
+    console.log(
+      `Updated: ${m.home} ${homeScore}-${awayScore} ${m.away} [${status}] ${
+        updateData.liveText || ""
+      }`
+    );
   }
 
   console.log(`Updated ${writes} result(s).`);
