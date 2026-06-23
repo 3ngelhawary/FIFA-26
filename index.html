@@ -45,9 +45,12 @@
   }
   .logo{display:flex;align-items:center;gap:12px;margin-bottom:6px}
   .bolt{
-    width:46px;height:46px;border-radius:13px;display:grid;place-items:center;font-size:24px;
-    background:linear-gradient(135deg,var(--magenta),var(--purple));
-    box-shadow:0 0 24px rgba(255,46,151,.5);
+    width:54px;height:76px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;
+    background:none;box-shadow:none;border-radius:0;overflow:hidden;
+  }
+  .bolt img{
+    width:100%;height:100%;object-fit:contain;display:block;
+    filter:drop-shadow(0 0 12px rgba(255,255,255,.10)) drop-shadow(0 0 18px rgba(255,46,151,.18));
   }
   .logo h1{font-family:"Oswald";font-weight:700;font-size:24px;margin:0;letter-spacing:.5px;line-height:1}
   .logo .s{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--cyan)}
@@ -100,7 +103,7 @@
     background:linear-gradient(180deg,rgba(5,6,12,.92),rgba(5,6,12,.6));border-bottom:1px solid var(--line)}
   .head-inner{max-width:940px;margin:0 auto;padding:11px 16px;display:flex;align-items:center;gap:12px}
   .brand{display:flex;align-items:center;gap:10px;min-width:0}
-  .brand .bolt{width:34px;height:34px;border-radius:10px;font-size:18px}
+  .brand .bolt{width:32px;height:46px}
   .brand h1{font-family:"Oswald";font-weight:600;font-size:17px;margin:0;letter-spacing:.4px;line-height:1.05}
   .brand .s{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--cyan)}
   .head-spacer{flex:1}
@@ -591,6 +594,8 @@ function predictorsFor(mm){
 const $=s=>document.querySelector(s);
 const el=(t,c)=>{const e=document.createElement(t);if(c)e.className=c;return e;};
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+const WORLD_CUP_LOGO_URL="https://upload.wikimedia.org/wikipedia/commons/1/17/2026_FIFA_World_Cup_emblem.svg";
+function worldCupLogo(){return `<img src="${WORLD_CUP_LOGO_URL}" alt="FIFA World Cup 2026 logo" loading="lazy" referrerpolicy="no-referrer">`;}
 function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1800);}
 function flagEl(name,emoji){
   const iso=ISO[name];
@@ -635,7 +640,7 @@ function render(){
 function renderLoading(msg){
   $("#root").innerHTML=`
   <div class="auth"><div class="auth-card" style="text-align:center">
-    <div class="logo" style="justify-content:center"><div class="bolt">⚡</div></div>
+    <div class="logo" style="justify-content:center"><div class="bolt">${worldCupLogo()}</div></div>
     <div class="spinner"></div>
     <div style="color:var(--muted);margin-top:14px;font-size:14px">${esc(msg||"Loading…")}</div>
   </div></div>`;
@@ -670,7 +675,7 @@ service cloud.firestore {
   }
   $("#root").innerHTML=`
   <div class="auth"><div class="auth-card">
-    <div class="logo"><div class="bolt">⚡</div>
+    <div class="logo"><div class="bolt">${worldCupLogo()}</div>
       <div><h1>${esc(CFG.orgName)} <span class="neon-mag">Predictor</span></h1>
       <div class="s">Shared mode setup</div></div></div>
     <div class="setup-title">${title}</div>
@@ -691,7 +696,7 @@ function renderAuth(){
 function drawAuth(){
   const ac=$("#ac");
   ac.innerHTML=`
-    <div class="logo"><div class="bolt">⚡</div>
+    <div class="logo"><div class="bolt">${worldCupLogo()}</div>
       <div><h1>${esc(CFG.orgName)} <span class="neon-mag">Predictor</span></h1>
       <div class="s">${esc(CFG.seasonLabel)}</div></div></div>
     <div class="seg">
@@ -745,7 +750,7 @@ async function doRegister(){
 function showCodeReveal(name,code){
   const ac=$("#ac");
   ac.innerHTML=`
-    <div class="logo"><div class="bolt">⚡</div>
+    <div class="logo"><div class="bolt">${worldCupLogo()}</div>
       <div><h1>You're in, <span class="neon-cyan">${esc(name.split(" ")[0])}</span></h1>
       <div class="s">Save your login code</div></div></div>
     <div class="code-reveal">
@@ -785,7 +790,7 @@ function renderApp(){
 
   root.innerHTML=`
   <header class="app"><div class="head-inner">
-    <div class="brand"><div class="bolt">⚡</div>
+    <div class="brand"><div class="bolt">${worldCupLogo()}</div>
       <div><h1>${esc(CFG.orgName)} Predictor</h1><div class="s">${esc(CFG.seasonLabel)}</div></div></div>
     <div class="head-spacer"></div>
     <div class="me-chip">
