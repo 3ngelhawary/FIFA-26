@@ -333,6 +333,23 @@
   .banner.hot .bdot{background:var(--magenta);box-shadow:0 0 10px var(--magenta)}
   .banner .banner-btn{margin-left:auto;border:1px solid var(--line-2);background:rgba(0,229,255,.12);color:var(--cyan);border-radius:10px;padding:8px 12px;font-family:inherit;font-weight:800;cursor:pointer;white-space:nowrap}
 
+  .top3-popup{position:fixed;inset:0;z-index:85;display:flex;align-items:center;justify-content:flex-end;padding:84px 24px 24px;background:linear-gradient(90deg,rgba(5,6,12,.18),rgba(5,6,12,.82));backdrop-filter:blur(6px)}
+  .top3-popup-card{width:min(360px,calc(100vw - 32px));border:1px solid rgba(255,46,151,.42);border-radius:22px;background:linear-gradient(160deg,rgba(18,20,38,.98),rgba(255,46,151,.14) 48%,rgba(0,229,255,.10));box-shadow:0 28px 80px rgba(0,0,0,.58),0 0 38px rgba(255,46,151,.18);overflow:hidden}
+  .top3-popup-in{padding:18px 17px;text-align:center;position:relative}
+  .top3-popup-close{position:absolute;right:10px;top:10px;width:30px;height:30px;border-radius:50%;border:1px solid var(--line-2);background:rgba(255,255,255,.04);color:var(--muted);cursor:pointer;font-size:18px;line-height:1}
+  .top3-popup-close:hover{color:var(--ink);border-color:var(--magenta)}
+  .top3-popup-logo{width:58px;height:86px;margin:0 auto 7px;display:flex;align-items:center;justify-content:center}
+  .top3-popup-logo img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 0 16px rgba(255,255,255,.13))}
+  .top3-popup-kicker{font-size:10px;letter-spacing:2.2px;text-transform:uppercase;color:var(--magenta);font-weight:800}
+  .top3-popup-title{font-family:"Oswald";font-size:28px;line-height:1.05;margin:6px 0 7px;color:var(--ink);text-shadow:0 0 14px rgba(255,46,151,.28)}
+  .top3-popup-copy{font-size:13px;color:var(--muted);line-height:1.55;margin:0 0 12px}
+  .top3-popup-points{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:12px 0}
+  .top3-popup-points span{border:1px solid var(--line);border-radius:10px;padding:8px 4px;background:rgba(255,255,255,.04);font-family:"Oswald";font-weight:700;color:var(--cyan)}
+  .top3-popup-bonus{border:1px solid rgba(255,230,0,.34);background:rgba(255,230,0,.08);color:var(--draw);border-radius:12px;padding:9px 10px;font-size:12.5px;font-weight:700;margin:10px 0}
+  .top3-popup-time{font-size:12px;color:var(--muted);margin-top:10px}
+  .top3-popup-time b{font-family:"Oswald";color:var(--cyan);font-size:17px}
+  .top3-popup-btn{width:100%;margin-top:13px;border:0;border-radius:12px;cursor:pointer;font-family:"Oswald";font-weight:600;font-size:16px;letter-spacing:.3px;padding:12px;color:#04060e;background:linear-gradient(135deg,var(--cyan),var(--magenta));box-shadow:0 0 20px rgba(255,46,151,.28)}
+
   .foot{margin-top:24px;text-align:center;color:var(--faint);font-size:12px;line-height:1.7}
   .scoring-key{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:8px;color:var(--muted)}
   .scoring-key b{color:var(--cyan);font-family:"Oswald"}
@@ -352,6 +369,7 @@
     .tname{font-size:16px}.score{font-size:30px}.tabs{top:55px}
     .top3-grid{grid-template-columns:1fr}
     .banner .banner-btn{width:100%;margin-left:0}
+    .top3-popup{align-items:center;justify-content:center;padding:16px}
   }
   @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -833,7 +851,8 @@ function renderApp(){
       <div style="margin-top:7px;font-weight:700;color:#8b0000">Developed By A. ElHawary</div>
       <div style="margin-top:7px">${isAdmin?'Organizer mode is on. ':''}<button class="link" id="orgLink">${isAdmin?"Exit organizer":"Organizer login"}</button></div>
     </div>
-  </div>`;
+  </div>
+  <div id="top3PopupMount"></div>`;
 
   $("#logoutBtn").onclick=logout;
   $("#orgLink").onclick=toggleAdmin;
@@ -850,6 +869,7 @@ function renderApp(){
 
   renderHero();
   renderTop3Reminder();
+  renderTop3HomePopup();
   const view=$("#view");
   if(activeTab==="board"){view.appendChild(renderBoard());return;}
   if(activeTab==="top3"){view.appendChild(renderTop3());tick();return;}
@@ -899,6 +919,35 @@ function renderTop3Reminder(){
   b.innerHTML=`<div class="bdot"></div><div><b>Top 3 reminder:</b> predict 1st, 2nd and 3rd winners before the window closes in <b data-top3-countdown="close">--:--:--</b>.<br><span style="color:var(--muted)">Exact order gives an extra +${CFG.top3.exactOrderBonus} points.</span></div><button class="banner-btn" id="goTop3">Predict Top 3</button>`;
   box.appendChild(b);
   const go=$("#goTop3");if(go)go.onclick=()=>{activeTab="top3";renderApp();};
+}
+
+function top3PopupKey(){return "egec_top3_popup_"+ME.code+"_"+top3CloseAt();}
+function renderTop3HomePopup(){
+  const mount=$("#top3PopupMount");if(!mount)return;mount.innerHTML="";
+  if(activeTab!=="today"||top3State()==="closed"||now()>=top3CloseAt())return;
+  if(sessionStorage.getItem(top3PopupKey())==="1")return;
+  const state=top3State(),mine=Store.myTop3(ME.code);
+  const status=state==="open"?`Closes in <b data-top3-countdown="close">--:--:--</b>`:`Opens in <b data-top3-countdown="open">--:--:--</b>`;
+  const btnText=state==="open"?(hasCompleteTop3(mine)?"Update My Top 3":"Predict My Top 3"):"View Top 3 Feature";
+  mount.innerHTML=`<div class="top3-popup" role="dialog" aria-modal="true" aria-label="Top 3 Winners Challenge">
+    <div class="top3-popup-card">
+      <div class="top3-popup-in">
+        <button class="top3-popup-close" id="top3PopupClose" type="button" aria-label="Close">×</button>
+        <div class="top3-popup-logo">${worldCupLogo()}</div>
+        <div class="top3-popup-kicker">New Feature</div>
+        <div class="top3-popup-title">Top 3 Winners Challenge</div>
+        <p class="top3-popup-copy">Predict the final 1st, 2nd and 3rd winners before the feature ends, then fight for a big leaderboard jump.</p>
+        <div class="top3-popup-points"><span>1st<br>${CFG.top3.firstPts}</span><span>2nd<br>${CFG.top3.secondPts}</span><span>3rd<br>${CFG.top3.thirdPts}</span></div>
+        <div class="top3-popup-bonus">Exact order bonus: +${CFG.top3.exactOrderBonus} pts</div>
+        <div class="top3-popup-time">${status}</div>
+        <button class="top3-popup-btn" id="top3PopupGo" type="button">${btnText}</button>
+      </div>
+    </div>
+  </div>`;
+  const close=()=>{sessionStorage.setItem(top3PopupKey(),"1");mount.innerHTML="";};
+  const c=$("#top3PopupClose"),g=$("#top3PopupGo");
+  if(c)c.onclick=close;
+  if(g)g.onclick=()=>{sessionStorage.setItem(top3PopupKey(),"1");activeTab="top3";renderApp();};
 }
 
 function teamSelectHtml(id,label,value,disabled){
