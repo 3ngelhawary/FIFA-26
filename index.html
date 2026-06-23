@@ -294,6 +294,28 @@
   .mp-pick{display:flex;align-items:center;gap:9px}
   .mp-val{font-family:"Oswald";font-weight:700;font-size:20px;color:var(--ink)}
 
+  /* Top 3 winners prediction */
+  .top3-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:15px}
+  .top3-slot{border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.025);padding:12px}
+  .top3-slot label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);margin-bottom:8px}
+  .top3-slot select,.top3-select{width:100%;background:#070912;border:1px solid var(--line-2);color:var(--ink);border-radius:11px;padding:12px;font-family:inherit;outline:none}
+  .top3-slot select:focus,.top3-select:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,229,255,.14)}
+  .top3-actions{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;padding:0 15px 15px}
+  .top3-save{border:0;border-radius:12px;cursor:pointer;font-family:"Oswald";font-weight:600;font-size:16px;letter-spacing:.4px;padding:11px 18px;color:#04060e;background:linear-gradient(135deg,var(--cyan),var(--magenta));box-shadow:0 0 18px rgba(255,46,151,.28)}
+  .top3-save:disabled{opacity:.55;cursor:not-allowed;filter:grayscale(.5)}
+  .top3-note{color:var(--muted);font-size:12.5px;text-align:center;padding:0 15px 14px}
+  .top3-rule{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:12.5px;padding:12px 15px;border-top:1px solid var(--line)}
+  .top3-rule b{color:var(--cyan);font-family:"Oswald"}
+  .top3-picks{padding:0 13px 13px}
+  .top3-pick-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:9px 11px;border-radius:9px;font-size:13px}
+  .top3-pick-row:nth-child(odd){background:rgba(255,255,255,.025)}
+  .top3-pick-row.you{background:rgba(0,229,255,.08)}
+  .top3-line{font-family:"Oswald";font-weight:600;color:var(--ink)}
+  .top3-break{font-size:11.5px;color:var(--muted);margin-top:2px}
+  .banner.hot{border-color:rgba(255,46,151,.45);background:rgba(255,46,151,.08);color:#ffd6ea}
+  .banner.hot .bdot{background:var(--magenta);box-shadow:0 0 10px var(--magenta)}
+  .banner .banner-btn{margin-left:auto;border:1px solid var(--line-2);background:rgba(0,229,255,.12);color:var(--cyan);border-radius:10px;padding:8px 12px;font-family:inherit;font-weight:800;cursor:pointer;white-space:nowrap}
+
   .foot{margin-top:24px;text-align:center;color:var(--faint);font-size:12px;line-height:1.7}
   .scoring-key{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:8px;color:var(--muted)}
   .scoring-key b{color:var(--cyan);font-family:"Oswald"}
@@ -307,6 +329,8 @@
   @media (max-width:560px){
     .me-chip .nm{max-width:74px}
     .tname{font-size:16px}.score{font-size:30px}.tabs{top:55px}
+    .top3-grid{grid-template-columns:1fr}
+    .banner .banner-btn{width:100%;margin-left:0}
   }
   @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -358,9 +382,11 @@ const EMBEDDED={matches:[
 
 const DEFAULTS={orgName:"EGEC",seasonLabel:"World Cup 2026",lockOffsetMinutes:60,
   scoring:{exactScore:5,correctOutcome:3,correctGoalsBonus:1},adminCode:"EGEC2026",
+  top3:{openAt:"2026-06-28T00:00:00+03:00",closeAt:"2026-07-01T00:00:00+03:00",firstPts:100,secondPts:75,thirdPts:50,exactOrderBonus:100},
   liveScores:{apiToken:"",competitionId:"WC"},storage:{mode:"local",firebase:{}},refreshMs:30000};
 const CFG=Object.assign({},DEFAULTS,window.CONFIG||{});
 CFG.scoring=Object.assign({},DEFAULTS.scoring,(window.CONFIG&&window.CONFIG.scoring)||{});
+CFG.top3=Object.assign({},DEFAULTS.top3,(window.CONFIG&&window.CONFIG.top3)||{});
 CFG.storage=Object.assign({},DEFAULTS.storage,(window.CONFIG&&window.CONFIG.storage)||{});
 
 /* ---------------- State ---------------- */
@@ -371,6 +397,7 @@ let isAdmin=sessionStorage.getItem("egec_admin")==="1";
 let activeTab="today";
 let authMode="register";
 let savedTimer=null;
+const TOP3_DOC_ID="__top3__";
 
 /* ---------------- Storage (shared / Firebase only) ---------------- */
 const Store={
@@ -407,6 +434,8 @@ const Store={
   },
 
   myPicks(code){const all=this.predsAll();return (all[code]&&all[code].picks)||{};},
+  myTop3(code){const all=this.predsAll();return (all[code]&&all[code].top3)||{};},
+  top3Result(){return this.resultsAll()[TOP3_DOC_ID]||{};},
 
   async savePick(code,name,matchId,h,a){
     const cur=(this.cache.preds[code]&&this.cache.preds[code].picks)||{};
@@ -414,18 +443,30 @@ const Store={
     await this.fs.setDoc(this.fs.doc(this.db,"predictions",code),{name,picks:cur},{merge:true});
   },
 
+  async saveTop3(code,name,top3){
+    await this.fs.setDoc(this.fs.doc(this.db,"predictions",code),{name,top3,top3UpdatedAt:Date.now()},{merge:true});
+  },
+
   async setResult(matchId,h,a,status){
     await this.fs.setDoc(this.fs.doc(this.db,"results",matchId),{homeScore:h,awayScore:a,status});
+  },
+
+  async setTop3Result(first,second,third){
+    await this.fs.setDoc(this.fs.doc(this.db,"results",TOP3_DOC_ID),{first,second,third,status:"final",updatedAt:Date.now()});
   },
 
   async clearResult(matchId){
     try{ await this.fs.deleteDoc(this.fs.doc(this.db,"results",matchId)); }catch(e){}
   },
 
+  async clearTop3Result(){
+    try{ await this.fs.deleteDoc(this.fs.doc(this.db,"results",TOP3_DOC_ID)); }catch(e){}
+  },
+
   async deletePick(code,name,matchId){
     const cur=Object.assign({},(this.cache.preds[code]&&this.cache.preds[code].picks)||{});
     delete cur[matchId];
-    await this.fs.setDoc(this.fs.doc(this.db,"predictions",code),{name,picks:cur});
+    await this.fs.setDoc(this.fs.doc(this.db,"predictions",code),{name,picks:cur},{merge:true});
   },
 
   async deletePlayer(code){
@@ -492,6 +533,20 @@ function liveBadgeText(m){
   return "";
 }
 
+/* ---------------- Top 3 prediction window ---------------- */
+const top3OpenAt=()=>new Date(CFG.top3.openAt).getTime();
+const top3CloseAt=()=>new Date(CFG.top3.closeAt).getTime();
+function top3State(){const n=now();if(n<top3OpenAt())return"before";if(n>=top3CloseAt())return"closed";return"open";}
+function fmtTop3Date(iso){return new Date(iso).toLocaleString(undefined,{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});}
+function top3Teams(){
+  const fromCfg=Array.isArray(CFG.top3.teams)?CFG.top3.teams.filter(Boolean):[];
+  if(fromCfg.length)return [...new Set(fromCfg)].sort((a,b)=>a.localeCompare(b));
+  const set=new Set();MATCHES.forEach(m=>{if(m.home)set.add(m.home);if(m.away)set.add(m.away);});
+  return [...set].sort((a,b)=>a.localeCompare(b));
+}
+function hasCompleteTop3(t){return !!(t&&t.first&&t.second&&t.third);}
+function hasUniqueTop3(t){return hasCompleteTop3(t)&&new Set([t.first,t.second,t.third]).size===3;}
+
 /* ---------------- Scoring ---------------- */
 function scorePick(pick,m){
   if(m.status!=="finished"||!pick||pick.h==null)return{pts:0,kind:"none"};
@@ -501,7 +556,24 @@ function scorePick(pick,m){
   if(ph===fh)pts+=CFG.scoring.correctGoalsBonus;if(pa===fa)pts+=CFG.scoring.correctGoalsBonus;
   return{pts,kind:pts>0?"part":"miss"};
 }
-function totalFor(picks){let total=0,played=0;MATCHES.forEach(mm=>{const m=eff(mm);if(m.status==="finished"&&picks[m.id]&&picks[m.id].h!=null){total+=scorePick(picks[m.id],m).pts;played++;}});return{total,played};}
+function scoreTop3(top3){
+  const a=Store.top3Result();
+  if(!hasCompleteTop3(a))return{pts:0,kind:"none",bonus:false};
+  if(!hasCompleteTop3(top3))return{pts:0,kind:"none",bonus:false};
+  let pts=0;
+  if(top3.first===a.first)pts+=CFG.top3.firstPts;
+  if(top3.second===a.second)pts+=CFG.top3.secondPts;
+  if(top3.third===a.third)pts+=CFG.top3.thirdPts;
+  const bonus=top3.first===a.first&&top3.second===a.second&&top3.third===a.third;
+  if(bonus)pts+=CFG.top3.exactOrderBonus;
+  return{pts,kind:pts>0?"hit":"miss",bonus};
+}
+function totalFor(picks,top3){
+  let scorePts=0,played=0;
+  MATCHES.forEach(mm=>{const m=eff(mm);if(m.status==="finished"&&picks[m.id]&&picks[m.id].h!=null){scorePts+=scorePick(picks[m.id],m).pts;played++;}});
+  const t3=scoreTop3(top3);
+  return{total:scorePts+t3.pts,played,scorePts,top3Pts:t3.pts,top3Bonus:t3.bonus};
+}
 
 /* predictors of a match: names always; scores only after lock (or your own) */
 function predictorsFor(mm){
@@ -695,7 +767,7 @@ async function doLogin(){
 function logout(){ME=null;SESSION="";localStorage.removeItem("egec_session");isAdmin=false;sessionStorage.removeItem("egec_admin");activeTab="today";render();}
 
 /* ---- App shell ---- */
-const TABS=[{id:"today",label:"Today"},{id:"upcoming",label:"Upcoming"},{id:"finished",label:"Finished"},{id:"mine",label:"My Picks"},{id:"players",label:"Players"},{id:"board",label:"Leaderboard"}];
+const TABS=[{id:"today",label:"Today"},{id:"upcoming",label:"Upcoming"},{id:"finished",label:"Finished"},{id:"mine",label:"My Picks"},{id:"top3",label:"Top 3"},{id:"players",label:"Players"},{id:"board",label:"Live Leaderboard"}];
 function startToday(){const d=new Date();d.setHours(0,0,0,0);return d.getTime();}
 function endToday(){const d=new Date();d.setHours(23,59,59,999);return d.getTime();}
 function listFor(tab){
@@ -708,7 +780,7 @@ function listFor(tab){
 
 function renderApp(){
   const root=$("#root");
-  const myPicks=Store.myPicks(ME.code);const mine=totalFor(myPicks);
+  const myPicks=Store.myPicks(ME.code);const myTop3=Store.myTop3(ME.code);const mine=totalFor(myPicks,myTop3);
   const tabs=isAdmin?TABS.concat([{id:"org",label:"⚙ Organizer"}]):TABS;
 
   root.innerHTML=`
@@ -724,6 +796,7 @@ function renderApp(){
   </div></header>
   <div class="wrap">
     <section class="hero" id="hero" style="display:none"><div class="hero-in" id="heroIn"></div></section>
+    <div id="reminderBox"></div>
     <nav class="tabs" id="tabs"></nav>
     <main id="view"></main>
     <div class="foot">
@@ -731,8 +804,10 @@ function renderApp(){
         <span><b>${CFG.scoring.exactScore}</b> exact</span>
         <span><b>${CFG.scoring.correctOutcome}</b> result</span>
         <span><b>+${CFG.scoring.correctGoalsBonus}</b> per exact goals</span>
+        <span><b>${CFG.top3.firstPts}/${CFG.top3.secondPts}/${CFG.top3.thirdPts}</b> Top 3</span>
       </div>
-      <div style="margin-top:9px">Picks lock <b>${CFG.lockOffsetMinutes} min</b> before kickoff · Shared across all devices</div>
+      <div style="margin-top:9px">Picks lock <b>${CFG.lockOffsetMinutes} min</b> before kickoff · Top 3 exact order bonus <b>+${CFG.top3.exactOrderBonus}</b> · Shared across all devices</div>
+      <div style="margin-top:7px;font-weight:700;color:#8b0000">Developed By A. ElHawary</div>
       <div style="margin-top:7px">${isAdmin?'Organizer mode is on. ':''}<button class="link" id="orgLink">${isAdmin?"Exit organizer":"Organizer login"}</button></div>
     </div>
   </div>`;
@@ -745,13 +820,16 @@ function renderApp(){
     const b=el("button","tab"+(t.id===activeTab?" active":""));
     b.textContent=t.label;
     if(t.id==="today"){const n=listFor("today").length;if(n){const s=el("span","badge");s.textContent=n;b.appendChild(s);}}
+    if(t.id==="top3"&&top3State()==="open"&&!hasCompleteTop3(Store.myTop3(ME.code))){const s=el("span","badge");s.textContent="!";b.appendChild(s);}
     b.onclick=()=>{activeTab=t.id;renderApp();};
     tabsEl.appendChild(b);
   });
 
   renderHero();
+  renderTop3Reminder();
   const view=$("#view");
   if(activeTab==="board"){view.appendChild(renderBoard());return;}
+  if(activeTab==="top3"){view.appendChild(renderTop3());tick();return;}
   if(activeTab==="players"){view.appendChild(renderRoster());return;}
   if(activeTab==="org"){view.appendChild(renderOrg());return;}
   if(activeTab==="mine"){view.appendChild(renderMyPicks());tick();return;}
@@ -789,6 +867,96 @@ function renderHero(){
     live.forEach(m=>{const p=el("span","live-pill");p.innerHTML=`<span class="dot" style="background:var(--lose)"></span>${esc(m.home)} <span class="sc">${m.homeScore??0}-${m.awayScore??0}</span> ${esc(m.away)}`;t.appendChild(p);});
     box.appendChild(t);
   }
+}
+
+function renderTop3Reminder(){
+  const box=$("#reminderBox");if(!box)return;box.innerHTML="";
+  if(top3State()!=="open"||hasCompleteTop3(Store.myTop3(ME.code)))return;
+  const b=el("div","banner hot");
+  b.innerHTML=`<div class="bdot"></div><div><b>Top 3 reminder:</b> predict 1st, 2nd and 3rd winners before the window closes in <b data-top3-countdown="close">--:--:--</b>.<br><span style="color:var(--muted)">Exact order gives an extra +${CFG.top3.exactOrderBonus} points.</span></div><button class="banner-btn" id="goTop3">Predict Top 3</button>`;
+  box.appendChild(b);
+  const go=$("#goTop3");if(go)go.onclick=()=>{activeTab="top3";renderApp();};
+}
+
+function teamSelectHtml(id,label,value,disabled){
+  const opts=['<option value="">Select team</option>'].concat(top3Teams().map(t=>`<option value="${esc(t)}" ${t===value?"selected":""}>${esc(t)}</option>`));
+  return `<div class="top3-slot"><label for="${id}">${label}</label><select id="${id}" ${disabled?"disabled":""}>${opts.join("")}</select></div>`;
+}
+
+function renderTop3(){
+  const panel=el("div","panel");
+  const state=top3State(),mine=Store.myTop3(ME.code),actual=Store.top3Result(),closed=state==="closed";
+  const meta=state==="open"?"open now":state==="before"?"opens "+fmtTop3Date(CFG.top3.openAt):"locked";
+  const h=el("h2");h.innerHTML=`<span>🏅 Top 3 Winners Prediction</span><span class="meta">${meta}</span>`;panel.appendChild(h);
+
+  if(state==="before"){
+    const e=el("div","empty");
+    e.innerHTML=`<div class="big">Top 3 opens on ${fmtTop3Date(CFG.top3.openAt)}</div><div>Come back in <b data-top3-countdown="open">--:--:--</b> to predict 1st, 2nd and 3rd winners.</div>`;
+    panel.appendChild(e);
+  }else{
+    panel.insertAdjacentHTML("beforeend",`<div class="top3-grid">
+      ${teamSelectHtml("top3First","1st winner · "+CFG.top3.firstPts+" pts",mine.first||"",closed)}
+      ${teamSelectHtml("top3Second","2nd winner · "+CFG.top3.secondPts+" pts",mine.second||"",closed)}
+      ${teamSelectHtml("top3Third","3rd winner · "+CFG.top3.thirdPts+" pts",mine.third||"",closed)}
+    </div>`);
+    if(state==="open"){
+      const actions=el("div","top3-actions");
+      actions.innerHTML=`<button class="top3-save" id="top3Save">Save Top 3</button><span class="saved" id="top3Saved">Saved ✓</span>`;
+      panel.appendChild(actions);
+      const note=el("div","top3-note");
+      note.innerHTML=`Window closes in <b data-top3-countdown="close">--:--:--</b>. You can edit until then. Duplicate teams are not allowed.`;
+      panel.appendChild(note);
+      setTimeout(()=>{const btn=$("#top3Save");if(!btn)return;btn.onclick=saveTop3Pick;},0);
+    }else{
+      const note=el("div","top3-note");
+      note.innerHTML=hasCompleteTop3(mine)?`Your locked Top 3: <b>${esc(mine.first)}</b>, <b>${esc(mine.second)}</b>, <b>${esc(mine.third)}</b>`:"You did not submit a Top 3 prediction before the deadline.";
+      panel.appendChild(note);
+    }
+  }
+
+  const rule=el("div","top3-rule");
+  rule.innerHTML=`<span><b>${CFG.top3.firstPts}</b> correct 1st</span><span><b>${CFG.top3.secondPts}</b> correct 2nd</span><span><b>${CFG.top3.thirdPts}</b> correct 3rd</span><span><b>+${CFG.top3.exactOrderBonus}</b> exact order bonus</span>`;
+  panel.appendChild(rule);
+
+  if(hasCompleteTop3(actual)){
+    const sc=scoreTop3(mine), note=el("div","top3-note");
+    note.innerHTML=`Final Top 3: <b>${esc(actual.first)}</b>, <b>${esc(actual.second)}</b>, <b>${esc(actual.third)}</b> · Your Top 3 points: <b>${sc.pts}</b>${sc.bonus?" · exact-order bonus included":""}`;
+    panel.appendChild(note);
+  }
+
+  const picksPanel=renderTop3Players(closed||hasCompleteTop3(actual));
+  if(picksPanel)panel.appendChild(picksPanel);
+  return panel;
+}
+
+function renderTop3Players(reveal){
+  const rows=Object.values(Store.players()).map(p=>{const t=Store.myTop3(p.code),sc=scoreTop3(t);return{name:p.name,code:p.code,top3:t,pts:sc.pts,bonus:sc.bonus};})
+    .filter(p=>hasCompleteTop3(p.top3)).sort((a,b)=>b.pts-a.pts||a.name.localeCompare(b.name));
+  const wrap=el("div");
+  const cap=el("div","reveal-cap");cap.textContent=rows.length?`${rows.length} player${rows.length===1?"":"s"} submitted Top 3 ${reveal?"— picks revealed":"— picks hidden until lock"}`:"No Top 3 predictions submitted yet.";
+  wrap.appendChild(cap);
+  if(!rows.length)return wrap;
+  const list=el("div","top3-picks");
+  rows.forEach(p=>{
+    const row=el("div","top3-pick-row"+(ME&&p.code===ME.code?" you":""));
+    const left=el("div");
+    const shown=reveal||p.code===ME.code;
+    left.innerHTML=`<div class="lb-name"><span class="n">${esc(p.name)}</span>${ME&&p.code===ME.code?'<span class="tag you">YOU</span>':''}</div><div class="top3-break">${shown?esc(p.top3.first)+" / "+esc(p.top3.second)+" / "+esc(p.top3.third):"🔒 hidden until the window closes"}</div>`;
+    const right=el("div","top3-line");right.textContent=hasCompleteTop3(Store.top3Result())?p.pts+" pts":(shown?"saved":"");
+    row.appendChild(left);row.appendChild(right);list.appendChild(row);
+  });
+  wrap.appendChild(list);return wrap;
+}
+
+async function saveTop3Pick(){
+  const top3={first:$("#top3First").value,second:$("#top3Second").value,third:$("#top3Third").value};
+  if(top3State()!=="open"){toast("Top 3 window is not open");renderApp();return;}
+  if(!hasCompleteTop3(top3)){toast("Select all Top 3 teams");return;}
+  if(!hasUniqueTop3(top3)){toast("Choose three different teams");return;}
+  await Store.saveTop3(ME.code,ME.name,top3);
+  const saved=$("#top3Saved");if(saved){saved.classList.add("show");setTimeout(()=>saved.classList.remove("show"),1300);}
+  toast("Top 3 saved");
+  renderApp();
 }
 
 function renderCard(m){
@@ -889,7 +1057,7 @@ async function savePick(m,side,v){
   await Store.savePick(ME.code,ME.name,m.id,cur.h,cur.a);
   const s=document.querySelector(`[data-saved="${m.id}"]`);
   if(s){s.classList.add("show");clearTimeout(savedTimer);savedTimer=setTimeout(()=>s.classList.remove("show"),1300);}
-  $(".me-chip .pts").innerHTML=totalFor(Store.myPicks(ME.code)).total+'<small> PTS</small>';
+  $(".me-chip .pts").innerHTML=totalFor(Store.myPicks(ME.code),Store.myTop3(ME.code)).total+'<small> PTS</small>';
 }
 
 function renderMyPicks(){
@@ -945,15 +1113,15 @@ function renderBoard(){
   const panel=el("div","panel");
   const players=Object.values(Store.players());
   const preds=Store.predsAll();
-  const rows=players.map(p=>{const t=totalFor((preds[p.code]&&preds[p.code].picks)||{});return{name:p.name,code:p.code,pts:t.total,played:t.played};})
-    .sort((a,b)=>b.pts-a.pts||b.played-a.played||a.name.localeCompare(b.name));
-  const h=el("h2");h.innerHTML=`<span>🏆 Leaderboard</span><span class="meta">${rows.length} player${rows.length===1?"":"s"}</span>`;panel.appendChild(h);
+  const rows=players.map(p=>{const d=preds[p.code]||{},t=totalFor(d.picks||{},d.top3||{});return{name:p.name,code:p.code,pts:t.total,played:t.played,scorePts:t.scorePts,top3Pts:t.top3Pts,bonus:t.top3Bonus};})
+    .sort((a,b)=>b.pts-a.pts||b.scorePts-a.scorePts||b.played-a.played||a.name.localeCompare(b.name));
+  const h=el("h2");h.innerHTML=`<span>🏆 Live Leaderboard</span><span class="meta">live · ${rows.length} player${rows.length===1?"":"s"}</span>`;panel.appendChild(h);
   if(!rows.length){const e=el("div","empty");e.innerHTML='<div class="big">No players yet</div><div>Register to join the board.</div>';panel.appendChild(e);return panel;}
   rows.forEach((p,i)=>{
     const row=el("div","lb-row"+(ME&&p.code===ME.code?" me":""));
     const rk=el("div","rank"+(i===0?" g1":i===1?" g2":i===2?" g3":""));rk.textContent=i+1;
-    const nm=el("div","lb-name");nm.innerHTML=`<span class="n">${esc(p.name)}</span>${ME&&p.code===ME.code?'<span class="tag you">YOU</span>':''}`;
-    const sub=el("div","lb-sub");sub.textContent=p.played+" scored";
+    const nm=el("div","lb-name");nm.innerHTML=`<span class="n">${esc(p.name)}</span>${ME&&p.code===ME.code?'<span class="tag you">YOU</span>':''}${p.bonus?'<span class="tag me-tag">TOP 3 BONUS</span>':''}`;
+    const sub=el("div","lb-sub");sub.textContent=p.scorePts+" match pts · "+p.top3Pts+" Top 3 pts · "+p.played+" scored";
     const pt=el("div","lb-pts");pt.textContent=p.pts;
     row.appendChild(rk);row.appendChild(nm);row.appendChild(sub);row.appendChild(pt);panel.appendChild(row);
   });
@@ -967,13 +1135,13 @@ function renderRoster(){
   const h=el("h2");h.innerHTML=`<span>👥 Players</span><span class="meta">${players.length} registered</span>`;panel.appendChild(h);
   if(!players.length){const e=el("div","empty");e.innerHTML='<div class="big">No players yet</div>';panel.appendChild(e);return panel;}
   players.forEach(p=>{
-    const picks=(preds[p.code]&&preds[p.code].picks)||{};const n=Object.values(picks).filter(x=>x&&x.h!=null).length;
+    const d=preds[p.code]||{},picks=d.picks||{};const n=Object.values(picks).filter(x=>x&&x.h!=null).length,top3Done=hasCompleteTop3(d.top3);
     const row=el("div","roster-row");
     const av=el("div","av");av.textContent=(p.name[0]||"?").toUpperCase();
     const info=el("div","info");
     const mine=ME&&p.code===ME.code;
     info.innerHTML=`<div class="n">${esc(p.name)}${mine?' <span class="tag you">YOU</span>':''}</div>
-      <div class="s">${n} prediction${n===1?"":"s"} made${mine?` · your code <span class="mycode">${p.code}</span>`:(isAdmin?` · <span class="mycode">${p.code}</span>`:"")}</div>`;
+      <div class="s">${n} prediction${n===1?"":"s"} made · Top 3 ${top3Done?"saved":"not saved"}${mine?` · your code <span class="mycode">${p.code}</span>`:(isAdmin?` · <span class="mycode">${p.code}</span>`:"")}</div>`;
     row.appendChild(av);row.appendChild(info);panel.appendChild(row);
   });
   return panel;
@@ -1019,6 +1187,21 @@ function renderOrg(){
   }
   wrap.appendChild(pPanel);
 
+  /* ---- Top 3 final result ---- */
+  const tPanel=el("div","panel");tPanel.style.marginTop="16px";
+  const th=el("h2");th.innerHTML=`<span>⚙ Top 3 final result</span><span class="meta">used for bonus scoring</span>`;tPanel.appendChild(th);
+  const actual=Store.top3Result();
+  tPanel.insertAdjacentHTML("beforeend",`<div class="top3-grid">
+    ${teamSelectHtml("orgTop3First","1st winner",actual.first||"",false)}
+    ${teamSelectHtml("orgTop3Second","2nd winner",actual.second||"",false)}
+    ${teamSelectHtml("orgTop3Third","3rd winner",actual.third||"",false)}
+  </div>`);
+  const ta=el("div","top3-actions");
+  ta.innerHTML=`<button class="top3-save" id="orgTop3Save">Save Final Top 3</button><button class="org-clear" id="orgTop3Clear" title="Clear Top 3 result">×</button>`;
+  tPanel.appendChild(ta);
+  const tn=el("div","top3-note");tn.textContent="After saving, the live leaderboard immediately adds Top 3 points for all players.";tPanel.appendChild(tn);
+  wrap.appendChild(tPanel);
+
   /* ---- Match results ---- */
   const rPanel=el("div","panel");rPanel.style.marginTop="16px";
   const rh=el("h2");rh.innerHTML=`<span>⚙ Match results</span><span class="meta">enter final scores</span>`;rPanel.appendChild(rh);
@@ -1044,6 +1227,16 @@ function renderOrg(){
       const code=await Store.addPlayer(v.value);toast(v.value+" added · code "+code);$("#orgName").value="";renderApp();
     };
     const on=$("#orgName");if(on)on.addEventListener("input",()=>on.value=on.value.replace(NAME_FILTER,""));
+    const top3Val=id=>$(id)?$(id).value:"";
+    const top3Save=$("#orgTop3Save");
+    if(top3Save)top3Save.onclick=async()=>{
+      const t={first:top3Val("#orgTop3First"),second:top3Val("#orgTop3Second"),third:top3Val("#orgTop3Third")};
+      if(!hasCompleteTop3(t)){toast("Select all final Top 3 teams");return;}
+      if(!hasUniqueTop3(t)){toast("Final Top 3 must be three different teams");return;}
+      await Store.setTop3Result(t.first,t.second,t.third);toast("Final Top 3 saved");renderApp();
+    };
+    const top3Clear=$("#orgTop3Clear");
+    if(top3Clear)top3Clear.onclick=async()=>{await Store.clearTop3Result();toast("Final Top 3 cleared");renderApp();};
     const rd=(id)=>{const h=parseInt($("#oh-"+id).value,10),a=parseInt($("#oa-"+id).value,10);return{h,a,ok:!(isNaN(h)||isNaN(a))};};
     wrap.querySelectorAll("[data-live]").forEach(b=>b.onclick=async()=>{const id=b.getAttribute("data-live");const s=rd(id);if(!s.ok){toast("Enter both scores");return;}await Store.setResult(id,s.h,s.a,"live");toast("Live score updated");renderApp();});
     wrap.querySelectorAll("[data-final]").forEach(b=>b.onclick=async()=>{const id=b.getAttribute("data-final");const s=rd(id);if(!s.ok){toast("Enter both scores");return;}await Store.setResult(id,s.h,s.a,"finished");toast("Final result saved");renderApp();});
@@ -1066,6 +1259,11 @@ function tick(){
     const m=MATCHES.map(eff).find(x=>x.id===node.getAttribute("data-countdown"));if(!m)return;
     const ms=lockAt(m)-now();node.textContent=fmtCountdown(ms);
     node.classList.toggle("urgent",ms<=15*60000&&ms>0);
+    if(ms<=0&&!node._r){node._r=true;setTimeout(()=>renderApp(),400);}
+  });
+  document.querySelectorAll("[data-top3-countdown]").forEach(node=>{
+    const target=node.getAttribute("data-top3-countdown")==="open"?top3OpenAt():top3CloseAt();
+    const ms=target-now();node.textContent=fmtCountdown(ms);
     if(ms<=0&&!node._r){node._r=true;setTimeout(()=>renderApp(),400);}
   });
 }

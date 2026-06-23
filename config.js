@@ -20,6 +20,17 @@ window.CONFIG = {
     correctGoalsBonus: 1 // +bonus per team whose goal count you nailed
   },
 
+  // --- Top 3 Winners Prediction -------------------------------------------
+  // Active only between openAt and closeAt. Times below use Cairo time (+03:00).
+  top3: {
+    openAt: "2026-06-28T00:00:00+03:00",
+    closeAt: "2026-07-01T00:00:00+03:00",
+    firstPts: 100,
+    secondPts: 75,
+    thirdPts: 50,
+    exactOrderBonus: 100
+  },
+
   // --- Organizer (admin) ----------------------------------------------------
   // Anyone who enters this code unlocks the Organizer panel, where they can
   // enter match scores and add players. Change it before you share the app.
