@@ -120,11 +120,17 @@
   .hero:before{content:"";position:absolute;inset:0;background:
     repeating-linear-gradient(90deg,rgba(255,255,255,.02) 0 40px,transparent 40px 80px);pointer-events:none}
   .hero-in{position:relative;padding:16px 18px}
+  .hero-layout{display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .hero-main{min-width:0;flex:1}
   .eyebrow{font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:var(--magenta);font-weight:700}
   .hero-cta{font-family:"Oswald";font-weight:600;font-size:clamp(19px,4.4vw,28px);margin:4px 0 2px;letter-spacing:.3px}
   .hero-clock{font-family:"Oswald";font-weight:700;font-variant-numeric:tabular-nums;color:var(--cyan);text-shadow:0 0 12px rgba(0,229,255,.55)}
   .hero-clock.urgent{color:var(--lose);text-shadow:0 0 12px rgba(255,45,85,.6)}
   .hero-sub{color:var(--muted);font-size:13px}
+  .hero-prize{width:250px;flex:0 0 250px;border:1px solid rgba(255,230,0,.38);border-radius:15px;padding:12px 13px;background:linear-gradient(135deg,rgba(255,230,0,.12),rgba(255,46,151,.12));box-shadow:0 0 22px rgba(255,230,0,.08)}
+  .hero-prize-kicker{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--draw);font-weight:800}
+  .hero-prize-title{font-family:"Oswald";font-size:19px;font-weight:700;color:var(--ink);line-height:1.15;margin-top:3px}
+  .hero-prize-sub{font-size:12px;color:var(--muted);margin-top:4px}
   .live-ticker{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
   .live-pill{display:inline-flex;align-items:center;gap:8px;background:rgba(255,45,85,.12);border:1px solid rgba(255,45,85,.45);
     border-radius:999px;padding:5px 11px;font-size:12.5px}
@@ -367,6 +373,8 @@
   @media (max-width:560px){
     .me-chip .nm{max-width:74px}
     .tname{font-size:16px}.score{font-size:30px}.tabs{top:55px}
+    .hero-layout{align-items:stretch;flex-direction:column}
+    .hero-prize{width:100%;flex:auto}
     .top3-grid{grid-template-columns:1fr}
     .banner .banner-btn{width:100%;margin-left:0}
     .top3-popup{align-items:center;justify-content:center;padding:16px}
@@ -899,9 +907,18 @@ function renderHero(){
   hero.style.display="";box.innerHTML="";
   if(next){
     const has=Store.myPicks(ME.code)[next.id]&&Store.myPicks(ME.code)[next.id].h!=null;
-    box.innerHTML=`<div class="eyebrow">${has?"Pick is in — change it before lock":"Get your pick in"}</div>
-      <div class="hero-cta">${esc(next.home)} <span class="neon-cyan">v</span> ${esc(next.away)} · <span class="hero-clock" data-countdown="${next.id}">--:--:--</span></div>
-      <div class="hero-sub">${has?"You can edit your scoreline until picks lock.":"Predict the scoreline before the countdown hits zero."}</div>`;
+    box.innerHTML=`<div class="hero-layout">
+      <div class="hero-main">
+        <div class="eyebrow">${has?"Pick is in — change it before lock":"Get your pick in"}</div>
+        <div class="hero-cta">${esc(next.home)} <span class="neon-cyan">v</span> ${esc(next.away)} · <span class="hero-clock" data-countdown="${next.id}">--:--:--</span></div>
+        <div class="hero-sub">${has?"You can edit your scoreline until picks lock.":"Predict the scoreline before the countdown hits zero."}</div>
+      </div>
+      <div class="hero-prize">
+        <div class="hero-prize-kicker">🏆 Leaderboard Challenge</div>
+        <div class="hero-prize-title">1st place wins a surprise 🎁</div>
+        <div class="hero-prize-sub">Stay on top and claim the glory 🚀🔥</div>
+      </div>
+    </div>`;
   }else{
     box.innerHTML=`<div class="eyebrow neon-mag">Live now</div><div class="hero-cta">Matches in progress</div>`;
   }
