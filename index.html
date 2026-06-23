@@ -309,6 +309,20 @@
   .top3-note{color:var(--muted);font-size:12.5px;text-align:center;padding:0 15px 14px}
   .top3-rule{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:12.5px;padding:12px 15px;border-top:1px solid var(--line)}
   .top3-rule b{color:var(--cyan);font-family:"Oswald"}
+  .top3-feature-layout{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:16px;align-items:start}
+  .top3-ad{position:sticky;top:116px;border:1px solid rgba(255,46,151,.38);border-radius:var(--radius);overflow:hidden;background:linear-gradient(160deg,rgba(255,46,151,.16),rgba(0,229,255,.09) 48%,rgba(12,14,26,.95));box-shadow:0 18px 46px rgba(0,0,0,.32),0 0 32px rgba(255,46,151,.12)}
+  .top3-ad-in{padding:18px 16px;text-align:center;position:relative}
+  .top3-ad-logo{width:64px;height:96px;margin:0 auto 8px;display:flex;align-items:center;justify-content:center}
+  .top3-ad-logo img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 0 14px rgba(255,255,255,.14))}
+  .top3-ad-kicker{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--magenta);font-weight:800}
+  .top3-ad-title{font-family:"Oswald";font-size:26px;line-height:1.05;margin:6px 0;color:var(--ink);text-shadow:0 0 14px rgba(255,46,151,.28)}
+  .top3-ad-copy{font-size:13px;color:var(--muted);line-height:1.55;margin:0 0 12px}
+  .top3-ad-points{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin:12px 0}
+  .top3-ad-points span{border:1px solid var(--line);border-radius:10px;padding:8px 4px;background:rgba(255,255,255,.04);font-family:"Oswald";font-weight:700;color:var(--cyan)}
+  .top3-ad-bonus{border:1px solid rgba(255,230,0,.34);background:rgba(255,230,0,.08);color:var(--draw);border-radius:12px;padding:9px 10px;font-size:12.5px;font-weight:700;margin:10px 0}
+  .top3-ad-time{font-size:12px;color:var(--muted);margin-top:10px}
+  .top3-ad-time b{font-family:"Oswald";color:var(--cyan);font-size:17px}
+  .top3-ad-btn{width:100%;margin-top:13px;border:0;border-radius:12px;cursor:pointer;font-family:"Oswald";font-weight:600;font-size:15px;padding:11px;color:#04060e;background:linear-gradient(135deg,var(--cyan),var(--magenta));box-shadow:0 0 18px rgba(255,46,151,.25)}
   .top3-picks{padding:0 13px 13px}
   .top3-pick-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:9px 11px;border-radius:9px;font-size:13px}
   .top3-pick-row:nth-child(odd){background:rgba(255,255,255,.025)}
@@ -329,6 +343,10 @@
     font-size:13.5px;font-weight:600;z-index:90;transition:.25s;box-shadow:0 10px 30px rgba(0,0,0,.5),0 0 22px rgba(0,229,255,.15)}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
+  @media (max-width:760px){
+    .top3-feature-layout{grid-template-columns:1fr}
+    .top3-ad{position:relative;top:auto;order:-1}
+  }
   @media (max-width:560px){
     .me-chip .nm{max-width:74px}
     .tname{font-size:16px}.score{font-size:30px}.tabs{top:55px}
@@ -889,6 +907,7 @@ function teamSelectHtml(id,label,value,disabled){
 }
 
 function renderTop3(){
+  const layout=el("div","top3-feature-layout");
   const panel=el("div","panel");
   const state=top3State(),mine=Store.myTop3(ME.code),actual=Store.top3Result(),closed=state==="closed";
   const meta=state==="open"?"open now":state==="before"?"opens "+fmtTop3Date(CFG.top3.openAt):"locked";
@@ -931,7 +950,32 @@ function renderTop3(){
 
   const picksPanel=renderTop3Players(closed||hasCompleteTop3(actual));
   if(picksPanel)panel.appendChild(picksPanel);
-  return panel;
+  layout.appendChild(panel);
+  layout.appendChild(renderTop3Ad(state,mine));
+  return layout;
+}
+
+function renderTop3Ad(state,mine){
+  const ad=el("aside","top3-ad");
+  const status=state==="open"?`Closes in <b data-top3-countdown="close">--:--:--</b>`:state==="before"?`Opens in <b data-top3-countdown="open">--:--:--</b>`:`Prediction window locked`;
+  const buttonText=state==="open"?(hasCompleteTop3(mine)?"Update My Top 3":"Predict Now"):state==="before"?"Coming Soon":"See Submissions";
+  ad.innerHTML=`<div class="top3-ad-in">
+    <div class="top3-ad-logo">${worldCupLogo()}</div>
+    <div class="top3-ad-kicker">New Feature</div>
+    <div class="top3-ad-title">Top 3 Winners Challenge</div>
+    <p class="top3-ad-copy">Predict the final podium and fight for a big leaderboard jump.</p>
+    <div class="top3-ad-points"><span>1st<br>${CFG.top3.firstPts}</span><span>2nd<br>${CFG.top3.secondPts}</span><span>3rd<br>${CFG.top3.thirdPts}</span></div>
+    <div class="top3-ad-bonus">Exact order bonus: +${CFG.top3.exactOrderBonus} pts</div>
+    <div class="top3-ad-time">${status}</div>
+    <button class="top3-ad-btn" type="button">${buttonText}</button>
+  </div>`;
+  const btn=ad.querySelector("button");
+  btn.onclick=()=>{
+    const first=document.getElementById("top3First");
+    if(first&&!first.disabled){first.focus();first.scrollIntoView({behavior:"smooth",block:"center"});return;}
+    const panel=ad.previousElementSibling;if(panel)panel.scrollIntoView({behavior:"smooth",block:"start"});
+  };
+  return ad;
 }
 
 function renderTop3Players(reveal){
