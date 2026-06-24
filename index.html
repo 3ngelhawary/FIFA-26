@@ -873,7 +873,7 @@ async function doLogin(){
 function logout(){ME=null;SESSION="";localStorage.removeItem("egec_session");isAdmin=false;sessionStorage.removeItem("egec_admin");activeTab="today";render();}
 
 /* ---- App shell ---- */
-const TABS=[{id:"today",label:"Today"},{id:"upcoming",label:"Upcoming"},{id:"finished",label:"Finished"},{id:"mine",label:"My Picks"},{id:"top3",label:"Top 3"},{id:"tree",label:"World Cup Tree"},{id:"players",label:"Players"},{id:"board",label:"Live Leaderboard"}];
+const TABS=[{id:"today",label:"Today"},{id:"upcoming",label:"Upcoming"},{id:"finished",label:"Finished"},{id:"mine",label:"My Picks"},{id:"top3",label:"Top 3"},{id:"tree",label:"World Cup Tree"},{id:"board",label:"Live Leaderboard"}];
 function todayKey(){return dayKeyInAppTime(now());}
 function matchDayKey(m){return dayKeyInAppTime(ko(m));}
 function listFor(tab){
@@ -939,7 +939,6 @@ function renderApp(){
   if(activeTab==="board"){view.appendChild(renderBoard());return;}
   if(activeTab==="tree"){view.appendChild(renderTree());return;}
   if(activeTab==="top3"){view.appendChild(renderTop3());tick();return;}
-  if(activeTab==="players"){view.appendChild(renderRoster());return;}
   if(activeTab==="org"){view.appendChild(renderOrg());return;}
   if(activeTab==="mine"){view.appendChild(renderMyPicks());tick();return;}
 
