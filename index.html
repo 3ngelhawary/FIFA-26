@@ -231,15 +231,31 @@
   .panel h2{font-family:"Oswald";font-weight:600;margin:0;padding:15px 17px;font-size:17px;border-bottom:1px solid var(--line);
     display:flex;align-items:center;justify-content:space-between}
   .panel h2 .meta{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;font-family:"Inter";font-weight:700}
-  .lb-row{display:grid;grid-template-columns:36px 1fr auto auto;gap:12px;align-items:center;padding:12px 17px;border-bottom:1px solid var(--line)}
+  .lb-row{display:grid;grid-template-columns:36px 1fr auto auto;gap:12px;align-items:center;padding:12px 17px;border-bottom:1px solid var(--line);cursor:pointer;transition:background .18s,border-color .18s}
   .lb-row:last-child{border-bottom:0}
+  .lb-row:hover{background:rgba(0,229,255,.055)}
   .lb-row.me{background:rgba(255,46,151,.07)}
+  .lb-row.me:hover{background:rgba(255,46,151,.11)}
   .rank{font-family:"Oswald";font-weight:700;font-size:18px;color:var(--muted);text-align:center}
   .rank.g1{color:var(--draw);text-shadow:0 0 10px rgba(255,230,0,.5)} .rank.g2{color:#d6def0} .rank.g3{color:#ff9d5c}
   .lb-name{font-weight:700;display:flex;align-items:center;gap:8px;min-width:0}
   .lb-name span.n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .lb-sub{font-size:12px;color:var(--muted);white-space:nowrap}
   .lb-pts{font-family:"Oswald";font-weight:700;font-size:20px;color:var(--cyan);text-shadow:0 0 8px rgba(0,229,255,.45);text-align:right;min-width:42px}
+
+
+  .member-modal{position:fixed;inset:0;z-index:88;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(2,5,13,.82);backdrop-filter:blur(8px)}
+  .member-card{width:min(860px,100%);max-height:min(86vh,820px);display:flex;flex-direction:column;border:1px solid rgba(0,229,255,.28);border-radius:22px;background:linear-gradient(160deg,rgba(14,17,34,.98),rgba(10,12,24,.98));box-shadow:0 30px 90px rgba(0,0,0,.68),0 0 32px rgba(0,229,255,.12);overflow:hidden}
+  .member-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:16px 17px;border-bottom:1px solid var(--line);background:linear-gradient(90deg,rgba(0,229,255,.08),rgba(255,46,151,.05))}
+  .member-title{min-width:0}.member-title h3{font-family:"Oswald";font-weight:600;font-size:24px;line-height:1.1;margin:0;display:flex;align-items:center;gap:9px}.member-title .meta{margin-top:5px;color:var(--muted);font-size:12px}
+  .member-close{width:34px;height:34px;border-radius:50%;border:1px solid var(--line-2);background:rgba(255,255,255,.04);color:var(--muted);cursor:pointer;font-size:21px;line-height:1;flex:0 0 auto}.member-close:hover{color:var(--ink);border-color:var(--magenta)}
+  .member-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;padding:13px 17px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.02)}
+  .member-stat{border:1px solid var(--line);border-radius:13px;padding:10px;background:rgba(255,255,255,.035);text-align:center}.member-stat b{display:block;font-family:"Oswald";font-size:22px;color:var(--cyan);line-height:1}.member-stat span{display:block;margin-top:3px;font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-weight:800}
+  .member-body{overflow:auto;padding:13px 17px 17px}.member-section-title{font-family:"Oswald";font-size:15px;letter-spacing:.5px;text-transform:uppercase;color:var(--ink);margin:4px 0 10px;display:flex;align-items:center;justify-content:space-between;gap:12px}.member-section-title span{font-family:"Inter";font-size:11px;color:var(--muted);font-weight:700;text-transform:none;letter-spacing:0}
+  .history-list{display:grid;gap:8px}.history-row{display:grid;grid-template-columns:1.2fr auto auto auto;gap:10px;align-items:center;border:1px solid var(--line);border-radius:14px;padding:10px 11px;background:rgba(255,255,255,.028)}
+  .history-match{min-width:0}.history-teams{font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.history-meta{margin-top:3px;font-size:11px;color:var(--muted)}
+  .history-pick,.history-result,.history-pts{font-family:"Oswald";font-weight:700;white-space:nowrap;text-align:right}.history-pick{color:var(--ink)}.history-pick.hidden{font-family:"Inter";font-size:12px;color:var(--faint);font-weight:700}.history-pick.default{color:var(--draw)}.history-result{color:var(--muted)}.history-pts{color:var(--cyan);font-size:18px;min-width:38px}.history-pts.none{color:var(--faint)}
+  .top3-history{border:1px solid var(--line);border-radius:15px;background:rgba(255,255,255,.03);padding:12px;margin-bottom:15px}.top3-history .line{display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--muted);font-size:13px}.top3-history b{color:var(--ink);font-family:"Oswald"}.top3-history .top3-pick-text{margin-top:8px;font-weight:800;color:var(--cyan);line-height:1.5}.top3-history .hidden{color:var(--faint);font-style:italic;font-weight:700}
 
   .roster-row{display:flex;align-items:center;gap:12px;padding:12px 17px;border-bottom:1px solid var(--line)}
   .roster-row:last-child{border-bottom:0}
@@ -412,6 +428,7 @@
     .top3-grid{grid-template-columns:1fr}
     .banner .banner-btn{width:100%;margin-left:0}
     .top3-popup{align-items:center;justify-content:center;padding:16px}
+    .member-modal{padding:10px}.member-card{max-height:92vh;border-radius:18px}.member-head{padding:13px}.member-title h3{font-size:21px}.member-summary{grid-template-columns:repeat(2,1fr);padding:10px 13px}.member-body{padding:11px 13px 14px}.history-row{grid-template-columns:1fr auto;gap:7px}.history-result{font-size:13px}.history-pick,.history-pts{text-align:left}.history-pts{text-align:right}.history-match{grid-column:1/-1}.history-teams{white-space:normal}
   }
   @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -1429,6 +1446,9 @@ function renderBoard(){
   if(!rows.length){const e=el("div","empty");e.innerHTML='<div class="big">No players yet</div><div>Register to join the board.</div>';panel.appendChild(e);return panel;}
   rows.forEach((p,i)=>{
     const row=el("div","lb-row"+(ME&&p.code===ME.code?" me":""));
+    row.setAttribute("role","button");row.setAttribute("tabindex","0");row.title="View prediction history";
+    row.onclick=()=>showMemberHistory(p.code);
+    row.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();showMemberHistory(p.code);}};
     const rk=el("div","rank"+(i===0?" g1":i===1?" g2":i===2?" g3":""));rk.textContent=i+1;
     const nm=el("div","lb-name");nm.innerHTML=`<span class="n">${esc(p.name)}</span>${ME&&p.code===ME.code?'<span class="tag you">YOU</span>':''}${p.bonus?'<span class="tag me-tag">TOP 3 BONUS</span>':''}`;
     const sub=el("div","lb-sub");sub.textContent="#PM "+p.predicted;
@@ -1436,6 +1456,74 @@ function renderBoard(){
     row.appendChild(rk);row.appendChild(nm);row.appendChild(sub);row.appendChild(pt);panel.appendChild(row);
   });
   return panel;
+}
+
+function memberHistoryRows(code){
+  const d=Store.predsAll()[code]||{},picks=d.picks||{};
+  const isSelf=ME&&code===ME.code;
+  return allEffectiveMatches().slice().sort((a,b)=>ko(a)-ko(b)).map(m=>{
+    const raw=picks[m.id],manual=!!(raw&&raw.h!=null),locked=isLocked(m),finished=m.status==="finished"&&m.homeScore!=null&&m.awayScore!=null;
+    if(!manual&&!locked&&!finished)return null;
+    const reveal=manual&&(locked||isSelf||isAdmin);
+    let pickText="",pickClass="history-pick";
+    if(manual&&reveal)pickText=`${raw.h}-${raw.a}`;
+    else if(manual){pickText="Hidden until lock";pickClass+=" hidden";}
+    else{pickText="Default 0-0";pickClass+=" default";}
+    const sc=finished?scorePick(raw,m):null;
+    return {m,manual,finished,pickText,pickClass,pts:sc?sc.pts:null,kind:sc?sc.kind:"none"};
+  }).filter(Boolean);
+}
+function top3HistoryHtml(code,name){
+  const d=Store.predsAll()[code]||{},top3=d.top3||{},isSelf=ME&&code===ME.code;
+  const reveal=hasCompleteTop3(top3)&&(top3State()==="closed"||isSelf||isAdmin);
+  const sc=scoreTop3(top3);
+  let body="<span class='hidden'>No Top 3 prediction saved.</span>";
+  if(hasCompleteTop3(top3)&&reveal)body=`${esc(top3.first)} · ${esc(top3.second)} · ${esc(top3.third)}`;
+  else if(hasCompleteTop3(top3))body="<span class='hidden'>Saved — hidden until Top 3 closes.</span>";
+  return `<div class="top3-history">
+    <div class="line"><span>Top 3 prediction</span><b>${sc.pts} pts</b></div>
+    <div class="top3-pick-text">${body}</div>
+  </div>`;
+}
+function showMemberHistory(code){
+  const player=Store.getByCode(code);if(!player)return;
+  const d=Store.predsAll()[code]||{},picks=d.picks||{},t=totalFor(picks,d.top3||{});
+  const rows=memberHistoryRows(code);
+  const modal=el("div","member-modal");modal.setAttribute("role","dialog");modal.setAttribute("aria-modal","true");modal.setAttribute("aria-label",player.name+" prediction history");
+  const close=()=>{document.removeEventListener("keydown",escClose);modal.remove();};
+  const escClose=e=>{if(e.key==="Escape")close();};document.addEventListener("keydown",escClose);
+  modal.onclick=e=>{if(e.target===modal)close();};
+  const list=rows.length?rows.map(r=>{
+    const m=r.m,result=r.finished?`${m.homeScore}-${m.awayScore}`:(isLocked(m)?"Locked":"Not locked");
+    const pts=r.pts==null?"–":String(r.pts);
+    const ptsClass=r.pts==null?"history-pts none":"history-pts";
+    const tag=r.manual?"Manual pick":"Default applied";
+    return `<div class="history-row">
+      <div class="history-match"><div class="history-teams">${esc(m.home)} vs ${esc(m.away)}</div><div class="history-meta">${esc(roundDisplay(m))} · ${fmtKO(m)} · ${tag}</div></div>
+      <div class="${r.pickClass}">${esc(r.pickText)}</div>
+      <div class="history-result">${esc(result)}</div>
+      <div class="${ptsClass}">${pts}</div>
+    </div>`;
+  }).join(""):`<div class="empty"><div class="big">No prediction history yet</div><div>When matches lock or finish, default 0-0 history will appear here.</div></div>`;
+  modal.innerHTML=`<div class="member-card">
+    <div class="member-head">
+      <div class="member-title"><h3>📋 ${esc(player.name)}</h3><div class="meta">Prediction history · click outside or press Esc to close</div></div>
+      <button class="member-close" type="button" aria-label="Close">×</button>
+    </div>
+    <div class="member-summary">
+      <div class="member-stat"><b>${t.total}</b><span>Score</span></div>
+      <div class="member-stat"><b>${t.played}</b><span>#PM</span></div>
+      <div class="member-stat"><b>${t.scorePts}</b><span>Match pts</span></div>
+      <div class="member-stat"><b>${t.top3Pts}</b><span>Top 3 pts</span></div>
+    </div>
+    <div class="member-body">
+      ${top3HistoryHtml(code,player.name)}
+      <div class="member-section-title">Match predictions <span>${rows.length} shown</span></div>
+      <div class="history-list">${list}</div>
+    </div>
+  </div>`;
+  const btn=modal.querySelector(".member-close");if(btn)btn.onclick=close;
+  document.body.appendChild(modal);
 }
 
 function renderRoster(){
