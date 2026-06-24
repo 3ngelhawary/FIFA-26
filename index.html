@@ -1213,15 +1213,18 @@ function renderBoard(){
   const panel=el("div","panel");
   const players=Object.values(Store.players());
   const preds=Store.predsAll();
-  const rows=players.map(p=>{const d=preds[p.code]||{},t=totalFor(d.picks||{},d.top3||{});return{name:p.name,code:p.code,pts:t.total,played:t.played,scorePts:t.scorePts,top3Pts:t.top3Pts,bonus:t.top3Bonus};})
-    .sort((a,b)=>b.pts-a.pts||b.scorePts-a.scorePts||b.played-a.played||a.name.localeCompare(b.name));
+  const rows=players.map(p=>{
+    const d=preds[p.code]||{},picks=d.picks||{},t=totalFor(picks,d.top3||{});
+    const predicted=Object.values(picks).filter(x=>x&&x.h!=null).length;
+    return{name:p.name,code:p.code,pts:t.total,played:t.played,predicted,scorePts:t.scorePts,top3Pts:t.top3Pts,bonus:t.top3Bonus};
+  }).sort((a,b)=>b.pts-a.pts||b.scorePts-a.scorePts||b.played-a.played||a.name.localeCompare(b.name));
   const h=el("h2");h.innerHTML=`<span>🏆 Live Leaderboard</span><span class="meta">live · ${rows.length} player${rows.length===1?"":"s"}</span>`;panel.appendChild(h);
   if(!rows.length){const e=el("div","empty");e.innerHTML='<div class="big">No players yet</div><div>Register to join the board.</div>';panel.appendChild(e);return panel;}
   rows.forEach((p,i)=>{
     const row=el("div","lb-row"+(ME&&p.code===ME.code?" me":""));
     const rk=el("div","rank"+(i===0?" g1":i===1?" g2":i===2?" g3":""));rk.textContent=i+1;
     const nm=el("div","lb-name");nm.innerHTML=`<span class="n">${esc(p.name)}</span>${ME&&p.code===ME.code?'<span class="tag you">YOU</span>':''}${p.bonus?'<span class="tag me-tag">TOP 3 BONUS</span>':''}`;
-    const sub=el("div","lb-sub");sub.textContent=p.scorePts+" match pts · "+p.top3Pts+" Top 3 pts · "+p.played+" scored";
+    const sub=el("div","lb-sub");sub.textContent="#PM "+p.predicted;
     const pt=el("div","lb-pts");pt.textContent=p.pts;
     row.appendChild(rk);row.appendChild(nm);row.appendChild(sub);row.appendChild(pt);panel.appendChild(row);
   });
