@@ -8,12 +8,9 @@ import admin from "firebase-admin";
 
 const SA = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT || "{}");
 
-const TOKEN = (
-  process.env.FOOTBALL_TOKEN ||
-  "062dd9d5f4f04baab9ffac84d510befb"
-)
-  .trim()
-  .replace(/\s+/g, "");
+// Token MUST come from the environment. Never hardcode a credential here —
+// anything committed to the repo is effectively public and must be rotated.
+const TOKEN = (process.env.FOOTBALL_TOKEN || "").trim().replace(/\s+/g, "");
 
 const COMP = process.env.COMPETITION || "WC";
 
