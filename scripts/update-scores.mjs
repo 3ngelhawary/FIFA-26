@@ -116,24 +116,27 @@ async function main() {
   console.log(`API returned ${api.length} matches for ${COMP}`);
 
   const byPair = {};
+  const byId = {};
 
   for (const am of api) {
     const key = `${norm(am.homeTeam?.name)}|${norm(am.awayTeam?.name)}`;
     byPair[key] = am;
+    byId[String(am.id)] = am;
   }
 
   let writes = 0;
 
   for (const m of ours) {
     const key = `${norm(m.home)}|${norm(m.away)}`;
-    const am = byPair[key];
+    const externalId = m.externalId || (/^\d+$/.test(String(m.id)) ? m.id : "");
+    const am = (externalId && byId[String(externalId)]) || byPair[key];
 
     if (!am) {
       console.log(`Skipped: ${m.home} vs ${m.away}`);
       continue;
     }
 
-    let status = null;
+    let status = "scheduled";
 
     if (am.status === "FINISHED") {
       status = "finished";
@@ -141,26 +144,35 @@ async function main() {
       status = "live";
     }
 
-    if (!status) {
-      console.log(`Not started: ${m.home} vs ${m.away}`);
-      continue;
-    }
-
     const ft = am.score?.fullTime || {};
     const homeScore = ft.home;
     const awayScore = ft.away;
-
-    if (homeScore == null || awayScore == null) {
-      console.log(`No score yet: ${m.home} vs ${m.away}`);
-      continue;
-    }
+    const homeName = am.homeTeam?.name || "";
+    const awayName = am.awayTeam?.name || "";
 
     const updateData = {
-      homeScore,
-      awayScore,
       status,
       updatedAt: admin.firestore.FieldValue.serverTimestamp()
     };
+
+    if (homeName && !/^TBD/i.test(homeName)) updateData.home = homeName;
+    if (awayName && !/^TBD/i.test(awayName)) updateData.away = awayName;
+    if (am.utcDate) updateData.kickoff = am.utcDate;
+
+    if (status !== "scheduled") {
+      if (homeScore == null || awayScore == null) {
+        console.log(`No score yet: ${m.home} vs ${m.away}`);
+        continue;
+      }
+      updateData.homeScore = homeScore;
+      updateData.awayScore = awayScore;
+    }
+
+    const hasFixtureUpdate = updateData.home || updateData.away || updateData.kickoff;
+    if (status === "scheduled" && !hasFixtureUpdate) {
+      console.log(`Not started: ${m.home} vs ${m.away}`);
+      continue;
+    }
 
     if (status === "live") {
       const liveMinute = getLiveMinute(m.kickoff);
@@ -176,8 +188,12 @@ async function main() {
 
     writes++;
 
+    const homeLabel = updateData.home || m.home;
+    const awayLabel = updateData.away || m.away;
+    const scoreLabel = status === "scheduled" ? "fixture synced" : `${updateData.homeScore}-${updateData.awayScore}`;
+
     console.log(
-      `Updated: ${m.home} ${homeScore}-${awayScore} ${m.away} [${status}] ${
+      `Updated: ${homeLabel} ${scoreLabel} ${awayLabel} [${status}] ${
         updateData.liveText || ""
       }`
     );
