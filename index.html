@@ -4,6 +4,8 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>EGEC · World Cup Predictor</title>
+<link rel="icon" type="image/svg+xml" href="https://upload.wikimedia.org/wikipedia/commons/1/17/2026_FIFA_World_Cup_emblem.svg">
+<link rel="shortcut icon" type="image/svg+xml" href="https://upload.wikimedia.org/wikipedia/commons/1/17/2026_FIFA_World_Cup_emblem.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -580,13 +582,17 @@ function hasCompleteTop3(t){return !!(t&&t.first&&t.second&&t.third);}
 function hasUniqueTop3(t){return hasCompleteTop3(t)&&new Set([t.first,t.second,t.third]).size===3;}
 
 /* ---------------- Scoring ---------------- */
+function effectivePick(pick){
+  return pick&&pick.h!=null?pick:{h:0,a:0,defaulted:true};
+}
 function scorePick(pick,m){
-  if(m.status!=="finished"||!pick||pick.h==null)return{pts:0,kind:"none"};
-  const ph=+pick.h,pa=+pick.a,fh=m.homeScore,fa=m.awayScore;
-  if(ph===fh&&pa===fa)return{pts:CFG.scoring.exactScore,kind:"hit"};
+  if(m.status!=="finished"||m.homeScore==null||m.awayScore==null)return{pts:0,kind:"none"};
+  const p=effectivePick(pick);
+  const ph=+p.h,pa=+p.a,fh=m.homeScore,fa=m.awayScore;
+  if(ph===fh&&pa===fa)return{pts:CFG.scoring.exactScore,kind:"hit",defaulted:!!p.defaulted};
   let pts=0;if(Math.sign(ph-pa)===Math.sign(fh-fa))pts+=CFG.scoring.correctOutcome;
   if(ph===fh)pts+=CFG.scoring.correctGoalsBonus;if(pa===fa)pts+=CFG.scoring.correctGoalsBonus;
-  return{pts,kind:pts>0?"part":"miss"};
+  return{pts,kind:pts>0?"part":"miss",defaulted:!!p.defaulted};
 }
 function scoreTop3(top3){
   const a=Store.top3Result();
@@ -602,7 +608,11 @@ function scoreTop3(top3){
 }
 function totalFor(picks,top3){
   let scorePts=0,played=0;
-  MATCHES.forEach(mm=>{const m=eff(mm);if(m.status==="finished"&&picks[m.id]&&picks[m.id].h!=null){scorePts+=scorePick(picks[m.id],m).pts;played++;}});
+  MATCHES.forEach(mm=>{
+    const m=eff(mm),pick=picks[m.id];
+    if(m.status==="finished"&&m.homeScore!=null&&m.awayScore!=null){scorePts+=scorePick(pick,m).pts;}
+    if(pick&&pick.h!=null)played++;
+  });
   const t3=scoreTop3(top3);
   return{total:scorePts+t3.pts,played,scorePts,top3Pts:t3.pts,top3Bonus:t3.bonus};
 }
@@ -1092,13 +1102,13 @@ function renderCard(m){
 
   const pred=el("div","pred");
   if(m.status==="finished"){
-    const sc=scorePick(pick,m);const line=el("div","result-line");
-    const yp=el("div","yourpick");yp.innerHTML=pick&&pick.h!=null?`Your pick: <b>${pick.h}-${pick.a}</b>`:`<span style="color:var(--faint)">No pick made</span>`;
+    const sc=scorePick(pick,m),shown=effectivePick(pick);const line=el("div","result-line");
+    const yp=el("div","yourpick");yp.innerHTML=pick&&pick.h!=null?`Your pick: <b>${pick.h}-${pick.a}</b>`:`Default pick: <b>0-0</b>`;
     const b=el("span","pts-badge "+sc.kind);b.textContent=sc.kind==="none"?"—":sc.kind==="hit"?"Exact! +"+sc.pts:sc.pts>0?"+"+sc.pts+" pts":"0 pts";
     line.appendChild(yp);line.appendChild(b);pred.appendChild(line);
   }else if(locked){
     const note=el("div","locked-note");
-    note.innerHTML=pick&&pick.h!=null?`<span class="status locked"><span class="dot"></span></span> Picks closed · your pick <b>${pick.h}-${pick.a}</b>`:`<span class="status locked"><span class="dot"></span></span> Picks closed — no pick made`;
+    note.innerHTML=pick&&pick.h!=null?`<span class="status locked"><span class="dot"></span></span> Picks closed · your pick <b>${pick.h}-${pick.a}</b>`:`<span class="status locked"><span class="dot"></span></span> Picks closed · default pick <b>0-0</b>`;
     pred.appendChild(note);
   }else{
     const label=el("div","pred-label");label.textContent="Your scoreline prediction";pred.appendChild(label);
