@@ -17,7 +17,20 @@ window.CONFIG = {
   scoring: {
     exactScore: 5,       // predicted the exact final score
     correctOutcome: 3,   // right winner / draw, wrong score
-    correctGoalsBonus: 1 // +bonus per team whose goal count you nailed
+    correctGoalsBonus: 1,// +bonus per team whose goal count you nailed
+
+    // --- Streak bonus ------------------------------------------------------
+    // Consecutive correct OUTCOMES (in kickoff order) earn an escalating bonus
+    // once the run reaches streakMin. Each match in the run from streakMin
+    // onward adds streakBonus points. Set streakBonus:0 to disable.
+    streakMin: 3,
+    streakBonus: 2,
+
+    // --- Joker / double-down ----------------------------------------------
+    // Players may pick ONE match per day as their Joker before it locks.
+    // That match's points are multiplied by jokerMultiplier.
+    jokerEnabled: true,
+    jokerMultiplier: 2
   },
 
   // --- Top 3 Winners Prediction -------------------------------------------
