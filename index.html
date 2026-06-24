@@ -544,7 +544,13 @@ const isLocked=m=>liveState(m)!=="upcoming"||now()>=lockAt(m);
 function outcome(m){if(m.homeScore==null||m.awayScore==null)return null;if(m.homeScore>m.awayScore)return"home";if(m.awayScore>m.homeScore)return"away";return"draw";}
 
 function fmtCountdown(ms){if(ms<=0)return"00:00:00";const s=Math.floor(ms/1000),d=Math.floor(s/86400),h=Math.floor((s%86400)/3600),mi=Math.floor((s%3600)/60),se=s%60,p=n=>String(n).padStart(2,"0");return(d>0?d+"d ":"")+p(h)+":"+p(mi)+":"+p(se);}
-function fmtKO(m){return new Date(m.kickoff).toLocaleString(undefined,{weekday:"short",hour:"2-digit",minute:"2-digit"});}
+const APP_TIME_ZONE="Africa/Cairo";
+function dayKeyInAppTime(t){
+  const parts=new Intl.DateTimeFormat("en-CA",{timeZone:APP_TIME_ZONE,year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(new Date(t));
+  const vals={};parts.forEach(x=>{vals[x.type]=x.value;});
+  return vals.year+"-"+vals.month+"-"+vals.day;
+}
+function fmtKO(m){return new Date(m.kickoff).toLocaleString(undefined,{weekday:"short",hour:"2-digit",minute:"2-digit",timeZone:APP_TIME_ZONE});}
 function liveBadgeText(m){
   if(m.liveText)return m.liveText;
   if(!m.kickoff)return "";
@@ -796,11 +802,11 @@ function logout(){ME=null;SESSION="";localStorage.removeItem("egec_session");isA
 
 /* ---- App shell ---- */
 const TABS=[{id:"today",label:"Today"},{id:"upcoming",label:"Upcoming"},{id:"finished",label:"Finished"},{id:"mine",label:"My Picks"},{id:"top3",label:"Top 3"},{id:"players",label:"Players"},{id:"board",label:"Live Leaderboard"}];
-function startToday(){const d=new Date();d.setHours(0,0,0,0);return d.getTime();}
-function endToday(){const d=new Date();d.setHours(23,59,59,999);return d.getTime();}
+function todayKey(){return dayKeyInAppTime(now());}
+function matchDayKey(m){return dayKeyInAppTime(ko(m));}
 function listFor(tab){
   const arr=MATCHES.map(eff).sort((a,b)=>ko(a)-ko(b));
-  if(tab==="today")return arr.filter(m=>liveState(m)==="live"||(ko(m)>=startToday()&&ko(m)<=endToday()));
+  if(tab==="today"){const tk=todayKey();return arr.filter(m=>liveState(m)==="live"||matchDayKey(m)===tk);}
   if(tab==="upcoming")return arr.filter(m=>liveState(m)!=="finished");
   if(tab==="finished")return arr.filter(m=>m.status==="finished").reverse();
   return arr;
