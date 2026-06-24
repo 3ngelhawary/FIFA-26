@@ -431,21 +431,12 @@
     .member-modal{padding:10px}.member-card{max-height:92vh;border-radius:18px}.member-head{padding:13px}.member-title h3{font-size:21px}.member-summary{grid-template-columns:repeat(2,1fr);padding:10px 13px}.member-body{padding:11px 13px 14px}.history-row{grid-template-columns:1fr auto;gap:7px}.history-result{font-size:13px}.history-pick,.history-pts{text-align:left}.history-pts{text-align:right}.history-match{grid-column:1/-1}.history-teams{white-space:normal}
   }
   @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
-  /* ===== New features: joker, badges, help, projection ===== */
+  /* ===== Features: badges, help, projection, nudge ===== */
   .me-open{background:none;border:0;color:inherit;font:inherit;cursor:pointer;display:flex;align-items:center;gap:8px;padding:0;text-align:left}
   .me-open:hover .pts{filter:brightness(1.15)}
 
   .banner.nudge{border-color:rgba(0,229,255,.35);background:linear-gradient(180deg,rgba(0,229,255,.10),rgba(0,229,255,.03))}
   .banner.nudge .bdot{background:var(--cyan)}
-
-  .joker-row{display:flex;align-items:center;gap:10px;margin-top:9px;flex-wrap:wrap}
-  .joker-btn{appearance:none;cursor:pointer;border:1px solid var(--line-2);background:rgba(255,255,255,.04);
-    color:var(--ink);font-weight:700;font-size:13px;padding:7px 12px;border-radius:999px;transition:.15s}
-  .joker-btn:hover{border-color:var(--purple)}
-  .joker-btn.on{background:linear-gradient(90deg,var(--magenta),var(--purple));border-color:transparent;color:#fff;box-shadow:0 0 14px rgba(177,78,255,.5)}
-  .joker-note{font-size:11.5px;color:var(--muted)}
-  .joker-tag{display:inline-block;margin-left:6px;font-size:11px;font-weight:800;color:#fff;
-    background:linear-gradient(90deg,var(--magenta),var(--purple));padding:2px 8px;border-radius:999px;vertical-align:middle}
 
   .board-toggle{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:4px 0 12px}
   .bt-btn{appearance:none;cursor:pointer;border:1px solid var(--line-2);background:rgba(255,255,255,.04);
@@ -510,7 +501,7 @@ const ISO = {
 const EMBEDDED={"matches":[{"id":"g20-ned-swe","group":"F","home":"Netherlands","away":"Sweden","homeFlag":"🇳🇱","awayFlag":"🇸🇪","kickoff":"2026-06-20T16:00:00Z","venue":"Houston","status":"finished","homeScore":5,"awayScore":1},{"id":"g20-ger-civ","group":"E","home":"Germany","away":"Ivory Coast","homeFlag":"🇩🇪","awayFlag":"🇨🇮","kickoff":"2026-06-20T20:00:00Z","venue":"MetLife","status":"finished","homeScore":2,"awayScore":1},{"id":"g20-ecu-cuw","group":"E","home":"Ecuador","away":"Curaçao","homeFlag":"🇪🇨","awayFlag":"🇨🇼","kickoff":"2026-06-20T23:00:00Z","venue":"Philadelphia","status":"finished","homeScore":0,"awayScore":0},{"id":"g21-tun-jpn","group":"F","home":"Tunisia","away":"Japan","homeFlag":"🇹🇳","awayFlag":"🇯🇵","kickoff":"2026-06-21T17:00:00Z","venue":"Kansas City","status":"finished","homeScore":0,"awayScore":4},{"id":"g21-esp-ksa","group":"H","home":"Spain","away":"Saudi Arabia","homeFlag":"🇪🇸","awayFlag":"🇸🇦","kickoff":"2026-06-21T19:00:00Z","venue":"Atlanta","status":"finished","homeScore":4,"awayScore":0},{"id":"g21-bel-irn","group":"G","home":"Belgium","away":"IR Iran","homeFlag":"🇧🇪","awayFlag":"🇮🇷","kickoff":"2026-06-21T21:00:00Z","venue":"Los Angeles","status":"finished","homeScore":0,"awayScore":0},{"id":"g21-uru-cpv","group":"H","home":"Uruguay","away":"Cabo Verde","homeFlag":"🇺🇾","awayFlag":"🇨🇻","kickoff":"2026-06-21T23:00:00Z","venue":"Miami","status":"finished","homeScore":2,"awayScore":2},{"id":"g21-egy-nzl","group":"G","home":"Egypt","away":"New Zealand","homeFlag":"🇪🇬","awayFlag":"🇳🇿","kickoff":"2026-06-22T01:00:00Z","venue":"Vancouver","status":"finished","homeScore":3,"awayScore":1},{"id":"g22-arg-aut","group":"J","home":"Argentina","away":"Austria","homeFlag":"🇦🇷","awayFlag":"🇦🇹","kickoff":"2026-06-22T17:00:00Z","venue":"Arlington","status":"finished","homeScore":2,"awayScore":0},{"id":"g22-fra-irq","group":"I","home":"France","away":"Iraq","homeFlag":"🇫🇷","awayFlag":"🇮🇶","kickoff":"2026-06-22T21:00:00Z","venue":"Philadelphia","status":"finished","homeScore":3,"awayScore":0},{"id":"g22-nor-sen","group":"I","home":"Norway","away":"Senegal","homeFlag":"🇳🇴","awayFlag":"🇸🇳","kickoff":"2026-06-23T00:00:00Z","venue":"New York/NJ","status":"finished","homeScore":3,"awayScore":2},{"id":"g22-jor-alg","group":"J","home":"Jordan","away":"Algeria","homeFlag":"🇯🇴","awayFlag":"🇩🇿","kickoff":"2026-06-23T03:00:00Z","venue":"SF Bay Area","status":"finished","homeScore":1,"awayScore":2},{"id":"g23-por-uzb","group":"K","home":"Portugal","away":"Uzbekistan","homeFlag":"🇵🇹","awayFlag":"🇺🇿","kickoff":"2026-06-23T17:00:00Z","venue":"Houston","status":"finished","homeScore":5,"awayScore":0},{"id":"g23-eng-gha","group":"L","home":"England","away":"Ghana","homeFlag":"🏴","awayFlag":"🇬🇭","kickoff":"2026-06-23T20:00:00Z","venue":"Boston","status":"finished","homeScore":0,"awayScore":0},{"id":"g23-pan-cro","group":"L","home":"Panama","away":"Croatia","homeFlag":"🇵🇦","awayFlag":"🇭🇷","kickoff":"2026-06-23T23:00:00Z","venue":"Toronto","status":"finished","homeScore":0,"awayScore":1},{"id":"g23-col-cod","group":"K","home":"Colombia","away":"Congo DR","homeFlag":"🇨🇴","awayFlag":"🇨🇩","kickoff":"2026-06-24T02:00:00Z","venue":"Guadalajara Stadium","status":"finished","homeScore":1,"awayScore":0},{"id":"g24-bih-qat","group":"B","home":"Bosnia and Herzegovina","away":"Qatar","homeFlag":"🇧🇦","awayFlag":"🇶🇦","kickoff":"2026-06-24T19:00:00Z","venue":"Lumen Field, Seattle","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g24-sui-can","group":"B","home":"Switzerland","away":"Canada","homeFlag":"🇨🇭","awayFlag":"🇨🇦","kickoff":"2026-06-24T19:00:00Z","venue":"BC Place, Vancouver","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g24-mar-hai","group":"C","home":"Morocco","away":"Haiti","homeFlag":"🇲🇦","awayFlag":"🇭🇹","kickoff":"2026-06-24T22:00:00Z","venue":"MetLife Stadium","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g24-sco-bra","group":"C","home":"Scotland","away":"Brazil","homeFlag":"🏴","awayFlag":"🇧🇷","kickoff":"2026-06-24T22:00:00Z","venue":"Hard Rock Stadium, Miami","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g24-cze-mex","group":"A","home":"Czechia","away":"Mexico","homeFlag":"🇨🇿","awayFlag":"🇲🇽","kickoff":"2026-06-25T01:00:00Z","venue":"Dallas Stadium","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g24-rsa-kor","group":"A","home":"South Africa","away":"South Korea","homeFlag":"🇿🇦","awayFlag":"🇰🇷","kickoff":"2026-06-25T01:00:00Z","venue":"Atlanta Stadium","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g25-cuw-civ","group":"E","home":"Curaçao","away":"Ivory Coast","homeFlag":"🇨🇼","awayFlag":"🇨🇮","kickoff":"2026-06-25T20:00:00Z","venue":"Boston Stadium","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g25-ecu-ger","group":"E","home":"Ecuador","away":"Germany","homeFlag":"🇪🇨","awayFlag":"🇩🇪","kickoff":"2026-06-25T20:00:00Z","venue":"Toronto Stadium","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g25-jpn-swe","group":"F","home":"Japan","away":"Sweden","homeFlag":"🇯🇵","awayFlag":"🇸🇪","kickoff":"2026-06-25T23:00:00Z","venue":"Dallas Stadium","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g25-tun-ned","group":"F","home":"Tunisia","away":"Netherlands","homeFlag":"🇹🇳","awayFlag":"🇳🇱","kickoff":"2026-06-25T23:00:00Z","venue":"Kansas City Stadium","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g25-par-aus","group":"D","home":"Paraguay","away":"Australia","homeFlag":"🇵🇾","awayFlag":"🇦🇺","kickoff":"2026-06-26T02:00:00Z","venue":"Houston Stadium","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g25-tur-usa","group":"D","home":"Turkey","away":"United States","homeFlag":"🇹🇷","awayFlag":"🇺🇸","kickoff":"2026-06-26T02:00:00Z","venue":"Los Angeles Stadium","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g26-nor-fra","group":"I","home":"Norway","away":"France","homeFlag":"🇳🇴","awayFlag":"🇫🇷","kickoff":"2026-06-26T19:00:00Z","venue":"Seattle Stadium","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g26-sen-irq","group":"I","home":"Senegal","away":"Iraq","homeFlag":"🇸🇳","awayFlag":"🇮🇶","kickoff":"2026-06-26T19:00:00Z","venue":"Philadelphia Stadium","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g26-cpv-ksa","group":"H","home":"Cabo Verde","away":"Saudi Arabia","homeFlag":"🇨🇻","awayFlag":"🇸🇦","kickoff":"2026-06-27T00:00:00Z","venue":"Miami Stadium","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g26-uru-esp","group":"H","home":"Uruguay","away":"Spain","homeFlag":"🇺🇾","awayFlag":"🇪🇸","kickoff":"2026-06-27T00:00:00Z","venue":"Kansas City Stadium","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g26-egy-irn","group":"G","home":"Egypt","away":"IR Iran","homeFlag":"🇪🇬","awayFlag":"🇮🇷","kickoff":"2026-06-27T03:00:00Z","venue":"Vancouver","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g26-nzl-bel","group":"G","home":"New Zealand","away":"Belgium","homeFlag":"🇳🇿","awayFlag":"🇧🇪","kickoff":"2026-06-27T03:00:00Z","venue":"Los Angeles","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g27-cro-gha","group":"L","home":"Croatia","away":"Ghana","homeFlag":"🇭🇷","awayFlag":"🇬🇭","kickoff":"2026-06-27T21:00:00Z","venue":"Philadelphia Stadium","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g27-pan-eng","group":"L","home":"Panama","away":"England","homeFlag":"🇵🇦","awayFlag":"🏴","kickoff":"2026-06-27T21:00:00Z","venue":"Kansas City Stadium","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g27-cod-uzb","group":"K","home":"Congo DR","away":"Uzbekistan","homeFlag":"🇨🇩","awayFlag":"🇺🇿","kickoff":"2026-06-27T23:30:00Z","venue":"Dallas Stadium","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g27-col-por","group":"K","home":"Colombia","away":"Portugal","homeFlag":"🇨🇴","awayFlag":"🇵🇹","kickoff":"2026-06-27T23:30:00Z","venue":"Miami Stadium","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g28-alg-aut","group":"J","home":"Algeria","away":"Austria","homeFlag":"🇩🇿","awayFlag":"🇦🇹","kickoff":"2026-06-28T02:00:00Z","venue":"Vancouver Stadium","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g28-jor-arg","group":"J","home":"Jordan","away":"Argentina","homeFlag":"🇯🇴","awayFlag":"🇦🇷","kickoff":"2026-06-28T02:00:00Z","venue":"New York/New Jersey Stadium","status":"scheduled","homeScore":null,"awayScore":null}]};
 
 const DEFAULTS={orgName:"EGEC",seasonLabel:"World Cup 2026",lockOffsetMinutes:60,
-  scoring:{exactScore:5,correctOutcome:3,correctGoalsBonus:1,streakMin:3,streakBonus:2,jokerEnabled:true,jokerMultiplier:2},adminCode:"EGEC2026",
+  scoring:{exactScore:5,correctOutcome:3,correctGoalsBonus:1},adminCode:"EGEC2026",
   top3:{openAt:"2026-06-28T00:00:00+03:00",closeAt:"2026-07-01T00:00:00+03:00",firstPts:100,secondPts:75,thirdPts:50,exactOrderBonus:100},
   liveScores:{apiToken:"",competitionId:"WC"},storage:{mode:"local",firebase:{}},refreshMs:30000};
 const CFG=Object.assign({},DEFAULTS,window.CONFIG||{});
@@ -570,26 +561,7 @@ const Store={
 
   async savePick(code,name,matchId,h,a){
     const cur=(this.cache.preds[code]&&this.cache.preds[code].picks)||{};
-    cur[matchId]={h,a,joker:!!(cur[matchId]&&cur[matchId].joker)};
-    await this.fs.setDoc(this.fs.doc(this.db,"predictions",code),{name,picks:cur},{merge:true});
-  },
-
-  async setJoker(code,name,matchId,on){
-    const all=Object.assign({},(this.cache.preds[code]&&this.cache.preds[code].picks)||{});
-    const cur={};
-    Object.keys(all).forEach(k=>{cur[k]=Object.assign({},all[k]);});
-    if(on){
-      const dayKey=dayKeyInAppTime(ko(rawMatchById(matchId)||{kickoff:Date.now()}));
-      // one joker per day: clear any existing joker on the same calendar day
-      Object.keys(cur).forEach(k=>{
-        const rm=rawMatchById(k);
-        if(rm&&cur[k].joker&&dayKeyInAppTime(ko(rm))===dayKey)cur[k].joker=false;
-      });
-      if(!cur[matchId])cur[matchId]={h:0,a:0};
-      cur[matchId].joker=true;
-    }else if(cur[matchId]){
-      cur[matchId].joker=false;
-    }
+    cur[matchId]={h,a};
     await this.fs.setDoc(this.fs.doc(this.db,"predictions",code),{name,picks:cur},{merge:true});
   },
 
@@ -798,32 +770,27 @@ function scorable(m,projected){
   return false;
 }
 
-/* Master scorer: match points (+joker +streak) and Top 3, plus stats for
+/* Master scorer: match points and Top 3, plus stats for
    badges / profile. opts.projected counts in-play matches as if final. */
 function computeScore(picks,top3,opts){
   opts=opts||{};const projected=!!opts.projected;
-  const sc=CFG.scoring;
   const list=MATCHES.map(m=>eff(m)).filter(m=>scorable(m,projected)).sort((a,b)=>ko(a)-ko(b));
 
-  let scorePts=0,jokerExtra=0,exacts=0,correctOutcomes=0,confirmedScored=0,projectedScored=0;
-  let run=0,longestStreak=0,currentStreak=0,jokerHit=false;
+  let scorePts=0,exacts=0,correctOutcomes=0,confirmedScored=0,projectedScored=0;
+  let run=0,longestStreak=0,currentStreak=0;
   const perDay={}; // dayKey -> {total, correct}
 
   list.forEach(m=>{
     const pick=picks[m.id];
-    const base=scorePick(pick,m).pts;
-    const isJoker=!!(pick&&pick.joker)&&sc.jokerEnabled;
-    const mult=isJoker?(sc.jokerMultiplier||2):1;
-    const earned=base*mult;
+    const earned=scorePick(pick,m).pts;
     scorePts+=earned;
-    if(isJoker){jokerExtra+=earned-base;if(base>0)jokerHit=true;}
     if(m.status!=="finished")projectedScored+=earned;else confirmedScored+=earned;
 
     const correct=pickOutcome(pick)===outcome(m);
     if(scorePick(pick,m).kind==="hit")exacts++;
     if(correct)correctOutcomes++;
 
-    // streak (only on confirmed-final matches to keep it stable)
+    // streak tracking (confirmed-final matches only) — used for the badge & display
     if(m.status==="finished"){
       if(correct){run++;currentStreak=run;if(run>longestStreak)longestStreak=run;}
       else{run=0;currentStreak=0;}
@@ -837,16 +804,6 @@ function computeScore(picks,top3,opts){
     }
   });
 
-  // streak bonus: each match in a run from streakMin onward adds streakBonus
-  let streakPts=0;
-  if(sc.streakBonus>0){
-    let r=0;
-    MATCHES.map(m=>eff(m)).filter(m=>m.status==="finished"&&m.homeScore!=null).sort((a,b)=>ko(a)-ko(b)).forEach(m=>{
-      const correct=pickOutcome(picks[m.id])===outcome(m);
-      if(correct){r++;if(r>=sc.streakMin)streakPts+=sc.streakBonus;}else r=0;
-    });
-  }
-
   const t3=scoreTop3(top3);
   const played=Object.values(picks).filter(x=>x&&x.h!=null).length;
   const perfectDay=Object.values(perDay).some(d=>d.total>=2&&d.correct===d.total);
@@ -856,10 +813,10 @@ function computeScore(picks,top3,opts){
   const manualOnLockable=lockable.filter(m=>picks[m.id]&&picks[m.id].h!=null).length;
   const marathon=lockable.length>0&&manualOnLockable===lockable.length;
 
-  const total=scorePts+streakPts+t3.pts;
+  const total=scorePts+t3.pts;
   return{
-    total,scorePts,streakPts,jokerExtra,top3Pts:t3.pts,top3Bonus:t3.bonus,
-    played,exacts,correctOutcomes,longestStreak,currentStreak,jokerHit,
+    total,scorePts,top3Pts:t3.pts,top3Bonus:t3.bonus,
+    played,exacts,correctOutcomes,longestStreak,currentStreak,
     perfectDay,marathon,confirmedScored,projectedScored,scoredCount:list.length
   };
 }
@@ -871,7 +828,6 @@ const BADGES=[
   {id:"sniper",icon:"🔭",en:["Sniper Elite","Nail 10 exact scorelines."],ar:["قنّاص محترف","أصبت ١٠ نتائج بالضبط."],test:s=>s.exacts>=10},
   {id:"hot_streak",icon:"🔥",en:["On Fire","5 correct results in a row."],ar:["مشتعل","٥ نتائج صحيحة متتالية."],test:s=>s.longestStreak>=5},
   {id:"perfect_day",icon:"🌟",en:["Perfect Day","All your picks on one matchday were right."],ar:["يوم مثالي","كل توقعاتك في يوم واحد كانت صحيحة."],test:s=>s.perfectDay},
-  {id:"joker_master",icon:"🃏",en:["Joker Master","Landed points on a Joker match."],ar:["سيّد الجوكر","ربحت نقاطاً في مباراة الجوكر."],test:s=>s.jokerHit},
   {id:"oracle",icon:"🔮",en:["Oracle","Scored on the Top 3 prediction."],ar:["العرّاف","سجّلت نقاطاً في توقع المراكز الثلاثة."],test:s=>s.top3Pts>0},
   {id:"clean_sweep",icon:"👑",en:["Clean Sweep","Exact Top 3 order — full bonus."],ar:["كنس كامل","ترتيب المراكز الثلاثة بالضبط — مكافأة كاملة."],test:s=>s.top3Bonus},
   {id:"centurion",icon:"💯",en:["Centurion","Reach 100 total points."],ar:["المئوي","الوصول إلى ١٠٠ نقطة."],test:s=>s.total>=100},
@@ -909,10 +865,8 @@ const HELP={
       ["🔐 Register & login code","Sign up with your full name and you'll get a 6-character code. That code is your login on any device — screenshot it. Lost it? Your organizer can find it in the Players list."],
       ["⚽ Predict scorelines","On each match card, set the score you expect with the + / – steppers. You can edit freely until the pick locks. Picks lock "+CFG.lockOffsetMinutes+" minutes before kickoff. Don't predict? A default 0-0 is applied so you still play."],
       ["🏅 Scoring","Exact score = "+CFG.scoring.exactScore+" points. Correct result (right winner or draw) = "+CFG.scoring.correctOutcome+" points. Plus +"+CFG.scoring.correctGoalsBonus+" for each team whose goal count you got exactly right."],
-      ["🔥 Streak bonus","Get the result right in "+CFG.scoring.streakMin+" or more matches in a row (in kickoff order) and every match in the streak adds +"+CFG.scoring.streakBonus+" bonus points. Keep the run alive!"],
-      ["🃏 Joker / double-down","Pick ONE match per day as your Joker and its points are multiplied by "+(CFG.scoring.jokerMultiplier||2)+"×. Set it before the match locks. Choosing a Joker on a new match moves it off the old one for that day. Use it on a match you feel sure about."],
       ["🏆 Top 3 winners","During the Top 3 window, predict the final 1st, 2nd and 3rd places. Worth "+CFG.top3.firstPts+" / "+CFG.top3.secondPts+" / "+CFG.top3.thirdPts+" points, with a +"+CFG.top3.exactOrderBonus+" bonus if you get the exact order."],
-      ["🎖️ Achievements","Unlock badges as you play — first points, exact-score sniper, hot streaks, perfect matchdays, Joker wins, Top 3 mastery and more. See them on your profile."],
+      ["🎖️ Achievements","Unlock badges as you play — first points, exact-score sniper, hot streaks, perfect matchdays, Top 3 mastery and more. See them on your profile."],
       ["👤 Player profile","Tap any name on the leaderboard (or your points up top) to open a profile: total points, accuracy, current and best streak, badges and a full prediction history."],
       ["📊 Live leaderboard","Ranks everyone by points in real time. Turn on “Include live” to see projected points from matches in progress — the board reshuffles as goals go in."],
       ["🗺️ World Cup tree","The knockout bracket. As real results come in, winners flow through the tree automatically."],
@@ -929,10 +883,8 @@ const HELP={
       ["🔐 التسجيل وكود الدخول","سجّل باسمك الكامل وستحصل على كود من ٦ أحرف. هذا الكود هو وسيلة دخولك على أي جهاز — التقط له صورة. فقدته؟ يمكن للمنظّم إيجاده في قائمة اللاعبين."],
       ["⚽ توقع النتائج","في كل بطاقة مباراة، اضبط النتيجة المتوقعة بأزرار + / –. يمكنك التعديل بحرية حتى يُغلق التوقع. تُغلق التوقعات قبل "+CFG.lockOffsetMinutes+" دقيقة من انطلاق المباراة. لم تتوقع؟ تُطبَّق نتيجة افتراضية ٠-٠ لتبقى مشاركاً."],
       ["🏅 النقاط","النتيجة المضبوطة = "+CFG.scoring.exactScore+" نقاط. النتيجة الصحيحة (الفائز الصحيح أو التعادل) = "+CFG.scoring.correctOutcome+" نقاط. بالإضافة إلى +"+CFG.scoring.correctGoalsBonus+" لكل فريق أصبت عدد أهدافه بالضبط."],
-      ["🔥 مكافأة السلسلة","أصب النتيجة الصحيحة في "+CFG.scoring.streakMin+" مباريات متتالية أو أكثر (بترتيب الانطلاق) وكل مباراة في السلسلة تضيف +"+CFG.scoring.streakBonus+" نقطة إضافية. حافظ على السلسلة!"],
-      ["🃏 الجوكر / المضاعفة","اختر مباراة واحدة في اليوم كجوكر لتُضاعَف نقاطها "+(CFG.scoring.jokerMultiplier||2)+"×. حدّدها قبل إغلاق المباراة. اختيار الجوكر لمباراة جديدة ينقله من القديمة في نفس اليوم. استخدمه في مباراة أنت واثق منها."],
       ["🏆 المراكز الثلاثة","خلال فترة التوقع، توقّع المركز الأول والثاني والثالث النهائي. القيمة "+CFG.top3.firstPts+" / "+CFG.top3.secondPts+" / "+CFG.top3.thirdPts+" نقطة، مع مكافأة +"+CFG.top3.exactOrderBonus+" إذا أصبت الترتيب بالضبط."],
-      ["🎖️ الإنجازات","افتح أوسمة أثناء اللعب — أول النقاط، قنّاص النتائج المضبوطة، السلاسل المشتعلة، الأيام المثالية، فوز الجوكر، إتقان المراكز الثلاثة والمزيد. تظهر في ملفك الشخصي."],
+      ["🎖️ الإنجازات","افتح أوسمة أثناء اللعب — أول النقاط، قنّاص النتائج المضبوطة، السلاسل المشتعلة، الأيام المثالية، إتقان المراكز الثلاثة والمزيد. تظهر في ملفك الشخصي."],
       ["👤 الملف الشخصي","اضغط على أي اسم في لوحة المتصدرين (أو على نقاطك بالأعلى) لفتح الملف: مجموع النقاط، الدقة، السلسلة الحالية والأفضل، الأوسمة وسجل التوقعات الكامل."],
       ["📊 لوحة المتصدرين المباشرة","ترتّب الجميع بالنقاط لحظياً. فعّل «تضمين المباشر» لرؤية النقاط المتوقعة من المباريات الجارية — تتغيّر اللوحة مع كل هدف."],
       ["🗺️ شجرة كأس العالم","شجرة الأدوار الإقصائية. مع ورود النتائج الحقيقية، ينتقل الفائزون عبر الشجرة تلقائياً."],
@@ -1463,20 +1415,16 @@ function renderCard(m){
   const pred=el("div","pred");
   if(m.status==="finished"){
     const sc=scorePick(pick,m),shown=effectivePick(pick);const line=el("div","result-line");
-    const isJoker=!!(pick&&pick.joker)&&CFG.scoring.jokerEnabled;
-    const mult=isJoker?(CFG.scoring.jokerMultiplier||2):1;
-    const shownPts=sc.pts*mult;
-    const yp=el("div","yourpick");yp.innerHTML=(pick&&pick.h!=null?`Your pick: <b>${pick.h}-${pick.a}</b>`:`Default pick: <b>0-0</b>`)+(isJoker?` <span class="joker-tag">🃏 ×${mult}</span>`:"");
-    const b=el("span","pts-badge "+sc.kind);b.textContent=sc.kind==="none"?"—":sc.kind==="hit"?"Exact! +"+shownPts:shownPts>0?"+"+shownPts+" pts":"0 pts";
+    const yp=el("div","yourpick");yp.innerHTML=pick&&pick.h!=null?`Your pick: <b>${pick.h}-${pick.a}</b>`:`Default pick: <b>0-0</b>`;
+    const b=el("span","pts-badge "+sc.kind);b.textContent=sc.kind==="none"?"—":sc.kind==="hit"?"Exact! +"+sc.pts:sc.pts>0?"+"+sc.pts+" pts":"0 pts";
     line.appendChild(yp);line.appendChild(b);pred.appendChild(line);
   }else if(isKnockout(m)&&hasPlaceholderTeams(m)){
     const note=el("div","locked-note");
     note.innerHTML=`<span class="status pending"><span class="dot"></span></span> Teams not confirmed yet · prediction opens after bracket sync`;
     pred.appendChild(note);
   }else if(locked){
-    const isJoker=!!(pick&&pick.joker)&&CFG.scoring.jokerEnabled;
     const note=el("div","locked-note");
-    note.innerHTML=(pick&&pick.h!=null?`<span class="status locked"><span class="dot"></span></span> Picks closed · your pick <b>${pick.h}-${pick.a}</b>`:`<span class="status locked"><span class="dot"></span></span> Picks closed · default pick <b>0-0</b>`)+(isJoker?` <span class="joker-tag">🃏 ×${CFG.scoring.jokerMultiplier||2}</span>`:"");
+    note.innerHTML=pick&&pick.h!=null?`<span class="status locked"><span class="dot"></span></span> Picks closed · your pick <b>${pick.h}-${pick.a}</b>`:`<span class="status locked"><span class="dot"></span></span> Picks closed · default pick <b>0-0</b>`;
     pred.appendChild(note);
   }else{
     const label=el("div","pred-label");label.textContent="Your scoreline prediction";pred.appendChild(label);
@@ -1487,26 +1435,6 @@ function renderCard(m){
     const lock=el("div","lock-row");
     lock.innerHTML=`Locks in <span class="lock-clock" data-countdown="${m.id}">--:--:--</span> <span class="saved" data-saved="${m.id}">Saved ✓</span>`;
     pred.appendChild(lock);
-    if(CFG.scoring.jokerEnabled){
-      const isJoker=!!(pick&&pick.joker);
-      const dayKey=dayKeyInAppTime(ko(m));
-      const myPicks=Store.myPicks(ME.code);
-      const other=Object.keys(myPicks).find(id=>{const rm=rawMatchById(id);return rm&&myPicks[id].joker&&id!==m.id&&dayKeyInAppTime(ko(rm))===dayKey;});
-      const jr=el("div","joker-row");
-      const jb=el("button","joker-btn"+(isJoker?" on":""));jb.type="button";
-      jb.innerHTML=`🃏 Joker ×${CFG.scoring.jokerMultiplier||2}${isJoker?" · ON":""}`;
-      jb.onclick=async()=>{
-        const cur=Store.myPicks(ME.code)[m.id];
-        if(!isJoker&&!(cur&&cur.h!=null)){toast("Set your scoreline first");return;}
-        await Store.setJoker(ME.code,ME.name,m.id,!isJoker);
-        toast(isJoker?"Joker removed":"Joker set ×"+(CFG.scoring.jokerMultiplier||2));renderApp();
-      };
-      jr.appendChild(jb);
-      const note=el("span","joker-note");
-      note.textContent=isJoker?"This match scores double.":other?"Today's Joker is on another match — tap to move it here.":"Double one match's points each day.";
-      jr.appendChild(note);
-      pred.appendChild(jr);
-    }
     const hint=el("div","hint");hint.textContent="🔒 Colleagues see your name now, but your score only after lock.";pred.appendChild(hint);
   }
   card.appendChild(pred);
@@ -1800,10 +1728,9 @@ function showMemberHistory(code){
   modal.onclick=e=>{if(e.target===modal)close();};
   const list=rows.length?rows.map(r=>{
     const m=r.m,result=r.finished?`${m.homeScore}-${m.awayScore}`:(isLocked(m)?"Locked":"Not locked");
-    const jokered=!!(picks[m.id]&&picks[m.id].joker);
-    const pts=r.pts==null?"–":String(r.pts*(jokered&&CFG.scoring.jokerEnabled?(CFG.scoring.jokerMultiplier||2):1));
+    const pts=r.pts==null?"–":String(r.pts);
     const ptsClass=r.pts==null?"history-pts none":"history-pts";
-    const tag=(r.manual?"Manual pick":"Default applied")+(jokered?" · 🃏 ×"+(CFG.scoring.jokerMultiplier||2):"");
+    const tag=r.manual?"Manual pick":"Default applied";
     return `<div class="history-row">
       <div class="history-match"><div class="history-teams">${esc(m.home)} vs ${esc(m.away)}</div><div class="history-meta">${esc(roundDisplay(m))} · ${fmtKO(m)} · ${tag}</div></div>
       <div class="${r.pickClass}">${esc(r.pickText)}</div>
@@ -1827,7 +1754,7 @@ function showMemberHistory(code){
     </div>
     <div class="member-summary">
       <div class="member-stat"><b>${stats.scorePts}</b><span>Match pts</span></div>
-      <div class="member-stat"><b>${stats.streakPts}</b><span>Streak pts</span></div>
+      <div class="member-stat"><b>${stats.correctOutcomes}</b><span>Results</span></div>
       <div class="member-stat"><b>${stats.top3Pts}</b><span>Top 3 pts</span></div>
       <div class="member-stat"><b>${stats.played}</b><span>Predicted</span></div>
     </div>
