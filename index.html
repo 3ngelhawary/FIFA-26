@@ -362,23 +362,33 @@
 
   /* World Cup Tree */
   .tree-note{margin:0 15px 14px;color:var(--muted);font-size:12.5px;line-height:1.55}
-  .tree-scroll{overflow-x:auto;padding:0 14px 16px;scrollbar-width:thin}
-  .tree-grid{display:grid;grid-template-columns:repeat(6,minmax(210px,1fr));gap:12px;min-width:1280px}
-  .tree-round{border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.022);padding:10px}
-  .tree-round-title{font-family:"Oswald";font-weight:700;color:var(--cyan);letter-spacing:.4px;margin:0 0 9px;font-size:15px;text-align:center}
-  .tree-match{border:1px solid var(--line);border-radius:12px;background:#080a14;margin-bottom:9px;overflow:hidden}
-  .tree-match:last-child{margin-bottom:0}
-  .tree-match-head{display:flex;justify-content:space-between;gap:8px;padding:7px 9px;border-bottom:1px solid var(--line);font-size:10.5px;color:var(--muted)}
-  .tree-match-head b{font-family:"Oswald";color:var(--ink);font-size:12px}
-  .tree-team{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:8px 9px;font-size:12.5px}
-  .tree-team+.tree-team{border-top:1px solid var(--line)}
-  .tree-team.win{background:rgba(43,255,136,.09);color:var(--win)}
-  .tree-team.placeholder{color:var(--faint)}
-  .tree-score{font-family:"Oswald";font-weight:700;font-size:15px;color:var(--ink)}
-  .tree-team.win .tree-score{color:var(--win)}
-  .tree-meta{font-size:11px;color:var(--muted);padding:0 9px 8px}
   .tree-admin{margin:0 15px 15px;border:1px solid rgba(255,230,0,.28);background:rgba(255,230,0,.06);border-radius:12px;padding:10px 12px;color:#ffe9a3;font-size:12px;line-height:1.5}
-  @media (max-width:560px){.tree-scroll{padding-left:10px;padding-right:10px}.tree-grid{min-width:1120px;gap:9px}.tree-round{padding:8px}}
+  .tree-scroll{overflow-x:auto;padding:0 13px 16px;scrollbar-width:thin}
+  .tree-board{min-width:1780px;min-height:780px;display:grid;grid-template-columns:250px 210px 190px 175px 230px 175px 190px 210px 250px;gap:11px;align-items:stretch;padding:15px;border:1px solid rgba(0,229,255,.15);border-radius:18px;background:radial-gradient(circle at center,rgba(255,46,151,.10),transparent 34%),linear-gradient(180deg,rgba(255,255,255,.025),rgba(255,255,255,.01))}
+  .tree-column{display:flex;flex-direction:column;min-height:745px;position:relative}
+  .tree-round-title{font-size:12px;text-align:center;color:var(--ink);letter-spacing:2px;text-transform:uppercase;font-weight:800;margin:0 0 10px;font-family:"Oswald"}
+  .tree-stack{flex:1;display:flex;flex-direction:column;justify-content:space-around;gap:8px}
+  .tree-column.r16 .tree-stack{padding:44px 0}
+  .tree-column.qf .tree-stack{padding:115px 0}
+  .tree-column.sf .tree-stack{padding:235px 0}
+  .tree-center{display:flex;flex-direction:column;justify-content:center;gap:13px;min-height:745px;text-align:center}
+  .tree-cup{border:1px solid rgba(255,230,0,.32);border-radius:18px;background:linear-gradient(160deg,rgba(255,230,0,.10),rgba(255,46,151,.08));padding:16px 12px;box-shadow:0 0 28px rgba(255,46,151,.10)}
+  .tree-cup-logo{width:54px;height:78px;margin:0 auto 8px}.tree-cup-logo img{width:100%;height:100%;object-fit:contain}
+  .tree-cup-label{font-size:10px;letter-spacing:2.4px;text-transform:uppercase;color:var(--muted);font-weight:800}.tree-cup-name{font-family:"Oswald";font-size:27px;line-height:1.05;color:var(--draw);margin-top:5px;text-transform:uppercase}.tree-cup-name.tbd{color:var(--muted)}
+  .tree-match{border:1px solid rgba(255,255,255,.09);border-radius:12px;background:linear-gradient(180deg,rgba(11,18,31,.96),rgba(7,9,18,.96));overflow:hidden;box-shadow:0 8px 22px rgba(0,0,0,.22);position:relative}
+  .tree-column.left .tree-match:not(.final)::after{content:"";position:absolute;right:-12px;top:50%;width:12px;border-top:2px solid rgba(255,46,151,.58)}
+  .tree-column.right .tree-match:not(.final)::before{content:"";position:absolute;left:-12px;top:50%;width:12px;border-top:2px solid rgba(255,46,151,.58)}
+  .tree-match-head{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:7px 9px;border-bottom:1px solid rgba(255,255,255,.08);font-size:10.5px;color:var(--muted)}
+  .tree-match-head b{font-family:"Oswald";color:var(--cyan);font-size:12.5px;letter-spacing:.5px}.tree-match-head span{white-space:nowrap}
+  .tree-team{display:grid;grid-template-columns:auto 1fr auto;gap:7px;align-items:center;padding:7px 9px;font-size:12.2px;line-height:1.2;text-transform:uppercase;letter-spacing:.2px}
+  .tree-team+.tree-team{border-top:1px solid rgba(255,255,255,.07)}
+  .tree-team.win{background:rgba(43,255,136,.10);color:var(--win)}
+  .tree-team.placeholder{color:var(--faint);text-transform:none;letter-spacing:0}
+  .tree-team .flag-emo{width:23px;text-align:center;font-size:17px}.tree-team-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.tree-slot{font-size:10px;color:var(--muted);font-weight:800}.tree-score{font-family:"Oswald";font-weight:700;font-size:15px;color:var(--ink)}
+  .tree-team.win .tree-score{color:var(--win)}
+  .tree-meta{font-size:10.5px;color:var(--muted);padding:0 9px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .tree-final-box{border-color:rgba(255,230,0,.32)}
+  @media (max-width:560px){.tree-scroll{padding-left:9px;padding-right:9px}.tree-board{min-width:1540px;grid-template-columns:220px 185px 170px 155px 200px 155px 170px 185px 220px;gap:8px;padding:10px}.tree-match-head{font-size:10px}.tree-team{font-size:11.3px;padding:7px}.tree-round-title{font-size:11px}}
 
   .foot{margin-top:24px;text-align:center;color:var(--faint);font-size:12px;line-height:1.7}
   .scoring-key{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:8px;color:var(--muted)}
@@ -552,10 +562,29 @@ function eff(m){
 }
 function rawMatchById(id){return MATCHES.find(x=>x.id===id)||null;}
 function isKnockout(m){return !!(m&&(m.round||m.group==="KO"));}
+const KO_LABELS={
+  "53452545":"R32-01","53452547":"R32-02","53452511":"R16-01",
+  "53452541":"R32-03","53452543":"R32-04","53452509":"R16-02",
+  "53452557":"R32-05","53452561":"R32-06","53452517":"R16-03",
+  "53452563":"R32-07","53452565":"R32-08","53452519":"R16-04",
+  "53452549":"R32-09","53452551":"R32-10","53452513":"R16-05",
+  "53452553":"R32-11","53452555":"R32-12","53452515":"R16-06",
+  "53452569":"R32-13","53452503":"R32-14","53452521":"R16-07",
+  "53452505":"R32-15","53452507":"R32-16","53452523":"R16-08",
+  "53452525":"QF-01","53452527":"QF-02","53452529":"QF-03","53452531":"QF-04",
+  "53452533":"SF-01","53452535":"SF-02","53452539":"3RD","53452537":"FINAL"
+};
+function friendlyMatchName(x){
+  const id=typeof x==="string"?x:(x&&(x.id||x.externalId));
+  return KO_LABELS[String(id)]||String(id||"");
+}
+function cleanTreeText(name){
+  return String(name||"").replace(/\b\d{6,}\b/g,id=>KO_LABELS[id]||id);
+}
 function isPlaceholderTeam(name){return /^(TBD|Winner of|Loser of|\d+(st|nd|rd|th) Group|[123]rd Group|[12]nd Group|[12]st Group)/i.test(String(name||""));}
 function hasPlaceholderTeams(m){return isPlaceholderTeam(m.home)||isPlaceholderTeam(m.away);}
 function roundDisplay(m){return isKnockout(m)?(m.round||"Knockout"):"Group "+m.group;}
-function shortMatchName(m){return m.externalId||m.id;}
+function shortMatchName(m){return friendlyMatchName(m);}
 function resultWinnerSide(m){
   if(!m||m.status!=="finished"||m.homeScore==null||m.awayScore==null)return "";
   if(m.homeScore>m.awayScore)return "home";
@@ -565,7 +594,7 @@ function resultWinnerSide(m){
 function resolvedParticipant(source,fallbackName,fallbackFlag,stack){
   if(!source)return{name:fallbackName,flag:fallbackFlag||"",placeholder:isPlaceholderTeam(fallbackName)};
   const src=resolvedMatch(source.matchId,stack);
-  if(!src)return{name:(source.type==="loser"?"Loser":"Winner")+" of "+source.matchId,flag:"",placeholder:true};
+  if(!src)return{name:(source.type==="loser"?"Loser":"Winner")+" of "+friendlyMatchName(source.matchId),flag:"",placeholder:true};
   const win=resultWinnerSide(src);
   if(!win)return{name:(source.type==="loser"?"Loser":"Winner")+" of "+shortMatchName(src),flag:"",placeholder:true};
   const side=source.type==="loser"?(win==="home"?"away":"home"):win;
@@ -1288,28 +1317,66 @@ async function removePick(m){
 function renderTree(){
   const panel=el("div","panel");
   const h=el("h2");
-  h.innerHTML=`<span>🌳 World Cup Tree</span><span class="meta">auto winner propagation</span>`;
+  h.innerHTML=`<span>🌳 World Cup Tree</span><span class="meta">professional bracket · auto propagation</span>`;
   panel.appendChild(h);
   const note=el("div","tree-note");
-  note.textContent="Knockout winners automatically move to the next location after a final score is saved. Semifinal losers also move to the 3rd Place Playoff.";
+  note.textContent="The tree now uses readable bracket labels such as R32-01, R16-01 and FINAL instead of technical API match IDs. Winners move automatically to their next bracket location after final scores are saved.";
   panel.appendChild(note);
-  if(isAdmin){const a=el("div","tree-admin");a.textContent="Organizer: save final scores in the Organizer tab. The tree recalculates immediately from the saved results.";panel.appendChild(a);}
-  const order=["Round of 32","Round of 16","Quarterfinal","Semifinal","3rd Place Playoff","Final"];
-  const labels={"Round of 32":"R32","Round of 16":"R16","Quarterfinal":"QF","Semifinal":"SF","3rd Place Playoff":"3rd","Final":"Final"};
+  if(isAdmin){const a=el("div","tree-admin");a.textContent="Organizer: save final scores in the Organizer tab. The tree recalculates immediately from the saved results. Semifinal losers move to the 3rd Place Playoff.";panel.appendChild(a);}
+
+  const matches=allEffectiveMatches().filter(isKnockout).sort((a,b)=>ko(a)-ko(b));
+  const r32=matches.filter(m=>m.round==="Round of 32");
+  const r16=matches.filter(m=>m.round==="Round of 16");
+  const qf=matches.filter(m=>m.round==="Quarterfinal");
+  const sf=matches.filter(m=>m.round==="Semifinal");
+  const final=matches.find(m=>m.round==="Final");
+  const third=matches.find(m=>m.round==="3rd Place Playoff");
+
   const scroll=el("div","tree-scroll");
-  const grid=el("div","tree-grid");
-  const matches=allEffectiveMatches().filter(isKnockout);
-  order.forEach(round=>{
-    const col=el("div","tree-round");
-    const title=el("div","tree-round-title");title.textContent=labels[round];col.appendChild(title);
-    matches.filter(m=>(m.round||"")===round).sort((a,b)=>ko(a)-ko(b)).forEach(m=>col.appendChild(renderTreeMatch(m)));
-    grid.appendChild(col);
-  });
-  scroll.appendChild(grid);panel.appendChild(scroll);
+  const board=el("div","tree-board");
+  board.appendChild(renderTreeColumn("ROUND OF 32",splitTreeSide(r32,"left"),"r32 left"));
+  board.appendChild(renderTreeColumn("R16",splitTreeSide(r16,"left"),"r16 left"));
+  board.appendChild(renderTreeColumn("QF",splitTreeSide(qf,"left"),"qf left"));
+  board.appendChild(renderTreeColumn("SF",splitTreeSide(sf,"left"),"sf left"));
+  board.appendChild(renderTreeCenter(final,third));
+  board.appendChild(renderTreeColumn("SF",splitTreeSide(sf,"right"),"sf right"));
+  board.appendChild(renderTreeColumn("QF",splitTreeSide(qf,"right"),"qf right"));
+  board.appendChild(renderTreeColumn("R16",splitTreeSide(r16,"right"),"r16 right"));
+  board.appendChild(renderTreeColumn("ROUND OF 32",splitTreeSide(r32,"right"),"r32 right"));
+  scroll.appendChild(board);panel.appendChild(scroll);
   return panel;
 }
-function renderTreeMatch(m){
-  const box=el("div","tree-match");
+function splitTreeSide(list,side){
+  const mid=Math.ceil(list.length/2);
+  const part=side==="left"?list.slice(0,mid):list.slice(mid);
+  return side==="right"?part.slice().reverse():part;
+}
+function renderTreeColumn(title,matches,cls){
+  const col=el("div","tree-column "+cls);
+  const t=el("div","tree-round-title");t.textContent=title;col.appendChild(t);
+  const stack=el("div","tree-stack");
+  matches.forEach(m=>stack.appendChild(renderTreeMatch(m)));
+  col.appendChild(stack);
+  return col;
+}
+function renderTreeCenter(final,third){
+  const c=el("div","tree-center");
+  const cup=el("div","tree-cup");
+  const champ=final?championName(final):"Champion TBD";
+  cup.innerHTML=`<div class="tree-cup-logo">${worldCupLogo()}</div><div class="tree-cup-label">Winners</div><div class="tree-cup-name${champ==="Champion TBD"?" tbd":""}">${esc(champ)}</div>`;
+  c.appendChild(cup);
+  if(final)c.appendChild(renderTreeMatch(final,true));
+  if(third)c.appendChild(renderTreeMatch(third,true));
+  return c;
+}
+function championName(final){
+  const side=resultWinnerSide(final);
+  if(side==="home")return final.home;
+  if(side==="away")return final.away;
+  return "Champion TBD";
+}
+function renderTreeMatch(m,isCenter){
+  const box=el("div","tree-match"+(isCenter?" final tree-final-box":""));
   const win=resultWinnerSide(m);
   const head=el("div","tree-match-head");
   head.innerHTML=`<b>${esc(shortMatchName(m))}</b><span>${fmtKO(m)}</span>`;
@@ -1317,17 +1384,35 @@ function renderTreeMatch(m){
   box.appendChild(renderTreeTeam(m.home,m.homeScore,m.homeFlag,win==="home"));
   box.appendChild(renderTreeTeam(m.away,m.awayScore,m.awayFlag,win==="away"));
   const meta=el("div","tree-meta");
-  if(m.status==="finished")meta.textContent=win?"Winner advanced":"Final saved, winner needs non-draw score";
-  else if(m.status==="live")meta.textContent="Live";
-  else meta.textContent=m.venue||"Scheduled";
+  meta.textContent=treeAdvanceText(m,win);
   box.appendChild(meta);
   return box;
 }
+function treeAdvanceText(m,win){
+  if(m.round==="Final")return win?"World Cup Champion":"Final · champion pending";
+  if(m.round==="3rd Place Playoff")return win?"Third place confirmed":"3rd place match";
+  if(m.round==="Semifinal")return "Winner → FINAL · Loser → 3RD";
+  if(m.winnerTo)return "Winner → "+friendlyMatchName(m.winnerTo);
+  if(m.status==="finished")return win?"Winner advanced":"Final saved, non-draw winner needed";
+  return m.venue||"Scheduled";
+}
+function seedLabel(name){
+  const s=String(name||"");
+  let m=s.match(/^(1st|2nd|3rd) Group ([A-L])/i);
+  if(m)return m[1][0]+m[2].toUpperCase();
+  m=s.match(/^3rd Group ([A-L\/]+)/i);
+  if(m)return "3"+m[1].replace(/\//g,"");
+  if(/^Winner of/i.test(s))return "W";
+  if(/^Loser of/i.test(s))return "L";
+  return "";
+}
 function renderTreeTeam(name,score,flag,win){
   const row=el("div","tree-team"+(win?" win":"")+(isPlaceholderTeam(name)?" placeholder":""));
-  const left=el("span");left.textContent=(flag?flag+" ":"")+name;
-  const right=el("span","tree-score");right.textContent=score==null?"–":score;
-  row.appendChild(left);row.appendChild(right);
+  const seed=seedLabel(name);
+  const f=el("span","flag-emo");f.textContent=flag||seed||"•";
+  const nm=el("span","tree-team-name");nm.textContent=cleanTreeText(name);
+  const sc=el("span","tree-score");sc.textContent=score==null?"–":score;
+  row.appendChild(f);row.appendChild(nm);row.appendChild(sc);
   return row;
 }
 
