@@ -30,36 +30,58 @@ admin.initializeApp({
 
 const db = admin.firestore();
 
+// Every spelling a feed might use for a country must normalize to ONE token,
+// and that token must equal what matches.json normalizes to. norm() strips
+// everything except a-z, so hyphens/accents/"and"/"the" all collapse away —
+// but only the forms listed here are aliased to a canonical token.
 const ALIAS = {
-  iriran: "iran",
+  // Iran  (matches.json uses "IR Iran")
   iran: "iran",
+  iriran: "iran",
+  islamicrepublicofiran: "iran",
 
+  // DR Congo  (matches.json uses "Congo DR")
   congodr: "drcongo",
   drcongo: "drcongo",
   democraticrepublicofcongo: "drcongo",
+  democraticrepublicofthecongo: "drcongo",
+  drcongozaire: "drcongo",
 
+  // Cape Verde  (matches.json uses "Cabo Verde")
   caboverde: "capeverde",
   capeverde: "capeverde",
 
+  // Curaçao
   curacao: "curacao",
   curacaoo: "curacao",
 
+  // Türkiye  (matches.json uses "Turkey")
   turkiye: "turkey",
   turkey: "turkey",
 
+  // South Korea
   korearepublic: "southkorea",
   republicofkorea: "southkorea",
   southkorea: "southkorea",
 
+  // USA  (matches.json uses "United States")
   unitedstates: "usa",
   unitedstatesofamerica: "usa",
   usa: "usa",
 
+  // Côte d'Ivoire  (matches.json uses "Ivory Coast")
   cotedivoire: "ivorycoast",
   ivorycoast: "ivorycoast",
 
+  // Bosnia and Herzegovina  (feeds often render "Bosnia-Herzegovina")
   bosniaandherzegovina: "bosnia",
-  bosnia: "bosnia"
+  bosniaherzegovina: "bosnia",
+  bosniaherzegowina: "bosnia",
+  bosnia: "bosnia",
+
+  // Czechia  (feeds may still use "Czech Republic")
+  czechia: "czechia",
+  czechrepublic: "czechia"
 };
 
 function norm(value) {
