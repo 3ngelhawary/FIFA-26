@@ -647,7 +647,11 @@ function resultWinnerSide(m){
   return "";
 }
 function resolvedParticipant(source,fallbackName,fallbackFlag,stack){
-  if(!source)return{name:fallbackName,flag:fallbackFlag||"",placeholder:isPlaceholderTeam(fallbackName)};
+  if(!source){
+    const g=resolveGroupSlot(fallbackName);
+    if(g)return{name:g.name,flag:g.flag||fallbackFlag||"",placeholder:!!g.placeholder};
+    return{name:fallbackName,flag:fallbackFlag||"",placeholder:isPlaceholderTeam(fallbackName)};
+  }
   const src=resolvedMatch(source.matchId,stack);
   if(!src)return{name:(source.type==="loser"?"Loser":"Winner")+" of "+friendlyMatchName(source.matchId),flag:"",placeholder:true};
   const win=resultWinnerSide(src);
@@ -672,6 +676,63 @@ function resolvedMatch(id,stack){
   }
   delete stack[id];
   return m;
+}
+/* ---- Group standings -> Round-of-32 qualifiers ----
+   Resolves "1st Group X" / "2nd Group X" placeholders into the real
+   qualified team (with flag) once that group's matches are all finished.
+   "3rd Group A/B/C/D/F" combo slots are labelled with the candidate
+   third-placed teams once known, but not assigned (no best-thirds table). */
+function teamFlagMap(){
+  const map={};
+  MATCHES.forEach(m=>{
+    if(m.home&&m.homeFlag&&!isPlaceholderTeam(m.home))map[m.home]=m.homeFlag;
+    if(m.away&&m.awayFlag&&!isPlaceholderTeam(m.away))map[m.away]=m.awayFlag;
+  });
+  return map;
+}
+function groupStanding(letter){
+  const ms=MATCHES.filter(m=>!isKnockout(m)&&String(m.group).toUpperCase()===letter);
+  if(!ms.length)return null;
+  const res=Store.resultsAll();
+  const allDone=ms.every(m=>{
+    const r=res[m.id]||{};
+    const status=r.status||m.status;
+    const hs=r.homeScore!=null?r.homeScore:m.homeScore;
+    const as=r.awayScore!=null?r.awayScore:m.awayScore;
+    return status==="finished"&&hs!=null&&as!=null;
+  });
+  if(!allDone)return null;
+  const table={};
+  const ensure=(name,flag)=>{if(!table[name])table[name]={team:name,flag:flag||"",pts:0,gf:0,ga:0,gd:0};if(flag&&!table[name].flag)table[name].flag=flag;return table[name];};
+  ms.forEach(m=>{
+    const r=res[m.id]||{};
+    const hs=r.homeScore!=null?r.homeScore:m.homeScore;
+    const as=r.awayScore!=null?r.awayScore:m.awayScore;
+    const h=ensure(m.home,m.homeFlag),a=ensure(m.away,m.awayFlag);
+    h.gf+=hs;h.ga+=as;a.gf+=as;a.ga+=hs;
+    if(hs>as)h.pts+=3;else if(as>hs)a.pts+=3;else{h.pts++;a.pts++;}
+  });
+  Object.values(table).forEach(t=>t.gd=t.gf-t.ga);
+  return Object.values(table).sort((x,y)=>y.pts-x.pts||y.gd-x.gd||y.gf-x.gf||x.team.localeCompare(y.team));
+}
+function resolveGroupSlot(name){
+  const s=String(name||"");
+  let mt=s.match(/^(1st|2nd)\s+Group\s+([A-L])\b/i);
+  if(mt){
+    const idx=mt[1].toLowerCase()==="1st"?0:1;
+    const t=groupStanding(mt[2].toUpperCase());
+    if(t&&t[idx])return{name:t[idx].team,flag:t[idx].flag||teamFlagMap()[t[idx].team]||"",placeholder:false};
+    return null;
+  }
+  mt=s.match(/^3rd\s+Group\s+([A-L\/]+)/i);
+  if(mt){
+    const letters=mt[1].split("/").map(x=>x.trim().toUpperCase()).filter(Boolean);
+    const names=[];
+    letters.forEach(L=>{const t=groupStanding(L);if(t&&t[2])names.push(t[2].team);});
+    if(names.length)return{name:"3rd: "+names.join(" / "),flag:"",placeholder:true};
+    return null;
+  }
+  return null;
 }
 function allEffectiveMatches(){return MATCHES.map(m=>eff(m));}
 
