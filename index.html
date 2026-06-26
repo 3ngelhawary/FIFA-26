@@ -380,7 +380,7 @@
   .tree-note{margin:0 15px 14px;color:var(--muted);font-size:12.5px;line-height:1.55}
   .tree-admin{margin:0 15px 15px;border:1px solid rgba(255,230,0,.28);background:rgba(255,230,0,.06);border-radius:12px;padding:10px 12px;color:#ffe9a3;font-size:12px;line-height:1.5}
   .tree-scroll{overflow-x:auto;padding:0 13px 16px;scrollbar-width:thin}
-  .tree-board{min-width:1780px;min-height:780px;display:grid;grid-template-columns:250px 210px 190px 175px 230px 175px 190px 210px 250px;gap:11px;align-items:stretch;padding:15px;border:1px solid rgba(0,229,255,.15);border-radius:18px;background:radial-gradient(circle at center,rgba(255,46,151,.10),transparent 34%),linear-gradient(180deg,rgba(255,255,255,.025),rgba(255,255,255,.01))}
+  .tree-board{min-width:1360px;min-height:720px;display:grid;grid-template-columns:165px 142px 130px 120px 190px 120px 130px 142px 165px;gap:9px;align-items:stretch;padding:13px;border:1px solid rgba(0,229,255,.15);border-radius:18px;background:radial-gradient(circle at center,rgba(255,46,151,.10),transparent 34%),linear-gradient(180deg,rgba(255,255,255,.025),rgba(255,255,255,.01))}
   .tree-column{display:flex;flex-direction:column;min-height:745px;position:relative}
   .tree-round-title{font-size:12px;text-align:center;color:var(--ink);letter-spacing:2px;text-transform:uppercase;font-weight:800;margin:0 0 10px;font-family:"Oswald"}
   .tree-stack{flex:1;display:flex;flex-direction:column;justify-content:space-around;gap:8px}
@@ -390,7 +390,7 @@
   .tree-center{display:flex;flex-direction:column;justify-content:center;gap:13px;min-height:745px;text-align:center}
   .tree-cup{border:1px solid rgba(255,230,0,.32);border-radius:18px;background:linear-gradient(160deg,rgba(255,230,0,.10),rgba(255,46,151,.08));padding:16px 12px;box-shadow:0 0 28px rgba(255,46,151,.10)}
   .tree-cup-logo{width:54px;height:78px;margin:0 auto 8px}.tree-cup-logo img{width:100%;height:100%;object-fit:contain}
-  .tree-cup-label{font-size:10px;letter-spacing:2.4px;text-transform:uppercase;color:var(--muted);font-weight:800}.tree-cup-name{font-family:"Oswald";font-size:27px;line-height:1.05;color:var(--draw);margin-top:5px;text-transform:uppercase}.tree-cup-name.tbd{color:var(--muted)}
+  .tree-cup-label{font-size:10px;letter-spacing:2.4px;text-transform:uppercase;color:var(--muted);font-weight:800}.tree-cup-name{font-family:"Oswald";font-size:20px;line-height:1.05;color:var(--draw);margin-top:5px;text-transform:uppercase;word-break:break-word}.tree-cup-name.tbd{color:var(--muted)}
   .tree-match{border:1px solid rgba(255,255,255,.09);border-radius:12px;background:linear-gradient(180deg,rgba(11,18,31,.96),rgba(7,9,18,.96));overflow:hidden;box-shadow:0 8px 22px rgba(0,0,0,.22);position:relative}
   .tree-column.left .tree-match:not(.final)::after{content:"";position:absolute;right:-12px;top:50%;width:12px;border-top:2px solid rgba(255,46,151,.58)}
   .tree-column.right .tree-match:not(.final)::before{content:"";position:absolute;left:-12px;top:50%;width:12px;border-top:2px solid rgba(255,46,151,.58)}
@@ -400,7 +400,7 @@
   .tree-team+.tree-team{border-top:1px solid rgba(255,255,255,.07)}
   .tree-team.win{background:rgba(43,255,136,.10);color:var(--win)}
   .tree-team.placeholder{color:var(--faint);text-transform:none;letter-spacing:0}
-  .tree-team .flag-emo{width:23px;text-align:center;font-size:17px}.tree-team-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.tree-slot{font-size:10px;color:var(--muted);font-weight:800}.tree-score{font-family:"Oswald";font-weight:700;font-size:15px;color:var(--ink)}
+  .tree-team .flag-emo{width:23px;text-align:center;font-size:17px}.tree-team .flag-emo img{width:21px;height:14px;object-fit:cover;border-radius:2px;display:block;margin:0 auto;box-shadow:0 0 0 1px rgba(0,0,0,.35)}.tree-team-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.tree-slot{font-size:10px;color:var(--muted);font-weight:800}.tree-score{font-family:"Oswald";font-weight:700;font-size:15px;color:var(--ink)}
   .tree-team.win .tree-score{color:var(--win)}
   .tree-meta{font-size:10.5px;color:var(--muted);padding:0 9px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .tree-final-box{border-color:rgba(255,230,0,.32)}
@@ -725,13 +725,7 @@ function resolveGroupSlot(name){
     return null;
   }
   mt=s.match(/^3rd\s+Group\s+([A-L\/]+)/i);
-  if(mt){
-    const letters=mt[1].split("/").map(x=>x.trim().toUpperCase()).filter(Boolean);
-    const names=[];
-    letters.forEach(L=>{const t=groupStanding(L);if(t&&t[2])names.push(t[2].team);});
-    if(names.length)return{name:"3rd: "+names.join(" / "),flag:"",placeholder:true};
-    return null;
-  }
+  if(mt)return{name:"TBD",flag:"",placeholder:true};
   return null;
 }
 function allEffectiveMatches(){return MATCHES.map(m=>eff(m));}
@@ -1589,7 +1583,30 @@ function renderTree(){
   board.appendChild(renderTreeColumn("R16",splitTreeSide(r16,"right"),"r16 right"));
   board.appendChild(renderTreeColumn("ROUND OF 32",splitTreeSide(r32,"right"),"r32 right"));
   scroll.appendChild(board);panel.appendChild(scroll);
+  requestAnimationFrame(()=>fitTreeBoard(scroll,board));
+  if(!window.__treeFitBound){
+    window.__treeFitBound=true;
+    window.addEventListener("resize",()=>{
+      const s=document.querySelector(".tree-scroll"),b=s&&s.querySelector(".tree-board");
+      if(s&&b)fitTreeBoard(s,b);
+    });
+  }
   return panel;
+}
+function fitTreeBoard(scroll,board){
+  if(!scroll||!board)return;
+  board.style.transform="none";board.style.marginLeft="0";
+  const natW=board.offsetWidth,natH=board.offsetHeight;
+  if(!natW||!natH)return;
+  const availW=scroll.clientWidth;
+  const top=scroll.getBoundingClientRect().top;
+  const availH=Math.max(340,window.innerHeight-top-14);
+  const scale=Math.min(availW/natW,availH/natH,1);
+  board.style.transformOrigin="top left";
+  board.style.transform="scale("+scale+")";
+  scroll.style.overflow="hidden";
+  scroll.style.height=(natH*scale)+"px";
+  board.style.marginLeft=Math.max(0,(availW-natW*scale)/2)+"px";
 }
 function splitTreeSide(list,side){
   const mid=Math.ceil(list.length/2);
@@ -1628,9 +1645,6 @@ function renderTreeMatch(m,isCenter){
   box.appendChild(head);
   box.appendChild(renderTreeTeam(m.home,m.homeScore,m.homeFlag,win==="home"));
   box.appendChild(renderTreeTeam(m.away,m.awayScore,m.awayFlag,win==="away"));
-  const meta=el("div","tree-meta");
-  meta.textContent=treeAdvanceText(m,win);
-  box.appendChild(meta);
   return box;
 }
 function treeAdvanceText(m,win){
@@ -1651,10 +1665,27 @@ function seedLabel(name){
   if(/^Loser of/i.test(s))return "L";
   return "";
 }
+function flagIso(flag,name){
+  const overrides={England:"gb-eng",Scotland:"gb-sct",Wales:"gb-wls","Northern Ireland":"gb-nir"};
+  if(overrides[name])return overrides[name];
+  const cps=Array.from(String(flag||"")).map(c=>c.codePointAt(0)).filter(cp=>cp>=0x1F1E6&&cp<=0x1F1FF);
+  if(cps.length===2)return String.fromCharCode(0x61+(cps[0]-0x1F1E6))+String.fromCharCode(0x61+(cps[1]-0x1F1E6));
+  if(typeof ISO!=="undefined"&&ISO[name])return ISO[name];
+  return "";
+}
 function renderTreeTeam(name,score,flag,win){
   const row=el("div","tree-team"+(win?" win":"")+(isPlaceholderTeam(name)?" placeholder":""));
   const seed=seedLabel(name);
-  const f=el("span","flag-emo");f.textContent=flag||seed||"•";
+  const f=el("span","flag-emo");
+  const iso=flagIso(flag,name);
+  if(iso){
+    const img=document.createElement("img");
+    img.src="https://flagcdn.com/w40/"+iso+".png";img.alt="";img.loading="lazy";
+    img.onerror=function(){img.remove();f.textContent=flag||seed||"•";};
+    f.appendChild(img);
+  }else{
+    f.textContent=seed||"•";
+  }
   const nm=el("span","tree-team-name");nm.textContent=cleanTreeText(name);
   const sc=el("span","tree-score");sc.textContent=score==null?"–":score;
   row.appendChild(f);row.appendChild(nm);row.appendChild(sc);
