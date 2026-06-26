@@ -455,6 +455,7 @@
   .bt-note{font-size:11.5px;color:var(--muted)}
   .lb-delta{display:inline-block;margin-left:7px;font-size:11px;font-weight:800;color:var(--win);vertical-align:middle}
   .tag.streak-tag{background:rgba(255,77,0,.18);color:#ff8a3d}
+  .tag.exact-tag{background:rgba(43,255,136,.16);color:var(--win)}
 
   .rank-pill{font-size:13px;font-weight:800;color:#05060c;background:var(--cyan);padding:1px 9px;border-radius:999px;margin-left:6px}
 
@@ -1782,8 +1783,9 @@ function renderBoard(){
     const proj=liveOn?computeScore(picks,top3,{projected:true}):conf;
     const predicted=Object.values(picks).filter(x=>x&&x.h!=null).length;
     return{name:p.name,code:p.code,pts:conf.total,projPts:proj.total,delta:proj.total-conf.total,
-      played:conf.played,predicted,scorePts:conf.scorePts,bonus:conf.top3Bonus,streak:conf.currentStreak};
+      played:conf.played,predicted,scorePts:conf.scorePts,bonus:conf.top3Bonus,streak:conf.currentStreak,exacts:conf.exacts};
   });
+  const maxExact=rows.reduce((mx,r)=>Math.max(mx,r.exacts||0),0);
   const sortKey=boardProjected?"projPts":"pts";
   rows.sort((a,b)=>b[sortKey]-a[sortKey]||b.scorePts-a.scorePts||b.played-a.played||a.name.localeCompare(b.name));
 
@@ -1805,7 +1807,8 @@ function renderBoard(){
     row.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();showMemberHistory(p.code);}};
     const rk=el("div","rank"+(i===0?" g1":i===1?" g2":i===2?" g3":""));rk.textContent=i+1;
     const nm=el("div","lb-name");
-    const extras=`${ME&&p.code===ME.code?'<span class="tag you">YOU</span>':''}${p.bonus?'<span class="tag me-tag">TOP 3 BONUS</span>':''}${p.streak>=3?`<span class="tag streak-tag">🔥 ${p.streak}</span>`:''}`;
+    const topExact=maxExact>0&&p.exacts===maxExact;
+    const extras=`${ME&&p.code===ME.code?'<span class="tag you">YOU</span>':''}${topExact?`<span class="tag exact-tag" title="Most exact scores">🎯 ${p.exacts}</span>`:''}${p.bonus?'<span class="tag me-tag">TOP 3 BONUS</span>':''}${p.streak>=3?`<span class="tag streak-tag">🔥 ${p.streak}</span>`:''}`;
     nm.innerHTML=`<span class="n">${esc(p.name)}</span>${extras}`;
     const sub=el("div","lb-sub");sub.textContent="#PM "+p.predicted;
     const pt=el("div","lb-pts");
