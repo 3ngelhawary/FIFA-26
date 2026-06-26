@@ -379,7 +379,17 @@
   /* World Cup Tree */
   .tree-note{margin:0 15px 14px;color:var(--muted);font-size:12.5px;line-height:1.55}
   .tree-admin{margin:0 15px 15px;border:1px solid rgba(255,230,0,.28);background:rgba(255,230,0,.06);border-radius:12px;padding:10px 12px;color:#ffe9a3;font-size:12px;line-height:1.5}
-  .tree-scroll{overflow-x:auto;padding:0 13px 16px;scrollbar-width:thin}
+  .tree-scroll{overflow:hidden;padding:0 13px 16px;scrollbar-width:thin;touch-action:none}
+  .tree-scroll.pannable{cursor:grab}
+  .tree-scroll.grabbing{cursor:grabbing}
+  .tree-sizer{position:relative;margin:0 auto}
+  .tree-sizer>.tree-board{position:absolute;top:0;left:0}
+  .tree-zoom{display:flex;align-items:center;gap:7px;margin:0 15px 11px}
+  .tree-zoom button{width:34px;height:30px;border:1px solid rgba(0,229,255,.3);background:rgba(0,229,255,.08);color:var(--cyan);border-radius:9px;font-family:"Oswald";font-size:16px;font-weight:700;cursor:pointer;line-height:1}
+  .tree-zoom button[data-z="fit"]{width:auto;padding:0 12px;font-size:13px;letter-spacing:1px;text-transform:uppercase}
+  .tree-zoom button:hover{background:rgba(0,229,255,.16)}
+  .tree-zoom-hint{color:var(--muted);font-size:11px;margin-left:4px}
+  @media (max-width:560px){.tree-zoom-hint{display:none}}
   .tree-board{min-width:1360px;min-height:720px;display:grid;grid-template-columns:165px 142px 130px 120px 190px 120px 130px 142px 165px;gap:9px;align-items:stretch;padding:13px;border:1px solid rgba(0,229,255,.15);border-radius:18px;background:radial-gradient(circle at center,rgba(255,46,151,.10),transparent 34%),linear-gradient(180deg,rgba(255,255,255,.025),rgba(255,255,255,.01))}
   .tree-column{display:flex;flex-direction:column;min-height:745px;position:relative}
   .tree-round-title{font-size:12px;text-align:center;color:var(--ink);letter-spacing:2px;text-transform:uppercase;font-weight:800;margin:0 0 10px;font-family:"Oswald"}
@@ -511,6 +521,7 @@ let activeTab="today";
 let authMode="register";
 let savedTimer=null;
 let boardProjected=false;
+let treeUserZoom=1;
 let LANG=localStorage.getItem("egec_lang")||"en";
 const TOP3_DOC_ID="__top3__";
 
@@ -646,9 +657,9 @@ function resultWinnerSide(m){
   if(m.awayScore>m.homeScore)return "away";
   return "";
 }
-function resolvedParticipant(source,fallbackName,fallbackFlag,stack){
+function resolvedParticipant(source,fallbackName,fallbackFlag,stack,matchId){
   if(!source){
-    const g=resolveGroupSlot(fallbackName);
+    const g=resolveGroupSlot(fallbackName,matchId);
     if(g)return{name:g.name,flag:g.flag||fallbackFlag||"",placeholder:!!g.placeholder};
     return{name:fallbackName,flag:fallbackFlag||"",placeholder:isPlaceholderTeam(fallbackName)};
   }
@@ -663,8 +674,8 @@ function resolvedMatch(id,stack){
   const raw=rawMatchById(id);if(!raw)return null;
   stack=stack||{};if(stack[id])return Object.assign({},raw);stack[id]=true;
   const m=Object.assign({},raw);
-  const hp=resolvedParticipant(raw.homeSource,raw.home,raw.homeFlag,stack);
-  const ap=resolvedParticipant(raw.awaySource,raw.away,raw.awayFlag,stack);
+  const hp=resolvedParticipant(raw.homeSource,raw.home,raw.homeFlag,stack,raw.id);
+  const ap=resolvedParticipant(raw.awaySource,raw.away,raw.awayFlag,stack,raw.id);
   m.home=hp.name;m.homeFlag=hp.flag;m.away=ap.name;m.awayFlag=ap.flag;
   const r=Store.resultsAll()[id];
   if(r){
@@ -715,7 +726,18 @@ function groupStanding(letter){
   Object.values(table).forEach(t=>t.gd=t.gf-t.ga);
   return Object.values(table).sort((x,y)=>y.pts-x.pts||y.gd-x.gd||y.gf-x.gf||x.team.localeCompare(y.team));
 }
-function resolveGroupSlot(name){
+/* ---- Third-place R32 slots ----
+   Each R32 "3rd Group …/…" slot can be assigned to one group whose
+   third-placed team fills it. Set a group letter to assign; remove the
+   line (or leave it out) to show TBD. Allowed groups per slot:
+     53452541: A/B/C/D/F   53452543: C/D/F/G/H
+     53452563: C/E/F/H/I   53452565: E/H/I/J/K
+     53452555: A/E/H/I/J   53452553: B/E/F/I/J
+     53452505: E/F/G/I/J   53452507: D/E/I/J/L  */
+const THIRD_PLACE_GROUP={
+  "53452565":"K"
+};
+function resolveGroupSlot(name,matchId){
   const s=String(name||"");
   let mt=s.match(/^(1st|2nd)\s+Group\s+([A-L])\b/i);
   if(mt){
@@ -725,7 +747,15 @@ function resolveGroupSlot(name){
     return null;
   }
   mt=s.match(/^3rd\s+Group\s+([A-L\/]+)/i);
-  if(mt)return{name:"TBD",flag:"",placeholder:true};
+  if(mt){
+    const L=THIRD_PLACE_GROUP[String(matchId)];
+    if(L){
+      const t=groupStanding(String(L).toUpperCase());
+      if(t&&t[2])return{name:t[2].team,flag:t[2].flag||teamFlagMap()[t[2].team]||"",placeholder:false};
+      return{name:"3rd Group "+String(L).toUpperCase(),flag:"",placeholder:true};
+    }
+    return{name:"TBD",flag:"",placeholder:true};
+  }
   return null;
 }
 function allEffectiveMatches(){return MATCHES.map(m=>eff(m));}
@@ -1571,7 +1601,12 @@ function renderTree(){
   const final=matches.find(m=>m.round==="Final");
   const third=matches.find(m=>m.round==="3rd Place Playoff");
 
+  const ctrl=el("div","tree-zoom");
+  ctrl.innerHTML=`<button type="button" data-z="out" title="Zoom out">−</button><button type="button" data-z="fit" title="Fit to screen">Fit</button><button type="button" data-z="in" title="Zoom in">+</button><span class="tree-zoom-hint">Pinch / Ctrl+scroll to zoom · drag to pan</span>`;
+  panel.appendChild(ctrl);
+
   const scroll=el("div","tree-scroll");
+  const sizer=el("div","tree-sizer");
   const board=el("div","tree-board");
   board.appendChild(renderTreeColumn("ROUND OF 32",splitTreeSide(r32,"left"),"r32 left"));
   board.appendChild(renderTreeColumn("R16",splitTreeSide(r16,"left"),"r16 left"));
@@ -1582,7 +1617,24 @@ function renderTree(){
   board.appendChild(renderTreeColumn("QF",splitTreeSide(qf,"right"),"qf right"));
   board.appendChild(renderTreeColumn("R16",splitTreeSide(r16,"right"),"r16 right"));
   board.appendChild(renderTreeColumn("ROUND OF 32",splitTreeSide(r32,"right"),"r32 right"));
-  scroll.appendChild(board);panel.appendChild(scroll);
+  sizer.appendChild(board);scroll.appendChild(sizer);panel.appendChild(scroll);
+
+  ctrl.querySelectorAll("button").forEach(btn=>btn.onclick=()=>{
+    const z=btn.getAttribute("data-z");
+    if(z==="in")treeUserZoom=Math.min(5,treeUserZoom*1.25);
+    else if(z==="out")treeUserZoom=Math.max(1,treeUserZoom/1.25);
+    else treeUserZoom=1;
+    fitTreeBoard(scroll,board);
+  });
+  scroll.addEventListener("wheel",e=>{
+    if(e.ctrlKey||e.metaKey){
+      e.preventDefault();
+      treeUserZoom=Math.min(5,Math.max(1,treeUserZoom*(e.deltaY<0?1.12:0.89)));
+      fitTreeBoard(scroll,board);
+    }
+  },{passive:false});
+  enableTreePanZoom(scroll,board);
+
   requestAnimationFrame(()=>fitTreeBoard(scroll,board));
   if(!window.__treeFitBound){
     window.__treeFitBound=true;
@@ -1593,20 +1645,47 @@ function renderTree(){
   }
   return panel;
 }
+function enableTreePanZoom(scroll,board){
+  const pts=new Map();
+  let startDist=0,startZoom=1,panX=0,panY=0,panSL=0,panST=0,panning=false;
+  scroll.addEventListener("pointerdown",e=>{
+    if(e.target.closest("button"))return;
+    pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(pts.size===1){panning=true;panX=e.clientX;panY=e.clientY;panSL=scroll.scrollLeft;panST=scroll.scrollTop;scroll.classList.add("grabbing");}
+    else if(pts.size===2){panning=false;const a=[...pts.values()];startDist=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y);startZoom=treeUserZoom;}
+  });
+  window.addEventListener("pointermove",e=>{
+    if(!pts.has(e.pointerId))return;
+    pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(pts.size>=2){
+      const a=[...pts.values()],d=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y);
+      if(startDist>0){treeUserZoom=Math.min(5,Math.max(1,startZoom*(d/startDist)));fitTreeBoard(scroll,board);}
+    }else if(panning){
+      scroll.scrollLeft=panSL-(e.clientX-panX);scroll.scrollTop=panST-(e.clientY-panY);
+    }
+  });
+  const up=e=>{pts.delete(e.pointerId);if(pts.size<2)startDist=0;if(pts.size===0){panning=false;scroll.classList.remove("grabbing");}};
+  window.addEventListener("pointerup",up);
+  window.addEventListener("pointercancel",up);
+}
 function fitTreeBoard(scroll,board){
   if(!scroll||!board)return;
-  board.style.transform="none";board.style.marginLeft="0";
+  const sizer=board.parentNode;
+  board.style.transform="none";
   const natW=board.offsetWidth,natH=board.offsetHeight;
   if(!natW||!natH)return;
   const availW=scroll.clientWidth;
   const top=scroll.getBoundingClientRect().top;
   const availH=Math.max(340,window.innerHeight-top-14);
-  const scale=Math.min(availW/natW,availH/natH,1);
+  const fit=Math.min(availW/natW,availH/natH,1);
+  const scale=fit*(treeUserZoom||1);
   board.style.transformOrigin="top left";
   board.style.transform="scale("+scale+")";
-  scroll.style.overflow="hidden";
-  scroll.style.height=(natH*scale)+"px";
-  board.style.marginLeft=Math.max(0,(availW-natW*scale)/2)+"px";
+  if(sizer){sizer.style.width=(natW*scale)+"px";sizer.style.height=(natH*scale)+"px";}
+  const zoomed=(treeUserZoom||1)>1.001;
+  scroll.style.overflow=zoomed?"auto":"hidden";
+  scroll.classList.toggle("pannable",zoomed);
+  scroll.style.height=Math.min(natH*scale,availH)+"px";
 }
 function splitTreeSide(list,side){
   const mid=Math.ceil(list.length/2);
