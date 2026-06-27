@@ -1472,8 +1472,8 @@ function maybeShowBoostNotice(){
   if(document.querySelector(".boost-modal"))return;
   const team=boostTeam(),mult=CFG.boost.multiplier||2;
   const modal=el("div","boost-modal");modal.setAttribute("role","dialog");modal.setAttribute("aria-modal","true");
-  const close=()=>{sessionStorage.setItem(boostNoticeKey(),"1");document.removeEventListener("keydown",esc);modal.remove();};
-  const esc=e=>{if(e.key==="Escape")close();};document.addEventListener("keydown",esc);
+  const close=()=>{sessionStorage.setItem(boostNoticeKey(),"1");document.removeEventListener("keydown",escClose);modal.remove();};
+  const escClose=e=>{if(e.key==="Escape")close();};document.addEventListener("keydown",escClose);
   modal.onclick=e=>{if(e.target===modal)close();};
   modal.innerHTML=`<div class="boost-card">
     <div class="boost-flag">${boostFlagImg(52)}</div>
