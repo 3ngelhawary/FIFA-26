@@ -504,6 +504,7 @@
   .pen-pick,.pen-change{cursor:pointer;font-family:inherit;font-weight:700;font-size:12px;border-radius:999px;
     padding:6px 13px;border:1px solid var(--rc,var(--line-2));background:color-mix(in srgb, var(--rc) 12%, transparent);color:var(--rc,var(--ink))}
   .pen-change{font-size:11px;padding:4px 10px}
+  .pen-pick.warn{border-color:var(--draw);color:var(--draw);background:rgba(255,230,0,.10)}
   .mp-pen{border:1px solid var(--rc,var(--line-2));background:color-mix(in srgb,var(--rc) 14%, transparent);color:var(--rc);
     border-radius:9px;width:34px;cursor:pointer;font-size:15px}
   .pen-modal{position:fixed;inset:0;z-index:70;display:flex;align-items:center;justify-content:center;
@@ -1385,6 +1386,21 @@ function renderTop3Reminder(){
     const gp=$("#goPick");if(gp)gp.onclick=()=>{activeTab="upcoming";renderApp();};
   }
 
+  // --- Shootout nudge: knockout draws locking soon with no advance pick ---
+  const penPending=allEffectiveMatches().filter(m=>{
+    if(liveState(m)!=="upcoming"||hasPlaceholderTeams(m)||!isKnockout(m))return false;
+    const ms=lockAt(m)-now();
+    if(ms<=0||ms>WINDOW)return false;
+    const p=myPicks[m.id];
+    return p&&p.h!=null&&(+p.h===+p.a)&&p.pen!=="home"&&p.pen!=="away";
+  }).sort((a,b)=>lockAt(a)-lockAt(b));
+  if(penPending.length){
+    const n=penPending.length,pm=el("div","banner nudge");
+    pm.innerHTML=`<div class="bdot"></div><div><b>🥅 Shootout reminder:</b> you predicted a draw in ${n} knockout match${n===1?"":"es"} but haven't picked who advances — next locks in <b data-countdown="${penPending[0].id}">--:--:--</b>.<br><span style="color:var(--muted)">No shootout pick = no +${CFG.scoring.advanceBonus} advance bonus.</span></div><button class="banner-btn" id="goPen">Pick now</button>`;
+    box.appendChild(pm);
+    const gpn=$("#goPen");if(gpn)gpn.onclick=()=>openPenaltyModal(penPending[0],null);
+  }
+
   // --- Top 3 reminder ---
   if(top3State()!=="open"||hasCompleteTop3(Store.myTop3(ME.code)))return;
   const b=el("div","banner hot");
@@ -1603,7 +1619,7 @@ function renderCard(m){
         const who=pk.pen==="home"?m.home:pk.pen==="away"?m.away:null;
         penWrap.innerHTML=who
           ?`<span class="pen-tag">🥅 Shootout winner: <b>${esc(who)}</b></span><button type="button" class="pen-change">change</button>`
-          :`<button type="button" class="pen-pick">🥅 Pick shootout winner →</button>`;
+          :`<button type="button" class="pen-pick warn">⚠ Pick who advances on penalties</button>`;
         const btn=penWrap.querySelector(".pen-change,.pen-pick");
         if(btn)btn.onclick=()=>openPenaltyModal(m,pk.pen||null);
       }else{
