@@ -481,17 +481,18 @@
 
   /* ===== Per-round colour coding (cards in all tabs + bracket) ===== */
   .rc-group{--rc:#5b8cff}
-  .rc-r32{--rc:#00e5ff}
+  .rc-r32{--rc:#ff5ca8}
   .rc-r16{--rc:#19f0c4}
   .rc-qf{--rc:#b14eff}
-  .rc-sf{--rc:#ff9d3c}
+  .rc-sf{--rc:#c8d0e0}
   .rc-third{--rc:#cd7f32}
   .rc-final{--rc:#ffd24a}
-  .rc-ko{--rc:#00e5ff}
+  .rc-ko{--rc:#ff5ca8}
   /* match cards */
   .card{border-left:3px solid var(--rc,var(--line))}
   .card .grp{color:var(--rc,var(--muted))}
-  .card .card-head{box-shadow:inset 0 -1px 0 color-mix(in srgb, var(--rc) 22%, transparent)}
+  .card .card-head{background:color-mix(in srgb, var(--rc) 13%, transparent);
+    box-shadow:inset 0 -1px 0 color-mix(in srgb, var(--rc) 30%, transparent)}
   /* my-picks rows */
   .mp-row{border-left:3px solid var(--rc,var(--line))}
   /* organizer rows */
@@ -526,10 +527,10 @@
   /* ===== Bracket per-round colour ===== */
   .tree-match{border-left:3px solid var(--rc,rgba(255,255,255,.09))}
   .tree-match .tree-match-head b{color:var(--rc,var(--cyan))}
-  .tree-column.r32 .tree-round-title{color:#00e5ff}
+  .tree-column.r32 .tree-round-title{color:#ff5ca8}
   .tree-column.r16 .tree-round-title{color:#19f0c4}
   .tree-column.qf .tree-round-title{color:#b14eff}
-  .tree-column.sf .tree-round-title{color:#ff9d3c}
+  .tree-column.sf .tree-round-title{color:#c8d0e0}
   .tree-pen{font-size:9px;color:var(--draw);font-weight:800;margin-left:1px}
 </style>
 </head>
