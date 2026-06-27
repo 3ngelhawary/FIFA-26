@@ -34,6 +34,19 @@ window.CONFIG = {
     exactOrderBonus: 100
   },
 
+  // --- Team boost (Egypt ×2) ----------------------------------------------
+  // Doubles a player's TOTAL points (scoreline + advance bonus) on the boosted
+  // team's knockout matches, from the Round of 32 to the end of their run.
+  // A one-time login notification announces it; it stops appearing if the team
+  // is knocked out. To boost a different team change `team`, or set
+  // enabled:false to switch the whole feature off.
+  boost: {
+    enabled: true,
+    team: "Egypt",
+    multiplier: 2,
+    knockoutOnly: true   // only Round of 32 onward
+  },
+
   // --- Organizer (admin) ----------------------------------------------------
   // Anyone who enters this code unlocks the Organizer panel, where they can
   // enter match scores and add players. Change it before you share the app.

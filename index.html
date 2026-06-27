@@ -493,6 +493,25 @@
   .card .grp{color:var(--rc,var(--muted))}
   .card .card-head{background:color-mix(in srgb, var(--rc) 13%, transparent);
     box-shadow:inset 0 -1px 0 color-mix(in srgb, var(--rc) 30%, transparent)}
+  /* Egypt ×2 boost */
+  .head-left{display:flex;align-items:center;gap:8px;min-width:0;overflow:hidden}
+  .head-left .grp{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .boost-badge{flex:0 0 auto;font-family:"Oswald";font-weight:700;font-size:11px;letter-spacing:.5px;
+    color:#1a1407;background:linear-gradient(180deg,#ffe24a,#e8b400);border-radius:999px;padding:2px 9px;
+    box-shadow:0 0 10px rgba(255,210,74,.45)}
+  .pts-badge.boost{background:rgba(255,210,74,.16);color:#ffd24a;border:1px solid rgba(255,210,74,.5)}
+  .boost-modal{position:fixed;inset:0;z-index:80;display:flex;align-items:center;justify-content:center;
+    background:rgba(3,4,10,.74);backdrop-filter:blur(5px);padding:18px}
+  .boost-card{width:100%;max-width:420px;text-align:center;border-radius:20px;padding:26px 22px;
+    background:linear-gradient(180deg,#16110a,#0c0e1a);border:1px solid rgba(255,210,74,.5);
+    box-shadow:0 24px 70px rgba(0,0,0,.6),0 0 44px rgba(206,17,38,.22)}
+  .boost-flag{font-size:54px;line-height:1}
+  .boost-title{font-family:"Oswald";font-size:30px;font-weight:700;letter-spacing:1px;margin:6px 0 4px;
+    color:#ffd24a;text-shadow:0 0 16px rgba(255,210,74,.5)}
+  .boost-copy{font-size:14px;color:var(--ink);line-height:1.7;margin:6px 0 18px}.boost-copy b{color:#ffd24a}
+  .boost-btn{width:100%;cursor:pointer;font-family:"Oswald";font-weight:700;font-size:16px;letter-spacing:.5px;
+    border:0;border-radius:12px;padding:13px;color:#1a1407;background:linear-gradient(180deg,#ffe24a,#e8b400)}
+  .boost-btn:hover{filter:brightness(1.06)}
   /* my-picks rows */
   .mp-row{border-left:3px solid var(--rc,var(--line))}
   /* organizer rows */
@@ -561,10 +580,12 @@ const EMBEDDED={"matches":[{"id":"g20-ned-swe","group":"F","home":"Netherlands",
 const DEFAULTS={orgName:"EGEC",seasonLabel:"World Cup 2026",lockOffsetMinutes:60,
   scoring:{exactScore:5,correctOutcome:3,correctGoalsBonus:1,advanceBonus:3},adminCode:"EGEC2026",
   top3:{openAt:"2026-06-28T00:00:00+03:00",closeAt:"2026-07-01T00:00:00+03:00",firstPts:100,secondPts:75,thirdPts:50,exactOrderBonus:100},
+  boost:{enabled:true,team:"Egypt",multiplier:2,knockoutOnly:true},
   liveScores:{apiToken:"",competitionId:"WC"},storage:{mode:"local",firebase:{}},refreshMs:30000};
 const CFG=Object.assign({},DEFAULTS,window.CONFIG||{});
 CFG.scoring=Object.assign({},DEFAULTS.scoring,(window.CONFIG&&window.CONFIG.scoring)||{});
 CFG.top3=Object.assign({},DEFAULTS.top3,(window.CONFIG&&window.CONFIG.top3)||{});
+CFG.boost=Object.assign({},DEFAULTS.boost,(window.CONFIG&&window.CONFIG.boost)||{});
 CFG.storage=Object.assign({},DEFAULTS.storage,(window.CONFIG&&window.CONFIG.storage)||{});
 
 /* ---------------- State ---------------- */
@@ -915,6 +936,28 @@ function advanceScore(pick,m){
   const hit=pa===aa;
   return{pts:hit?(CFG.scoring.advanceBonus||0):0,kind:hit?"hit":"miss",predicted:pa,actual:aa};
 }
+
+/* ---- Team boost (e.g. Egypt ×2 in the knockouts) ---- */
+function boostTeam(){return (CFG.boost&&CFG.boost.team)||"";}
+function boostedMatch(m){
+  const b=CFG.boost||{};
+  if(!b.enabled||!b.team)return false;
+  if(b.knockoutOnly&&!isKnockout(m))return false;
+  return m.home===b.team||m.away===b.team;
+}
+function matchMultiplier(m){return boostedMatch(m)?(CFG.boost.multiplier||1):1;}
+/* the boosted team is out once a finished knockout tie they played didn't send them through */
+function boostTeamKnockedOut(){
+  const t=boostTeam();if(!t)return false;
+  return allEffectiveMatches().some(m=>{
+    if(!isKnockout(m)||m.status!=="finished")return false;
+    const isHome=m.home===t,isAway=m.away===t;
+    if(!isHome&&!isAway)return false;
+    const adv=actualAdvancer(m);if(!adv)return false;
+    return (isHome&&adv!=="home")||(isAway&&adv!=="away");
+  });
+}
+function boostActive(){return !!(CFG.boost&&CFG.boost.enabled&&CFG.boost.team)&&!boostTeamKnockedOut();}
 function scoreTop3(top3){
   const a=Store.top3Result();
   if(!hasCompleteTop3(a))return{pts:0,kind:"none",bonus:false};
@@ -953,7 +996,7 @@ function computeScore(picks,top3,opts){
 
   list.forEach(m=>{
     const pick=picks[m.id];
-    const earned=scorePick(pick,m).pts+advanceScore(pick,m).pts;
+    const earned=(scorePick(pick,m).pts+advanceScore(pick,m).pts)*matchMultiplier(m);
     scorePts+=earned;
     if(m.status!=="finished")projectedScored+=earned;else confirmedScored+=earned;
 
@@ -987,7 +1030,7 @@ function predictorsFor(mm){
     const isYou=ME&&code===ME.code;
     let score=null;
     if(m.status==="finished"){
-      const sc=scorePick(pk,m),adv=advanceScore(pk,m),pts=sc.pts+adv.pts;
+      const sc=scorePick(pk,m),adv=advanceScore(pk,m),pts=(sc.pts+adv.pts)*matchMultiplier(m);
       score={pts,kind:sc.kind==="hit"?"hit":pts>0?"part":"miss"};
     }
     out.push({name:d.name||"?",code,pick:pk,isYou,reveal:locked||isYou,score});
@@ -1316,6 +1359,7 @@ function renderApp(){
   renderHero();
   renderTop3Reminder();
   renderTop3HomePopup();
+  maybeShowBoostNotice();
   const view=$("#view");
   if(activeTab==="board"){view.appendChild(renderBoard());return;}
   if(activeTab==="tree"){view.appendChild(renderTree());return;}
@@ -1408,6 +1452,26 @@ function renderTop3Reminder(){
   b.innerHTML=`<div class="bdot"></div><div><b>Top 3 reminder:</b> predict 1st, 2nd and 3rd winners before the window closes in <b data-top3-countdown="close">--:--:--</b>.<br><span style="color:var(--muted)">Exact order gives an extra +${CFG.top3.exactOrderBonus} points.</span></div><button class="banner-btn" id="goTop3">Predict Top 3</button>`;
   box.appendChild(b);
   const go=$("#goTop3");if(go)go.onclick=()=>{activeTab="top3";renderApp();};
+}
+
+function boostNoticeKey(){return "egec_boost_notice_"+(ME?ME.code:"")+"_"+boostTeam();}
+function maybeShowBoostNotice(){
+  if(!ME||!boostActive())return;                       // off if disabled or team knocked out
+  if(sessionStorage.getItem(boostNoticeKey())==="1")return; // once per login session
+  if(document.querySelector(".boost-modal"))return;
+  const team=boostTeam(),mult=CFG.boost.multiplier||2;
+  const modal=el("div","boost-modal");modal.setAttribute("role","dialog");modal.setAttribute("aria-modal","true");
+  const close=()=>{sessionStorage.setItem(boostNoticeKey(),"1");document.removeEventListener("keydown",esc);modal.remove();};
+  const esc=e=>{if(e.key==="Escape")close();};document.addEventListener("keydown",esc);
+  modal.onclick=e=>{if(e.target===modal)close();};
+  modal.innerHTML=`<div class="boost-card">
+    <div class="boost-flag">🇪🇬</div>
+    <div class="boost-title">Mabrouuuuk ;)</div>
+    <p class="boost-copy">🇪🇬 ${esc(team)} have qualified! From the <b>Round of 32</b> to the end of their run, your <b>total points ×${mult}</b> on every ${esc(team)} match.<br>Predict carefully 🔥🇪🇬</p>
+    <button class="boost-btn" id="boostOk" type="button">Yalla 🇪🇬 ×${mult}</button>
+  </div>`;
+  document.body.appendChild(modal);
+  const ok=$("#boostOk");if(ok)ok.onclick=close;
 }
 
 function top3PopupKey(){return "egec_top3_popup_"+ME.code+"_"+top3CloseAt();}
@@ -1558,7 +1622,9 @@ function renderCard(m){
   const stCls=state==="live"?"live":state==="finished"?"ft":state==="pending"?"pending":locked?"locked":"";
   const st=el("span","status "+stCls);
   st.innerHTML=`<span class="dot"></span>${label}`;
-  head.appendChild(grp);head.appendChild(st);card.appendChild(head);
+  const headLeft=el("div","head-left");headLeft.appendChild(grp);
+  if(boostedMatch(m)){const bb=el("span","boost-badge");bb.textContent="🇪🇬 ×"+(CFG.boost.multiplier||2);headLeft.appendChild(bb);}
+  head.appendChild(headLeft);head.appendChild(st);card.appendChild(head);
 
   // result colour classes
   const hC=out==="home"?"win":out==="draw"?"draw":out?"lose":"";
@@ -1590,6 +1656,11 @@ function renderCard(m){
         ab.textContent=adv.kind==="hit"?"Advance ✓ +"+adv.pts:"Advance ✗";
         line.appendChild(ab);
       }
+    }
+    if(boostedMatch(m)){
+      const tot=(sc.pts+advanceScore(pick,m).pts)*matchMultiplier(m);
+      const bb=el("span","pts-badge boost");bb.textContent="🇪🇬 ×"+(CFG.boost.multiplier||2)+" = +"+tot;
+      line.appendChild(bb);
     }
     pred.appendChild(line);
   }else if(isKnockout(m)&&hasPlaceholderTeams(m)){
@@ -1756,7 +1827,7 @@ function renderMyPicks(){
       const pv=el("div","mp-pick");
       const val=el("span","mp-val");val.textContent=pick.h+"-"+pick.a;pv.appendChild(val);
       if(m.status==="finished"){
-        const sc=scorePick(pick,m);const tot=sc.pts+advanceScore(pick,m).pts;
+        const sc=scorePick(pick,m);const tot=(sc.pts+advanceScore(pick,m).pts)*matchMultiplier(m);
         const b=el("span","pts-badge "+(sc.kind==="hit"?"hit":tot>0?"part":"miss"));
         b.textContent=tot>0?"+"+tot:"0";pv.appendChild(b);
       }
