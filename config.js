@@ -15,9 +15,12 @@ window.CONFIG = {
 
   // --- Scoring rules --------------------------------------------------------
   scoring: {
-    exactScore: 5,       // predicted the exact final score
-    correctOutcome: 3,   // right winner / draw, wrong score
-    correctGoalsBonus: 1 // +bonus per team whose goal count you nailed
+    exactScore: 5,       // predicted the exact final score (after 120')
+    correctOutcome: 3,   // right winner / draw, wrong score (after 120')
+    correctGoalsBonus: 1,// +bonus per team whose goal count you nailed
+    advanceBonus: 3      // knockout only: correctly predicted who advances
+                         // (the winner of the tie — on penalties if you
+                         //  predicted a draw after 120 minutes)
   },
 
   // --- Top 3 Winners Prediction -------------------------------------------
