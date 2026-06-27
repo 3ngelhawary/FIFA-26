@@ -478,6 +478,58 @@
   .help-h{font-weight:800;font-size:14.5px;margin-bottom:3px}
   .help-d{font-size:13px;color:var(--muted);line-height:1.6}
   .help-done{margin-top:14px}
+
+  /* ===== Per-round colour coding (cards in all tabs + bracket) ===== */
+  .rc-group{--rc:#5b8cff}
+  .rc-r32{--rc:#00e5ff}
+  .rc-r16{--rc:#19f0c4}
+  .rc-qf{--rc:#b14eff}
+  .rc-sf{--rc:#ff9d3c}
+  .rc-third{--rc:#cd7f32}
+  .rc-final{--rc:#ffd24a}
+  .rc-ko{--rc:#00e5ff}
+  /* match cards */
+  .card{border-left:3px solid var(--rc,var(--line))}
+  .card .grp{color:var(--rc,var(--muted))}
+  .card .card-head{box-shadow:inset 0 -1px 0 color-mix(in srgb, var(--rc) 22%, transparent)}
+  /* my-picks rows */
+  .mp-row{border-left:3px solid var(--rc,var(--line))}
+  /* organizer rows */
+  .org-row{border-left:3px solid var(--rc,transparent)}
+
+  /* ===== Shootout (penalties) — inline + popup ===== */
+  .pen-inline{display:flex;align-items:center;justify-content:center;gap:9px;flex-wrap:wrap;margin-top:10px}
+  .pen-note{font-size:11.5px;color:var(--faint)}
+  .pen-tag{font-size:12.5px;color:var(--ink)}.pen-tag b{color:var(--rc,var(--cyan));font-family:"Oswald"}
+  .pen-pick,.pen-change{cursor:pointer;font-family:inherit;font-weight:700;font-size:12px;border-radius:999px;
+    padding:6px 13px;border:1px solid var(--rc,var(--line-2));background:color-mix(in srgb, var(--rc) 12%, transparent);color:var(--rc,var(--ink))}
+  .pen-change{font-size:11px;padding:4px 10px}
+  .mp-pen{border:1px solid var(--rc,var(--line-2));background:color-mix(in srgb,var(--rc) 14%, transparent);color:var(--rc);
+    border-radius:9px;width:34px;cursor:pointer;font-size:15px}
+  .pen-modal{position:fixed;inset:0;z-index:70;display:flex;align-items:center;justify-content:center;
+    background:rgba(3,4,10,.72);backdrop-filter:blur(5px);padding:18px}
+  .pen-card{width:100%;max-width:420px;background:var(--panel);border:1px solid var(--line-2);border-radius:18px;
+    padding:20px;box-shadow:0 24px 70px rgba(0,0,0,.6)}
+  .pen-title{font-family:"Oswald";font-size:20px;font-weight:700;letter-spacing:.5px}
+  .pen-sub{font-size:13px;color:var(--muted);line-height:1.6;margin:7px 0 16px}.pen-sub b{color:var(--ink)}
+  .pen-opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .pen-opt{display:flex;flex-direction:column;align-items:center;gap:7px;padding:15px 10px;cursor:pointer;
+    border:1px solid var(--line-2);border-radius:14px;background:#070912;color:var(--ink);font-family:inherit}
+  .pen-opt:hover{border-color:var(--cyan);box-shadow:0 0 0 2px rgba(0,229,255,.18)}
+  .pen-opt.sel{border-color:var(--win);box-shadow:0 0 0 2px rgba(43,255,136,.25)}
+  .pen-flag{font-size:30px;line-height:1}.pen-flag img{width:40px;height:27px;object-fit:cover;border-radius:4px}
+  .pen-name{font-family:"Oswald";font-weight:600;font-size:14px;text-align:center;line-height:1.15}
+  .pen-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:15px;font-size:12px;color:var(--draw)}
+  .pen-skip{background:transparent;border:0;color:var(--muted);cursor:pointer;font-family:inherit;font-size:12.5px;text-decoration:underline}
+
+  /* ===== Bracket per-round colour ===== */
+  .tree-match{border-left:3px solid var(--rc,rgba(255,255,255,.09))}
+  .tree-match .tree-match-head b{color:var(--rc,var(--cyan))}
+  .tree-column.r32 .tree-round-title{color:#00e5ff}
+  .tree-column.r16 .tree-round-title{color:#19f0c4}
+  .tree-column.qf .tree-round-title{color:#b14eff}
+  .tree-column.sf .tree-round-title{color:#ff9d3c}
+  .tree-pen{font-size:9px;color:var(--draw);font-weight:800;margin-left:1px}
 </style>
 </head>
 <body>
@@ -505,7 +557,7 @@ const ISO = {
 const EMBEDDED={"matches":[{"id":"g20-ned-swe","group":"F","home":"Netherlands","away":"Sweden","homeFlag":"🇳🇱","awayFlag":"🇸🇪","kickoff":"2026-06-20T16:00:00Z","venue":"Houston","status":"finished","homeScore":5,"awayScore":1},{"id":"g20-ger-civ","group":"E","home":"Germany","away":"Ivory Coast","homeFlag":"🇩🇪","awayFlag":"🇨🇮","kickoff":"2026-06-20T20:00:00Z","venue":"MetLife","status":"finished","homeScore":2,"awayScore":1},{"id":"g20-ecu-cuw","group":"E","home":"Ecuador","away":"Curaçao","homeFlag":"🇪🇨","awayFlag":"🇨🇼","kickoff":"2026-06-20T23:00:00Z","venue":"Philadelphia","status":"finished","homeScore":0,"awayScore":0},{"id":"g21-tun-jpn","group":"F","home":"Tunisia","away":"Japan","homeFlag":"🇹🇳","awayFlag":"🇯🇵","kickoff":"2026-06-21T17:00:00Z","venue":"Kansas City","status":"finished","homeScore":0,"awayScore":4},{"id":"g21-esp-ksa","group":"H","home":"Spain","away":"Saudi Arabia","homeFlag":"🇪🇸","awayFlag":"🇸🇦","kickoff":"2026-06-21T19:00:00Z","venue":"Atlanta","status":"finished","homeScore":4,"awayScore":0},{"id":"g21-bel-irn","group":"G","home":"Belgium","away":"IR Iran","homeFlag":"🇧🇪","awayFlag":"🇮🇷","kickoff":"2026-06-21T21:00:00Z","venue":"Los Angeles","status":"finished","homeScore":0,"awayScore":0},{"id":"g21-uru-cpv","group":"H","home":"Uruguay","away":"Cabo Verde","homeFlag":"🇺🇾","awayFlag":"🇨🇻","kickoff":"2026-06-21T23:00:00Z","venue":"Miami","status":"finished","homeScore":2,"awayScore":2},{"id":"g21-egy-nzl","group":"G","home":"Egypt","away":"New Zealand","homeFlag":"🇪🇬","awayFlag":"🇳🇿","kickoff":"2026-06-22T01:00:00Z","venue":"Vancouver","status":"finished","homeScore":3,"awayScore":1},{"id":"g22-arg-aut","group":"J","home":"Argentina","away":"Austria","homeFlag":"🇦🇷","awayFlag":"🇦🇹","kickoff":"2026-06-22T17:00:00Z","venue":"Arlington","status":"finished","homeScore":2,"awayScore":0},{"id":"g22-fra-irq","group":"I","home":"France","away":"Iraq","homeFlag":"🇫🇷","awayFlag":"🇮🇶","kickoff":"2026-06-22T21:00:00Z","venue":"Philadelphia","status":"finished","homeScore":3,"awayScore":0},{"id":"g22-nor-sen","group":"I","home":"Norway","away":"Senegal","homeFlag":"🇳🇴","awayFlag":"🇸🇳","kickoff":"2026-06-23T00:00:00Z","venue":"New York/NJ","status":"finished","homeScore":3,"awayScore":2},{"id":"g22-jor-alg","group":"J","home":"Jordan","away":"Algeria","homeFlag":"🇯🇴","awayFlag":"🇩🇿","kickoff":"2026-06-23T03:00:00Z","venue":"SF Bay Area","status":"finished","homeScore":1,"awayScore":2},{"id":"g23-por-uzb","group":"K","home":"Portugal","away":"Uzbekistan","homeFlag":"🇵🇹","awayFlag":"🇺🇿","kickoff":"2026-06-23T17:00:00Z","venue":"Houston","status":"finished","homeScore":5,"awayScore":0},{"id":"g23-eng-gha","group":"L","home":"England","away":"Ghana","homeFlag":"🏴","awayFlag":"🇬🇭","kickoff":"2026-06-23T20:00:00Z","venue":"Boston","status":"finished","homeScore":0,"awayScore":0},{"id":"g23-pan-cro","group":"L","home":"Panama","away":"Croatia","homeFlag":"🇵🇦","awayFlag":"🇭🇷","kickoff":"2026-06-23T23:00:00Z","venue":"Toronto","status":"finished","homeScore":0,"awayScore":1},{"id":"g23-col-cod","group":"K","home":"Colombia","away":"Congo DR","homeFlag":"🇨🇴","awayFlag":"🇨🇩","kickoff":"2026-06-24T02:00:00Z","venue":"Guadalajara Stadium","status":"finished","homeScore":1,"awayScore":0},{"id":"g24-bih-qat","group":"B","home":"Bosnia and Herzegovina","away":"Qatar","homeFlag":"🇧🇦","awayFlag":"🇶🇦","kickoff":"2026-06-24T19:00:00Z","venue":"Lumen Field, Seattle","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g24-sui-can","group":"B","home":"Switzerland","away":"Canada","homeFlag":"🇨🇭","awayFlag":"🇨🇦","kickoff":"2026-06-24T19:00:00Z","venue":"BC Place, Vancouver","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g24-mar-hai","group":"C","home":"Morocco","away":"Haiti","homeFlag":"🇲🇦","awayFlag":"🇭🇹","kickoff":"2026-06-24T22:00:00Z","venue":"MetLife Stadium","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g24-sco-bra","group":"C","home":"Scotland","away":"Brazil","homeFlag":"🏴","awayFlag":"🇧🇷","kickoff":"2026-06-24T22:00:00Z","venue":"Hard Rock Stadium, Miami","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g24-cze-mex","group":"A","home":"Czechia","away":"Mexico","homeFlag":"🇨🇿","awayFlag":"🇲🇽","kickoff":"2026-06-25T01:00:00Z","venue":"Dallas Stadium","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g24-rsa-kor","group":"A","home":"South Africa","away":"South Korea","homeFlag":"🇿🇦","awayFlag":"🇰🇷","kickoff":"2026-06-25T01:00:00Z","venue":"Atlanta Stadium","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g25-cuw-civ","group":"E","home":"Curaçao","away":"Ivory Coast","homeFlag":"🇨🇼","awayFlag":"🇨🇮","kickoff":"2026-06-25T20:00:00Z","venue":"Boston Stadium","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g25-ecu-ger","group":"E","home":"Ecuador","away":"Germany","homeFlag":"🇪🇨","awayFlag":"🇩🇪","kickoff":"2026-06-25T20:00:00Z","venue":"Toronto Stadium","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g25-jpn-swe","group":"F","home":"Japan","away":"Sweden","homeFlag":"🇯🇵","awayFlag":"🇸🇪","kickoff":"2026-06-25T23:00:00Z","venue":"Dallas Stadium","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g25-tun-ned","group":"F","home":"Tunisia","away":"Netherlands","homeFlag":"🇹🇳","awayFlag":"🇳🇱","kickoff":"2026-06-25T23:00:00Z","venue":"Kansas City Stadium","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g25-par-aus","group":"D","home":"Paraguay","away":"Australia","homeFlag":"🇵🇾","awayFlag":"🇦🇺","kickoff":"2026-06-26T02:00:00Z","venue":"Houston Stadium","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g25-tur-usa","group":"D","home":"Turkey","away":"United States","homeFlag":"🇹🇷","awayFlag":"🇺🇸","kickoff":"2026-06-26T02:00:00Z","venue":"Los Angeles Stadium","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g26-nor-fra","group":"I","home":"Norway","away":"France","homeFlag":"🇳🇴","awayFlag":"🇫🇷","kickoff":"2026-06-26T19:00:00Z","venue":"Seattle Stadium","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g26-sen-irq","group":"I","home":"Senegal","away":"Iraq","homeFlag":"🇸🇳","awayFlag":"🇮🇶","kickoff":"2026-06-26T19:00:00Z","venue":"Philadelphia Stadium","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g26-cpv-ksa","group":"H","home":"Cabo Verde","away":"Saudi Arabia","homeFlag":"🇨🇻","awayFlag":"🇸🇦","kickoff":"2026-06-27T00:00:00Z","venue":"Miami Stadium","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g26-uru-esp","group":"H","home":"Uruguay","away":"Spain","homeFlag":"🇺🇾","awayFlag":"🇪🇸","kickoff":"2026-06-27T00:00:00Z","venue":"Kansas City Stadium","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g26-egy-irn","group":"G","home":"Egypt","away":"IR Iran","homeFlag":"🇪🇬","awayFlag":"🇮🇷","kickoff":"2026-06-27T03:00:00Z","venue":"Vancouver","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g26-nzl-bel","group":"G","home":"New Zealand","away":"Belgium","homeFlag":"🇳🇿","awayFlag":"🇧🇪","kickoff":"2026-06-27T03:00:00Z","venue":"Los Angeles","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g27-cro-gha","group":"L","home":"Croatia","away":"Ghana","homeFlag":"🇭🇷","awayFlag":"🇬🇭","kickoff":"2026-06-27T21:00:00Z","venue":"Philadelphia Stadium","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g27-pan-eng","group":"L","home":"Panama","away":"England","homeFlag":"🇵🇦","awayFlag":"🏴","kickoff":"2026-06-27T21:00:00Z","venue":"Kansas City Stadium","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g27-cod-uzb","group":"K","home":"Congo DR","away":"Uzbekistan","homeFlag":"🇨🇩","awayFlag":"🇺🇿","kickoff":"2026-06-27T23:30:00Z","venue":"Dallas Stadium","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g27-col-por","group":"K","home":"Colombia","away":"Portugal","homeFlag":"🇨🇴","awayFlag":"🇵🇹","kickoff":"2026-06-27T23:30:00Z","venue":"Miami Stadium","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g28-alg-aut","group":"J","home":"Algeria","away":"Austria","homeFlag":"🇩🇿","awayFlag":"🇦🇹","kickoff":"2026-06-28T02:00:00Z","venue":"Vancouver Stadium","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g28-jor-arg","group":"J","home":"Jordan","away":"Argentina","homeFlag":"🇯🇴","awayFlag":"🇦🇷","kickoff":"2026-06-28T02:00:00Z","venue":"New York/New Jersey Stadium","status":"scheduled","homeScore":null,"awayScore":null}]};
 
 const DEFAULTS={orgName:"EGEC",seasonLabel:"World Cup 2026",lockOffsetMinutes:60,
-  scoring:{exactScore:5,correctOutcome:3,correctGoalsBonus:1},adminCode:"EGEC2026",
+  scoring:{exactScore:5,correctOutcome:3,correctGoalsBonus:1,advanceBonus:3},adminCode:"EGEC2026",
   top3:{openAt:"2026-06-28T00:00:00+03:00",closeAt:"2026-07-01T00:00:00+03:00",firstPts:100,secondPts:75,thirdPts:50,exactOrderBonus:100},
   liveScores:{apiToken:"",competitionId:"WC"},storage:{mode:"local",firebase:{}},refreshMs:30000};
 const CFG=Object.assign({},DEFAULTS,window.CONFIG||{});
@@ -564,9 +616,19 @@ const Store={
   myTop3(code){const all=this.predsAll();return (all[code]&&all[code].top3)||{};},
   top3Result(){return this.resultsAll()[TOP3_DOC_ID]||{};},
 
-  async savePick(code,name,matchId,h,a){
+  async savePick(code,name,matchId,h,a,extra){
     const cur=(this.cache.preds[code]&&this.cache.preds[code].picks)||{};
-    cur[matchId]={h,a};
+    const prev=cur[matchId]||{};
+    cur[matchId]=Object.assign({},prev,{h,a},extra||{});
+    await this.fs.setDoc(this.fs.doc(this.db,"predictions",code),{name,picks:cur},{merge:true});
+  },
+
+  // Knockout shootout pick: who the player thinks advances when they
+  // predicted a level score after 120'. side = "home" | "away" | null.
+  async savePenPick(code,name,matchId,side){
+    const cur=(this.cache.preds[code]&&this.cache.preds[code].picks)||{};
+    const prev=cur[matchId]||{h:0,a:0};
+    cur[matchId]=Object.assign({},prev,{pen:side});
     await this.fs.setDoc(this.fs.doc(this.db,"predictions",code),{name,picks:cur},{merge:true});
   },
 
@@ -574,8 +636,8 @@ const Store={
     await this.fs.setDoc(this.fs.doc(this.db,"predictions",code),{name,top3,top3UpdatedAt:Date.now()},{merge:true});
   },
 
-  async setResult(matchId,h,a,status){
-    await this.fs.setDoc(this.fs.doc(this.db,"results",matchId),{homeScore:h,awayScore:a,status});
+  async setResult(matchId,h,a,status,advance){
+    await this.fs.setDoc(this.fs.doc(this.db,"results",matchId),{homeScore:h,awayScore:a,status,advance:advance||null});
   },
 
   async setTop3Result(first,second,third){
@@ -651,11 +713,15 @@ function cleanTreeText(name){
 function isPlaceholderTeam(name){return /^(TBD|Winner of|Loser of|\d+(st|nd|rd|th) Group|[123]rd Group|[12]nd Group|[12]st Group)/i.test(String(name||""));}
 function hasPlaceholderTeams(m){return isPlaceholderTeam(m.home)||isPlaceholderTeam(m.away);}
 function roundDisplay(m){return isKnockout(m)?(m.round||"Knockout"):"Group "+m.group;}
+/* per-round color class, used on match cards (all tabs) and the bracket */
+const ROUND_CLASS={"Round of 32":"rc-r32","Round of 16":"rc-r16","Quarterfinal":"rc-qf","Semifinal":"rc-sf","3rd Place Playoff":"rc-third","Final":"rc-final"};
+function roundClass(m){return isKnockout(m)?(ROUND_CLASS[m.round]||"rc-ko"):"rc-group";}
 function shortMatchName(m){return friendlyMatchName(m);}
 function resultWinnerSide(m){
   if(!m||m.status!=="finished"||m.homeScore==null||m.awayScore==null)return "";
   if(m.homeScore>m.awayScore)return "home";
   if(m.awayScore>m.homeScore)return "away";
+  if(isKnockout(m)&&(m.advance==="home"||m.advance==="away"))return m.advance; // shootout
   return "";
 }
 function resolvedParticipant(source,fallbackName,fallbackFlag,stack,matchId){
@@ -683,6 +749,7 @@ function resolvedMatch(id,stack){
     if(r.home)m.home=r.home;if(r.away)m.away=r.away;
     if(r.homeFlag)m.homeFlag=r.homeFlag;if(r.awayFlag)m.awayFlag=r.awayFlag;
     m.homeScore=r.homeScore;m.awayScore=r.awayScore;m.status=r.status||m.status;
+    if(r.advance!==undefined)m.advance=r.advance;
     m.liveMinute=r.liveMinute;m.liveText=r.liveText;
     if(r.kickoff)m.kickoff=r.kickoff;
   }
@@ -822,6 +889,30 @@ function scorePick(pick,m){
   if(ph===fh)pts+=CFG.scoring.correctGoalsBonus;if(pa===fa)pts+=CFG.scoring.correctGoalsBonus;
   return{pts,kind:pts>0?"part":"miss",defaulted:!!p.defaulted};
 }
+/* ---- Knockout advancement (who goes through) ----
+   The 120' scoreline is scored by scorePick above. On top of that, every
+   knockout tie awards advanceBonus for naming the team that advances.
+   If you predicted a decisive 120' score, your advancer is the winner;
+   if you predicted a draw, it's your shootout pick (pick.pen). */
+function predictedAdvancer(pick){
+  const p=effectivePick(pick);
+  if(+p.h>+p.a)return"home";
+  if(+p.a>+p.h)return"away";
+  return p.pen==="home"||p.pen==="away"?p.pen:null; // draw -> needs a shootout pick
+}
+function actualAdvancer(m){
+  if(m.homeScore==null||m.awayScore==null)return null;
+  if(m.homeScore>m.awayScore)return"home";
+  if(m.awayScore>m.homeScore)return"away";
+  return m.advance==="home"||m.advance==="away"?m.advance:null; // organizer shootout result
+}
+function advanceScore(pick,m){
+  if(!isKnockout(m)||m.status!=="finished")return{pts:0,kind:"none",predicted:null,actual:null};
+  const pa=predictedAdvancer(pick),aa=actualAdvancer(m);
+  if(!pa||!aa)return{pts:0,kind:"none",predicted:pa,actual:aa};
+  const hit=pa===aa;
+  return{pts:hit?(CFG.scoring.advanceBonus||0):0,kind:hit?"hit":"miss",predicted:pa,actual:aa};
+}
 function scoreTop3(top3){
   const a=Store.top3Result();
   if(!hasCompleteTop3(a))return{pts:0,kind:"none",bonus:false};
@@ -860,7 +951,7 @@ function computeScore(picks,top3,opts){
 
   list.forEach(m=>{
     const pick=picks[m.id];
-    const earned=scorePick(pick,m).pts;
+    const earned=scorePick(pick,m).pts+advanceScore(pick,m).pts;
     scorePts+=earned;
     if(m.status!=="finished")projectedScored+=earned;else confirmedScored+=earned;
 
@@ -892,7 +983,12 @@ function predictorsFor(mm){
   Object.entries(preds).forEach(([code,d])=>{
     const pk=d.picks&&d.picks[m.id];if(!pk||pk.h==null)return;
     const isYou=ME&&code===ME.code;
-    out.push({name:d.name||"?",code,pick:pk,isYou,reveal:locked||isYou,score:m.status==="finished"?scorePick(pk,m):null});
+    let score=null;
+    if(m.status==="finished"){
+      const sc=scorePick(pk,m),adv=advanceScore(pk,m),pts=sc.pts+adv.pts;
+      score={pts,kind:sc.kind==="hit"?"hit":pts>0?"part":"miss"};
+    }
+    out.push({name:d.name||"?",code,pick:pk,isYou,reveal:locked||isYou,score});
   });
   out.sort((a,b)=>(b.isYou-a.isYou)||((b.score?b.score.pts:0)-(a.score?a.score.pts:0))||a.name.localeCompare(b.name));
   return out;
@@ -916,6 +1012,7 @@ const HELP={
       ["🔐 Register & login code","Sign up with your full name and you'll get a 6-character code. That code is your login on any device — screenshot it. Lost it? Your organizer can find it in the Players list."],
       ["⚽ Predict scorelines","On each match card, set the score you expect with the + / – steppers. You can edit freely until the pick locks. Picks lock "+CFG.lockOffsetMinutes+" minutes before kickoff. Don't predict? A default 0-0 is applied so you still play."],
       ["🏅 Scoring","Exact score = "+CFG.scoring.exactScore+" points. Correct result (right winner or draw) = "+CFG.scoring.correctOutcome+" points. Plus +"+CFG.scoring.correctGoalsBonus+" for each team whose goal count you got exactly right."],
+      ["🥅 Knockouts & penalties","From the Round of 32 on, your scoreline is judged on the result after 120 minutes, scored exactly as above. On top of that you earn +"+CFG.scoring.advanceBonus+" for correctly naming the team that advances. If you predict a draw after 120', a popup asks who wins the shootout — that's your advancing pick. No exact penalty score needed."],
       ["🏆 Top 3 winners","During the Top 3 window, predict the final 1st, 2nd and 3rd places. Worth "+CFG.top3.firstPts+" / "+CFG.top3.secondPts+" / "+CFG.top3.thirdPts+" points, with a +"+CFG.top3.exactOrderBonus+" bonus if you get the exact order."],
       ["👤 Player profile","Tap any name on the leaderboard (or your points up top) to open a profile: total points, accuracy, current and best streak, and a full prediction history."],
       ["📊 Live leaderboard","Ranks everyone by points in real time. Turn on “Include live” to see projected points from matches in progress — the board reshuffles as goals go in."],
@@ -933,6 +1030,7 @@ const HELP={
       ["🔐 التسجيل وكود الدخول","سجّل باسمك الكامل وستحصل على كود من ٦ أحرف. هذا الكود هو وسيلة دخولك على أي جهاز — التقط له صورة. فقدته؟ يمكن للمنظّم إيجاده في قائمة اللاعبين."],
       ["⚽ توقع النتائج","في كل بطاقة مباراة، اضبط النتيجة المتوقعة بأزرار + / –. يمكنك التعديل بحرية حتى يُغلق التوقع. تُغلق التوقعات قبل "+CFG.lockOffsetMinutes+" دقيقة من انطلاق المباراة. لم تتوقع؟ تُطبَّق نتيجة افتراضية ٠-٠ لتبقى مشاركاً."],
       ["🏅 النقاط","النتيجة المضبوطة = "+CFG.scoring.exactScore+" نقاط. النتيجة الصحيحة (الفائز الصحيح أو التعادل) = "+CFG.scoring.correctOutcome+" نقاط. بالإضافة إلى +"+CFG.scoring.correctGoalsBonus+" لكل فريق أصبت عدد أهدافه بالضبط."],
+      ["🥅 الأدوار الإقصائية والركلات","من دور الـ32 فصاعداً تُحتسب نتيجتك بعد 120 دقيقة بنفس القواعد أعلاه، وتحصل إضافياً على +"+CFG.scoring.advanceBonus+" عند تحديد الفريق المتأهل بشكل صحيح. وإذا توقعت تعادلاً بعد 120 دقيقة تظهر نافذة لتختار الفائز بركلات الترجيح — وهو اختيارك للمتأهل. لا حاجة لتوقع نتيجة الركلات بالضبط."],
       ["🏆 المراكز الثلاثة","خلال فترة التوقع، توقّع المركز الأول والثاني والثالث النهائي. القيمة "+CFG.top3.firstPts+" / "+CFG.top3.secondPts+" / "+CFG.top3.thirdPts+" نقطة، مع مكافأة +"+CFG.top3.exactOrderBonus+" إذا أصبت الترتيب بالضبط."],
       ["👤 الملف الشخصي","اضغط على أي اسم في لوحة المتصدرين (أو على نقاطك بالأعلى) لفتح الملف: مجموع النقاط، الدقة، السلسلة الحالية والأفضل، وسجل التوقعات الكامل."],
       ["📊 لوحة المتصدرين المباشرة","ترتّب الجميع بالنقاط لحظياً. فعّل «تضمين المباشر» لرؤية النقاط المتوقعة من المباريات الجارية — تتغيّر اللوحة مع كل هدف."],
@@ -1188,6 +1286,7 @@ function renderApp(){
         <span><b>${CFG.scoring.exactScore}</b> exact</span>
         <span><b>${CFG.scoring.correctOutcome}</b> result</span>
         <span><b>+${CFG.scoring.correctGoalsBonus}</b> per exact goals</span>
+        <span><b>+${CFG.scoring.advanceBonus}</b> KO advance</span>
         <span><b>${CFG.top3.firstPts}/${CFG.top3.secondPts}/${CFG.top3.thirdPts}</b> Top 3</span>
       </div>
       <div style="margin-top:9px">Picks lock <b>${CFG.lockOffsetMinutes} min</b> before kickoff · Top 3 exact order bonus <b>+${CFG.top3.exactOrderBonus}</b> · Shared across all devices</div>
@@ -1432,7 +1531,7 @@ async function saveTop3Pick(){
 
 function renderCard(m){
   const state=liveState(m),locked=isLocked(m),pick=Store.myPicks(ME.code)[m.id],out=outcome(m);
-  const card=el("div","card"+(state==="live"?" live":""));
+  const card=el("div","card "+roundClass(m)+(state==="live"?" live":""));
 
   const head=el("div","card-head");
   const grp=el("span","grp");grp.textContent=roundDisplay(m)+(m.venue?" · "+m.venue:"");
@@ -1466,7 +1565,16 @@ function renderCard(m){
     const sc=scorePick(pick,m),shown=effectivePick(pick);const line=el("div","result-line");
     const yp=el("div","yourpick");yp.innerHTML=pick&&pick.h!=null?`Your pick: <b>${pick.h}-${pick.a}</b>`:`Default pick: <b>0-0</b>`;
     const b=el("span","pts-badge "+sc.kind);b.textContent=sc.kind==="none"?"—":sc.kind==="hit"?"Exact! +"+sc.pts:sc.pts>0?"+"+sc.pts+" pts":"0 pts";
-    line.appendChild(yp);line.appendChild(b);pred.appendChild(line);
+    line.appendChild(yp);line.appendChild(b);
+    if(isKnockout(m)){
+      const adv=advanceScore(pick,m);
+      if(adv.kind!=="none"){
+        const ab=el("span","pts-badge "+(adv.kind==="hit"?"hit":"miss"));
+        ab.textContent=adv.kind==="hit"?"Advance ✓ +"+adv.pts:"Advance ✗";
+        line.appendChild(ab);
+      }
+    }
+    pred.appendChild(line);
   }else if(isKnockout(m)&&hasPlaceholderTeams(m)){
     const note=el("div","locked-note");
     note.innerHTML=`<span class="status pending"><span class="dot"></span></span> Teams not confirmed yet · prediction opens after bracket sync`;
@@ -1475,12 +1583,34 @@ function renderCard(m){
     const note=el("div","locked-note");
     note.innerHTML=pick&&pick.h!=null?`<span class="status locked"><span class="dot"></span></span> Picks closed · your pick <b>${pick.h}-${pick.a}</b>`:`<span class="status locked"><span class="dot"></span></span> Picks closed · default pick <b>0-0</b>`;
     pred.appendChild(note);
+    if(isKnockout(m)&&pick&&pick.h!=null&&+pick.h===+pick.a){
+      const pn=el("div","locked-note");
+      const who=pick.pen==="home"?m.home:pick.pen==="away"?m.away:null;
+      pn.innerHTML=who?`🥅 Shootout: <b>${esc(who)}</b>`:`🥅 No shootout winner picked`;
+      pred.appendChild(pn);
+    }
   }else{
-    const label=el("div","pred-label");label.textContent="Your scoreline prediction";pred.appendChild(label);
+    const label=el("div","pred-label");label.textContent=isKnockout(m)?"Your prediction (after 120')":"Your scoreline prediction";pred.appendChild(label);
     const row=el("div","pred-row");
     row.appendChild(stepper(m,"h",pick?pick.h:""));
     const mid=el("span","pred-mid");mid.textContent="–";row.appendChild(mid);
     row.appendChild(stepper(m,"a",pick?pick.a:""));pred.appendChild(row);
+    if(isKnockout(m)){
+      const penWrap=el("div","pen-inline");
+      const pk=Store.myPicks(ME.code)[m.id]||{};
+      const lvl=pk.h!=null&&(+pk.h===+pk.a);
+      if(lvl){
+        const who=pk.pen==="home"?m.home:pk.pen==="away"?m.away:null;
+        penWrap.innerHTML=who
+          ?`<span class="pen-tag">🥅 Shootout winner: <b>${esc(who)}</b></span><button type="button" class="pen-change">change</button>`
+          :`<button type="button" class="pen-pick">🥅 Pick shootout winner →</button>`;
+        const btn=penWrap.querySelector(".pen-change,.pen-pick");
+        if(btn)btn.onclick=()=>openPenaltyModal(m,pk.pen||null);
+      }else{
+        penWrap.innerHTML=`<span class="pen-note">A level score opens a shootout-winner pick.</span>`;
+      }
+      pred.appendChild(penWrap);
+    }
     const lock=el("div","lock-row");
     lock.innerHTML=`Locks in <span class="lock-clock" data-countdown="${m.id}">--:--:--</span> <span class="saved" data-saved="${m.id}">Saved ✓</span>`;
     pred.appendChild(lock);
@@ -1527,12 +1657,43 @@ function stepper(m,side,val){
   wrap.appendChild(minus);wrap.appendChild(input);wrap.appendChild(plus);return wrap;
 }
 async function savePick(m,side,v){
-  const cur=Object.assign({h:null,a:null},Store.myPicks(ME.code)[m.id]||{});
+  const existing=Store.myPicks(ME.code)[m.id]||{};
+  const cur=Object.assign({h:null,a:null},existing);
   cur[side]=v;if(cur.h==null)cur.h=0;if(cur.a==null)cur.a=0;
-  await Store.savePick(ME.code,ME.name,m.id,cur.h,cur.a);
+  const knockout=isKnockout(m), level=(+cur.h===+cur.a);
+  let pen=existing.pen||null;
+  if(!knockout||!level)pen=null;            // group, or decisive KO -> no shootout
+  await Store.savePick(ME.code,ME.name,m.id,cur.h,cur.a,{pen});
   const s=document.querySelector(`[data-saved="${m.id}"]`);
   if(s){s.classList.add("show");clearTimeout(savedTimer);savedTimer=setTimeout(()=>s.classList.remove("show"),1300);}
   $(".me-chip .pts").innerHTML=totalFor(Store.myPicks(ME.code),Store.myTop3(ME.code)).total+'<small> PTS</small>';
+  if(knockout&&level&&!pen)openPenaltyModal(m,null); // draw -> ask who advances
+}
+
+/* Popup: predict the shootout winner when you called a level score after 120'. */
+function openPenaltyModal(m,currentSide){
+  const existing=document.querySelector(".pen-modal");if(existing)existing.remove();
+  const modal=el("div","pen-modal");modal.setAttribute("role","dialog");modal.setAttribute("aria-modal","true");
+  const close=()=>{document.removeEventListener("keydown",escClose);modal.remove();};
+  const escClose=e=>{if(e.key==="Escape")close();};document.addEventListener("keydown",escClose);
+  modal.onclick=e=>{if(e.target===modal)close();};
+  const pk=Store.myPicks(ME.code)[m.id]||{};
+  const sc=(pk.h!=null?pk.h:0)+"–"+(pk.a!=null?pk.a:0);
+  const choose=async(sideSel)=>{
+    await Store.savePenPick(ME.code,ME.name,m.id,sideSel);
+    const p=$(".me-chip .pts");if(p)p.innerHTML=totalFor(Store.myPicks(ME.code),Store.myTop3(ME.code)).total+'<small> PTS</small>';
+    close();renderApp();
+  };
+  const opt=(s,name,flag)=>`<button class="pen-opt${currentSide===s?" sel":""}" data-side="${s}"><span class="pen-flag">${flag||"⚽"}</span><span class="pen-name">${esc(name)}</span></button>`;
+  modal.innerHTML=`<div class="pen-card">
+    <div class="pen-title">🥅 Shootout winner</div>
+    <div class="pen-sub">You predicted a <b>${esc(sc)}</b> draw after 120 minutes — who advances on penalties?</div>
+    <div class="pen-opts">${opt("home",m.home,m.homeFlag)}${opt("away",m.away,m.awayFlag)}</div>
+    <div class="pen-foot"><span>+${CFG.scoring.advanceBonus} pts if you call who advances</span><button class="pen-skip" id="penSkip" type="button">Decide later</button></div>
+  </div>`;
+  modal.querySelectorAll(".pen-opt").forEach(b=>b.onclick=()=>choose(b.getAttribute("data-side")));
+  modal.querySelector("#penSkip").onclick=close;
+  document.body.appendChild(modal);
 }
 
 function renderMyPicks(){
@@ -1545,7 +1706,7 @@ function renderMyPicks(){
   const h=el("h2");h.innerHTML=`<span>📝 My Picks</span><span class="meta">${list.length} total · ${editable} editable</span>`;panel.appendChild(h);
   list.forEach(m=>{
     const pick=picks[m.id],locked=isLocked(m);
-    const row=el("div","mp-row");
+    const row=el("div","mp-row "+roundClass(m));
     const info=el("div","mp-info");
     const teams=el("div","mp-teams");
     teams.appendChild(flagEl(m.home,m.homeFlag));
@@ -1554,7 +1715,10 @@ function renderMyPicks(){
     const an=el("span","mpt");an.textContent=m.away;teams.appendChild(an);
     teams.appendChild(flagEl(m.away,m.awayFlag));
     const sub=el("div","mp-sub");
-    sub.textContent="Group "+m.group+" · "+(m.status==="finished"?("Full time "+(m.homeScore??0)+"-"+(m.awayScore??0)):locked?"Locked":fmtKO(m));
+    const lvlPick=pick.h!=null&&(+pick.h===+pick.a);
+    const penWho=pick.pen==="home"?m.home:pick.pen==="away"?m.away:null;
+    const penTxt=isKnockout(m)&&lvlPick?(" · 🥅 "+(penWho||"shootout: pick a winner")):"";
+    sub.textContent=roundDisplay(m)+" · "+(m.status==="finished"?("Full time "+(m.homeScore??0)+"-"+(m.awayScore??0)):locked?"Locked":fmtKO(m))+penTxt;
     info.appendChild(teams);info.appendChild(sub);row.appendChild(info);
 
     const ctrl=el("div","mp-ctrl");
@@ -1564,13 +1728,21 @@ function renderMyPicks(){
       const d=el("span","pred-mid");d.textContent="–";st.appendChild(d);
       st.appendChild(stepper(m,"a",pick.a));
       ctrl.appendChild(st);
+      if(isKnockout(m)&&lvlPick){
+        const pb=el("button","mp-pen");pb.type="button";pb.title="Shootout winner";pb.textContent=penWho?"🥅":"🥅?";
+        pb.onclick=()=>openPenaltyModal(m,pick.pen||null);ctrl.appendChild(pb);
+      }
       const rm=el("button","mp-remove");rm.type="button";rm.title="Remove this prediction";rm.textContent="🗑";
       rm.onclick=()=>removePick(m);
       ctrl.appendChild(rm);
     }else{
       const pv=el("div","mp-pick");
       const val=el("span","mp-val");val.textContent=pick.h+"-"+pick.a;pv.appendChild(val);
-      if(m.status==="finished"){const sc=scorePick(pick,m);const b=el("span","pts-badge "+sc.kind);b.textContent=sc.kind==="hit"?"+"+sc.pts:sc.pts>0?"+"+sc.pts:"0";pv.appendChild(b);}
+      if(m.status==="finished"){
+        const sc=scorePick(pick,m);const tot=sc.pts+advanceScore(pick,m).pts;
+        const b=el("span","pts-badge "+(sc.kind==="hit"?"hit":tot>0?"part":"miss"));
+        b.textContent=tot>0?"+"+tot:"0";pv.appendChild(b);
+      }
       ctrl.appendChild(pv);
     }
     row.appendChild(ctrl);panel.appendChild(row);
@@ -1718,13 +1890,14 @@ function championName(final){
   return "Champion TBD";
 }
 function renderTreeMatch(m,isCenter){
-  const box=el("div","tree-match"+(isCenter?" final tree-final-box":""));
+  const box=el("div","tree-match "+roundClass(m)+(isCenter?" final tree-final-box":""));
   const win=resultWinnerSide(m);
+  const pen=m.status==="finished"&&m.homeScore!=null&&m.homeScore===m.awayScore&&(m.advance==="home"||m.advance==="away");
   const head=el("div","tree-match-head");
-  head.innerHTML=`<b>${esc(shortMatchName(m))}</b><span>${fmtKO(m)}</span>`;
+  head.innerHTML=`<b>${esc(shortMatchName(m))}</b><span>${pen?"PENS · ":""}${fmtKO(m)}</span>`;
   box.appendChild(head);
-  box.appendChild(renderTreeTeam(m.home,m.homeScore,m.homeFlag,win==="home"));
-  box.appendChild(renderTreeTeam(m.away,m.awayScore,m.awayFlag,win==="away"));
+  box.appendChild(renderTreeTeam(m.home,m.homeScore,m.homeFlag,win==="home",pen&&win==="home"));
+  box.appendChild(renderTreeTeam(m.away,m.awayScore,m.awayFlag,win==="away",pen&&win==="away"));
   return box;
 }
 function treeAdvanceText(m,win){
@@ -1753,7 +1926,7 @@ function flagIso(flag,name){
   if(typeof ISO!=="undefined"&&ISO[name])return ISO[name];
   return "";
 }
-function renderTreeTeam(name,score,flag,win){
+function renderTreeTeam(name,score,flag,win,pen){
   const row=el("div","tree-team"+(win?" win":"")+(isPlaceholderTeam(name)?" placeholder":""));
   const seed=seedLabel(name);
   const f=el("span","flag-emo");
@@ -1767,7 +1940,7 @@ function renderTreeTeam(name,score,flag,win){
     f.textContent=seed||"•";
   }
   const nm=el("span","tree-team-name");nm.textContent=cleanTreeText(name);
-  const sc=el("span","tree-score");sc.textContent=score==null?"–":score;
+  const sc=el("span","tree-score");sc.innerHTML=(score==null?"–":score)+(pen?'<sup class="tree-pen">P</sup>':"");
   row.appendChild(f);row.appendChild(nm);row.appendChild(sc);
   return row;
 }
@@ -1979,11 +2152,17 @@ function renderOrg(){
   const rh=el("h2");rh.innerHTML=`<span>⚙ Match results</span><span class="meta">enter final scores</span>`;rPanel.appendChild(rh);
   const arr=allEffectiveMatches().sort((a,b)=>ko(a)-ko(b));
   arr.forEach(m=>{
-    const row=el("div","org-row");
-    const t=el("div","ot");t.innerHTML=`${esc(m.home)} <span style="color:var(--faint)">v</span> ${esc(m.away)}<br><span style="font-family:Inter;font-size:11px;color:var(--muted)">${fmtKO(m)} · ${m.status}</span>`;
+    const row=el("div","org-row "+roundClass(m));
+    const t=el("div","ot");t.innerHTML=`${esc(m.home)} <span style="color:var(--faint)">v</span> ${esc(m.away)}<br><span style="font-family:Inter;font-size:11px;color:var(--muted)">${roundDisplay(m)} · ${fmtKO(m)} · ${m.status}</span>`;
     const ctrl=el("div","org-controls");
+    const penSel=isKnockout(m)?`<select class="mini org-pen" id="op-${m.id}" title="Penalty winner (only used if scores are level)">
+        <option value=""${m.advance?"":" selected"}>Pen: —</option>
+        <option value="home"${m.advance==="home"?" selected":""}>Pen: ${esc(m.home)}</option>
+        <option value="away"${m.advance==="away"?" selected":""}>Pen: ${esc(m.away)}</option>
+      </select>`:"";
     ctrl.innerHTML=`<input class="mini" id="oh-${m.id}" type="number" min="0" value="${m.homeScore??""}" placeholder="-"/>
       <input class="mini" id="oa-${m.id}" type="number" min="0" value="${m.awayScore??""}" placeholder="-"/>
+      ${penSel}
       <button class="org-live" data-live="${m.id}">Live</button>
       <button class="org-save" data-final="${m.id}">Final</button>
       <button class="org-clear" data-clear="${m.id}" title="Clear result">×</button>`;
@@ -2011,7 +2190,17 @@ function renderOrg(){
     if(top3Clear)top3Clear.onclick=async()=>{await Store.clearTop3Result();toast("Final Top 3 cleared");renderApp();};
     const rd=(id)=>{const h=parseInt($("#oh-"+id).value,10),a=parseInt($("#oa-"+id).value,10);return{h,a,ok:!(isNaN(h)||isNaN(a))};};
     wrap.querySelectorAll("[data-live]").forEach(b=>b.onclick=async()=>{const id=b.getAttribute("data-live");const s=rd(id);if(!s.ok){toast("Enter both scores");return;}await Store.setResult(id,s.h,s.a,"live");toast("Live score updated");renderApp();});
-    wrap.querySelectorAll("[data-final]").forEach(b=>b.onclick=async()=>{const id=b.getAttribute("data-final");const s=rd(id);if(!s.ok){toast("Enter both scores");return;}await Store.setResult(id,s.h,s.a,"finished");toast("Final result saved");renderApp();});
+    wrap.querySelectorAll("[data-final]").forEach(b=>b.onclick=async()=>{
+      const id=b.getAttribute("data-final");const s=rd(id);if(!s.ok){toast("Enter both scores");return;}
+      const m=rawMatchById(id)||{};const knockout=isKnockout(m);
+      let advance=null;
+      if(knockout){
+        const selEl=$("#op-"+id);const sel=selEl?selEl.value:"";
+        if(s.h>s.a)advance="home";else if(s.a>s.h)advance="away";
+        else{ if(sel!=="home"&&sel!=="away"){toast("Level score — pick the penalty winner");return;} advance=sel; }
+      }
+      await Store.setResult(id,s.h,s.a,"finished",advance);toast("Final result saved");renderApp();
+    });
     wrap.querySelectorAll("[data-clear]").forEach(b=>b.onclick=async()=>{const id=b.getAttribute("data-clear");await Store.clearResult(id);toast("Result cleared");renderApp();});
   },0);
   return wrap;
