@@ -2399,8 +2399,8 @@ function renderBoard(){
     row.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();showMemberHistory(p.code);}};
     const rk=el("div","rank"+(i===0?" g1":i===1?" g2":i===2?" g3":""));
     const move=(liveOn&&boardProjected)?(confRank[p.code]-projRank[p.code]):(rankMove[p.code]||0);
-    const moveHtml=move>0?`<span class="lb-move up" title="Up ${move} place${move>1?"s":""}">▲ ${move}</span>`
-                  :move<0?`<span class="lb-move down" title="Down ${-move} place${-move>1?"s":""}">▼ ${-move}</span>`:"";
+    const moveHtml=move>0?`<span class="lb-move up" title="Up ${move} place${move>1?"s":""}">▲</span>`
+                  :move<0?`<span class="lb-move down" title="Down ${-move} place${-move>1?"s":""}">▼</span>`:"";
     rk.innerHTML=`<span class="rk-num">${i+1}</span>${moveHtml}`;
     const nm=el("div","lb-name");
     const topExact=maxExact>0&&p.exacts===maxExact;
