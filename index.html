@@ -330,6 +330,26 @@
   .top3-slot label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);margin-bottom:8px}
   .top3-slot select,.top3-select{width:100%;background:#070912;border:1px solid var(--line-2);color:var(--ink);border-radius:11px;padding:12px;font-family:inherit;outline:none}
   .top3-slot select:focus,.top3-select:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,229,255,.14)}
+  .top3-slot.rank-1{border-color:rgba(255,215,0,.55);background:linear-gradient(160deg,rgba(255,215,0,.14),rgba(255,255,255,.02));box-shadow:0 0 18px rgba(255,215,0,.12)}
+  .top3-slot.rank-2{border-color:rgba(208,214,224,.55);background:linear-gradient(160deg,rgba(208,214,224,.13),rgba(255,255,255,.02));box-shadow:0 0 18px rgba(208,214,224,.10)}
+  .top3-slot.rank-3{border-color:rgba(205,127,50,.6);background:linear-gradient(160deg,rgba(205,127,50,.16),rgba(255,255,255,.02));box-shadow:0 0 18px rgba(205,127,50,.10)}
+  .top3-slot.rank-1 label{color:#ffd700}
+  .top3-slot.rank-2 label{color:#d8e0e8}
+  .top3-slot.rank-3 label{color:#e08a45}
+  .t3-dd{position:relative}
+  .t3-dd-btn{width:100%;display:flex;align-items:center;gap:9px;background:#070912;border:1px solid var(--line-2);color:var(--ink);border-radius:11px;padding:11px 12px;font-family:inherit;font-size:14px;cursor:pointer;outline:none;text-align:left}
+  .t3-dd-btn:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,229,255,.14)}
+  .t3-dd.disabled .t3-dd-btn{opacity:.55;cursor:not-allowed}
+  .t3-dd-caret{margin-left:auto;color:var(--muted);font-size:12px}
+  .t3-dd-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .t3-dd-name.placeholder{color:var(--muted)}
+  .t3-flag{width:26px;height:18px;object-fit:cover;border-radius:3px;box-shadow:0 0 0 1px rgba(0,0,0,.35);flex:0 0 auto}
+  .t3-flag-emo{font-size:18px;width:26px;text-align:center;flex:0 0 auto}
+  .t3-dd-menu{position:absolute;z-index:60;left:0;right:0;top:calc(100% + 6px);max-height:280px;overflow:auto;background:#0a0d18;border:1px solid var(--line-2);border-radius:12px;box-shadow:0 18px 46px rgba(0,0,0,.5);padding:5px}
+  .t3-dd-menu[hidden]{display:none}
+  .t3-dd-opt{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:8px;cursor:pointer;font-size:14px}
+  .t3-dd-opt:hover{background:rgba(0,229,255,.10)}
+  .t3-dd-opt.sel{background:rgba(0,229,255,.16)}
   .top3-actions{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;padding:0 15px 15px}
   .top3-save{border:0;border-radius:12px;cursor:pointer;font-family:"Oswald";font-weight:600;font-size:16px;letter-spacing:.4px;padding:11px 18px;color:#04060e;background:linear-gradient(135deg,var(--cyan),var(--magenta));box-shadow:0 0 18px rgba(255,46,151,.28)}
   .top3-save:disabled{opacity:.55;cursor:not-allowed;filter:grayscale(.5)}
@@ -602,6 +622,7 @@ let authMode="register";
 let savedTimer=null;
 let boardProjected=false;
 let treeUserZoom=1;
+let treeTabOpen=false;
 let LANG=localStorage.getItem("egec_lang")||"en";
 const TOP3_DOC_ID="__top3__";
 
@@ -1378,8 +1399,9 @@ function renderApp(){
   renderTop3HomePopup();
   maybeShowBoostNotice();
   const view=$("#view");
+  if(activeTab!=="tree")treeTabOpen=false;
   if(activeTab==="board"){view.appendChild(renderBoard());return;}
-  if(activeTab==="tree"){view.appendChild(renderTree());return;}
+  if(activeTab==="tree"){if(!treeTabOpen){treeUserZoom=1;treeTabOpen=true;}view.appendChild(renderTree());return;}
   if(activeTab==="top3"){view.appendChild(renderTop3());tick();return;}
   if(activeTab==="org"){view.appendChild(renderOrg());return;}
   if(activeTab==="mine"){view.appendChild(renderMyPicks());tick();return;}
@@ -1520,12 +1542,60 @@ function renderTop3HomePopup(){
   if(g)g.onclick=()=>{sessionStorage.setItem(top3PopupKey(),"1");activeTab="top3";renderApp();};
 }
 
-function teamSelectHtml(id,label,value,disabled){
-  const opts=['<option value="">Select team</option>'].concat(top3Teams().map(t=>{
-    const txt=(t.flag?t.flag+" ":"")+t.name;
-    return `<option value="${esc(t.name)}" ${t.name===value?"selected":""}>${esc(txt)}</option>`;
-  }));
-  return `<div class="top3-slot"><label for="${id}">${label}</label><select id="${id}" ${disabled?"disabled":""}>${opts.join("")}</select></div>`;
+function t3FlagHtml(t){
+  const iso=ISO[t.name];
+  if(iso)return `<img class="t3-flag" src="https://flagcdn.com/w40/${iso}.png" alt="" loading="lazy">`;
+  return `<span class="t3-flag-emo">${t.flag||"🏳️"}</span>`;
+}
+function teamSelectHtml(id,label,value,disabled,rankClass){
+  const teams=top3Teams();
+  const sel=teams.find(t=>t.name===value);
+  const btnInner=sel
+    ? `${t3FlagHtml(sel)}<span class="t3-dd-name">${esc(sel.name)}</span>`
+    : `<span class="t3-dd-name placeholder">Select team</span>`;
+  const opts=teams.map(t=>`<div class="t3-dd-opt${t.name===value?" sel":""}" role="option" data-val="${esc(t.name)}">${t3FlagHtml(t)}<span class="t3-dd-name">${esc(t.name)}</span></div>`).join("");
+  return `<div class="top3-slot ${rankClass||""}">
+    <label>${label}</label>
+    <div class="t3-dd${disabled?" disabled":""}" data-target="${id}">
+      <button type="button" class="t3-dd-btn" ${disabled?"disabled":""} aria-haspopup="listbox" aria-expanded="false">${btnInner}<span class="t3-dd-caret">▾</span></button>
+      <div class="t3-dd-menu" role="listbox" hidden>
+        <div class="t3-dd-opt" role="option" data-val=""><span class="t3-dd-name placeholder">Select team</span></div>
+        ${opts}
+      </div>
+    </div>
+    <input type="hidden" id="${id}" value="${esc(value||"")}">
+  </div>`;
+}
+function closeAllT3Menus(){
+  document.querySelectorAll(".t3-dd-menu").forEach(m=>{m.hidden=true;});
+  document.querySelectorAll(".t3-dd-btn").forEach(b=>b.setAttribute("aria-expanded","false"));
+}
+function wireTop3Dropdowns(){
+  document.querySelectorAll(".t3-dd").forEach(dd=>{
+    if(dd.classList.contains("disabled"))return;
+    const btn=dd.querySelector(".t3-dd-btn"),menu=dd.querySelector(".t3-dd-menu");
+    const input=document.getElementById(dd.getAttribute("data-target"));
+    btn.onclick=e=>{e.stopPropagation();const wasOpen=!menu.hidden;closeAllT3Menus();if(!wasOpen){menu.hidden=false;btn.setAttribute("aria-expanded","true");}};
+    menu.querySelectorAll(".t3-dd-opt").forEach(opt=>{
+      opt.onclick=e=>{
+        e.stopPropagation();
+        const val=opt.getAttribute("data-val");
+        if(input)input.value=val;
+        btn.innerHTML="";
+        if(val){
+          const fl=opt.querySelector(".t3-flag,.t3-flag-emo");
+          if(fl)btn.appendChild(fl.cloneNode(true));
+          const ns=document.createElement("span");ns.className="t3-dd-name";ns.textContent=val;btn.appendChild(ns);
+        }else{
+          const ns=document.createElement("span");ns.className="t3-dd-name placeholder";ns.textContent="Select team";btn.appendChild(ns);
+        }
+        const car=document.createElement("span");car.className="t3-dd-caret";car.textContent="▾";btn.appendChild(car);
+        menu.querySelectorAll(".t3-dd-opt").forEach(o=>o.classList.toggle("sel",o===opt));
+        menu.hidden=true;btn.setAttribute("aria-expanded","false");
+      };
+    });
+  });
+  if(!window.__t3DocClose){window.__t3DocClose=true;document.addEventListener("click",closeAllT3Menus);}
 }
 
 function renderTop3(){
@@ -1541,9 +1611,9 @@ function renderTop3(){
     panel.appendChild(e);
   }else{
     panel.insertAdjacentHTML("beforeend",`<div class="top3-grid">
-      ${teamSelectHtml("top3First","1st rank · "+CFG.top3.firstPts+" pts",mine.first||"",closed)}
-      ${teamSelectHtml("top3Second","2nd rank · "+CFG.top3.secondPts+" pts",mine.second||"",closed)}
-      ${teamSelectHtml("top3Third","3rd rank · "+CFG.top3.thirdPts+" pts",mine.third||"",closed)}
+      ${teamSelectHtml("top3First","🥇 1st rank · "+CFG.top3.firstPts+" pts",mine.first||"",closed,"rank-1")}
+      ${teamSelectHtml("top3Second","🥈 2nd rank · "+CFG.top3.secondPts+" pts",mine.second||"",closed,"rank-2")}
+      ${teamSelectHtml("top3Third","🥉 3rd rank · "+CFG.top3.thirdPts+" pts",mine.third||"",closed,"rank-3")}
     </div>`);
     if(state==="open"){
       const actions=el("div","top3-actions");
@@ -1552,7 +1622,7 @@ function renderTop3(){
       const note=el("div","top3-note");
       note.innerHTML=`Window closes in <b data-top3-countdown="close">--:--:--</b>. You can edit until then. Duplicate teams are not allowed.`;
       panel.appendChild(note);
-      setTimeout(()=>{const btn=$("#top3Save");if(!btn)return;btn.onclick=saveTop3Pick;},0);
+      setTimeout(()=>{const btn=$("#top3Save");if(btn)btn.onclick=saveTop3Pick;wireTop3Dropdowns();},0);
     }else{
       const note=el("div","top3-note");
       note.innerHTML=hasCompleteTop3(mine)?`Your locked Top 3: <b>${esc(mine.first)}</b>, <b>${esc(mine.second)}</b>, <b>${esc(mine.third)}</b>`:"You did not submit a Top 3 prediction before the deadline.";
@@ -1593,8 +1663,9 @@ function renderTop3Ad(state,mine){
   </div>`;
   const btn=ad.querySelector("button");
   btn.onclick=()=>{
-    const first=document.getElementById("top3First");
-    if(first&&!first.disabled){first.focus();first.scrollIntoView({behavior:"smooth",block:"center"});return;}
+    const dd=document.querySelector('.t3-dd[data-target="top3First"]');
+    const firstBtn=dd&&dd.querySelector(".t3-dd-btn");
+    if(firstBtn&&!firstBtn.disabled){firstBtn.focus();firstBtn.scrollIntoView({behavior:"smooth",block:"center"});return;}
     const panel=ad.previousElementSibling;if(panel)panel.scrollIntoView({behavior:"smooth",block:"start"});
   };
   return ad;
