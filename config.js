@@ -27,7 +27,7 @@ window.CONFIG = {
   // Active only between openAt and closeAt. Times below use Cairo time (+03:00).
   top3: {
     openAt: "2026-06-28T00:00:00+03:00",
-    closeAt: "2026-07-01T00:00:00+03:00",
+    closeAt: "2026-06-28T22:00:00+03:00",
     firstPts: 100,
     secondPts: 75,
     thirdPts: 50,

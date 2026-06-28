@@ -582,7 +582,7 @@ const EMBEDDED={"matches":[{"id":"g20-ned-swe","group":"F","home":"Netherlands",
 
 const DEFAULTS={orgName:"EGEC",seasonLabel:"World Cup 2026",lockOffsetMinutes:60,
   scoring:{exactScore:5,correctOutcome:3,correctGoalsBonus:1,advanceBonus:3},adminCode:"EGEC2026",
-  top3:{openAt:"2026-06-28T00:00:00+03:00",closeAt:"2026-07-01T00:00:00+03:00",firstPts:100,secondPts:75,thirdPts:50,exactOrderBonus:100},
+  top3:{openAt:"2026-06-28T00:00:00+03:00",closeAt:"2026-06-28T22:00:00+03:00",firstPts:100,secondPts:75,thirdPts:50,exactOrderBonus:100},
   boost:{enabled:true,team:"Egypt",multiplier:2,knockoutOnly:true},
   liveScores:{apiToken:"",competitionId:"WC"},storage:{mode:"local",firebase:{}},refreshMs:30000};
 const CFG=Object.assign({},DEFAULTS,window.CONFIG||{});
@@ -890,14 +890,19 @@ const top3CloseAt=()=>new Date(CFG.top3.closeAt).getTime();
 function top3State(){const n=now();if(n<top3OpenAt())return"before";if(n>=top3CloseAt())return"closed";return"open";}
 function fmtTop3Date(iso){return new Date(iso).toLocaleString(undefined,{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});}
 function top3Teams(){
+  const fmap=teamFlagMap();
   const fromCfg=Array.isArray(CFG.top3.teams)?CFG.top3.teams.filter(Boolean):[];
-  if(fromCfg.length)return [...new Set(fromCfg)].sort((a,b)=>a.localeCompare(b));
-  const set=new Set();
+  if(fromCfg.length){
+    return [...new Set(fromCfg)].sort((a,b)=>a.localeCompare(b)).map(n=>({name:n,flag:fmap[n]||""}));
+  }
+  // Only the teams that reached the Round of 32 (the remaining qualified teams).
+  const map=new Map();
   allEffectiveMatches().forEach(m=>{
-    if(m.home&&!isPlaceholderTeam(m.home))set.add(m.home);
-    if(m.away&&!isPlaceholderTeam(m.away))set.add(m.away);
+    if(m.round!=="Round of 32")return;
+    if(m.home&&!isPlaceholderTeam(m.home)&&!map.has(m.home))map.set(m.home,m.homeFlag||fmap[m.home]||"");
+    if(m.away&&!isPlaceholderTeam(m.away)&&!map.has(m.away))map.set(m.away,m.awayFlag||fmap[m.away]||"");
   });
-  return [...set].sort((a,b)=>a.localeCompare(b));
+  return [...map.entries()].map(([name,flag])=>({name,flag})).sort((a,b)=>a.name.localeCompare(b.name));
 }
 function hasCompleteTop3(t){return !!(t&&t.first&&t.second&&t.third);}
 function hasUniqueTop3(t){return hasCompleteTop3(t)&&new Set([t.first,t.second,t.third]).size===3;}
@@ -1460,7 +1465,7 @@ function renderTop3Reminder(){
   // --- Top 3 reminder ---
   if(top3State()!=="open"||hasCompleteTop3(Store.myTop3(ME.code)))return;
   const b=el("div","banner hot");
-  b.innerHTML=`<div class="bdot"></div><div><b>Top 3 reminder:</b> predict 1st, 2nd and 3rd winners before the window closes in <b data-top3-countdown="close">--:--:--</b>.<br><span style="color:var(--muted)">Exact order gives an extra +${CFG.top3.exactOrderBonus} points.</span></div><button class="banner-btn" id="goTop3">Predict Top 3</button>`;
+  b.innerHTML=`<div class="bdot"></div><div><b>Top 3 reminder:</b> predict your 1st, 2nd and 3rd rank before the window closes in <b data-top3-countdown="close">--:--:--</b>.<br><span style="color:var(--muted)">Exact order gives an extra +${CFG.top3.exactOrderBonus} points.</span></div><button class="banner-btn" id="goTop3">Predict Top 3</button>`;
   box.appendChild(b);
   const go=$("#goTop3");if(go)go.onclick=()=>{activeTab="top3";renderApp();};
 }
@@ -1515,7 +1520,10 @@ function renderTop3HomePopup(){
 }
 
 function teamSelectHtml(id,label,value,disabled){
-  const opts=['<option value="">Select team</option>'].concat(top3Teams().map(t=>`<option value="${esc(t)}" ${t===value?"selected":""}>${esc(t)}</option>`));
+  const opts=['<option value="">Select team</option>'].concat(top3Teams().map(t=>{
+    const txt=(t.flag?t.flag+" ":"")+t.name;
+    return `<option value="${esc(t.name)}" ${t.name===value?"selected":""}>${esc(txt)}</option>`;
+  }));
   return `<div class="top3-slot"><label for="${id}">${label}</label><select id="${id}" ${disabled?"disabled":""}>${opts.join("")}</select></div>`;
 }
 
@@ -1532,9 +1540,9 @@ function renderTop3(){
     panel.appendChild(e);
   }else{
     panel.insertAdjacentHTML("beforeend",`<div class="top3-grid">
-      ${teamSelectHtml("top3First","1st winner · "+CFG.top3.firstPts+" pts",mine.first||"",closed)}
-      ${teamSelectHtml("top3Second","2nd winner · "+CFG.top3.secondPts+" pts",mine.second||"",closed)}
-      ${teamSelectHtml("top3Third","3rd winner · "+CFG.top3.thirdPts+" pts",mine.third||"",closed)}
+      ${teamSelectHtml("top3First","1st rank · "+CFG.top3.firstPts+" pts",mine.first||"",closed)}
+      ${teamSelectHtml("top3Second","2nd rank · "+CFG.top3.secondPts+" pts",mine.second||"",closed)}
+      ${teamSelectHtml("top3Third","3rd rank · "+CFG.top3.thirdPts+" pts",mine.third||"",closed)}
     </div>`);
     if(state==="open"){
       const actions=el("div","top3-actions");
