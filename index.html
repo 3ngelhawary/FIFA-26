@@ -354,6 +354,20 @@
   .top3-bracket-cap{font-size:12px;color:var(--muted);text-align:center;margin-bottom:8px;line-height:1.4}
   .top3-bracket-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
   .top3-bracket-scroll svg{width:100%;min-width:340px;max-width:560px;height:auto;display:block;margin:0 auto}
+  .t3sim-podium{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:11px 2px 0}
+  .t3sim-cell{display:flex;align-items:center;gap:6px;justify-content:center;border:1px solid var(--line);border-radius:10px;padding:7px 6px;background:rgba(255,255,255,.03);font-size:12.5px;min-width:0}
+  .t3sim-cell:nth-child(1){border-color:rgba(255,215,0,.5)}
+  .t3sim-cell:nth-child(2){border-color:rgba(208,214,224,.5)}
+  .t3sim-cell:nth-child(3){border-color:rgba(205,127,50,.55)}
+  .t3sim-medal{font-size:15px;flex:0 0 auto}
+  .t3sim-flagimg{width:20px;height:14px;object-fit:cover;border-radius:2px;box-shadow:0 0 0 1px rgba(0,0,0,.4);flex:0 0 auto}
+  .t3sim-team{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .t3sim-empty{color:var(--muted)}
+  .t3sim-actions{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin:10px 2px 2px}
+  .t3sim-apply{border:0;border-radius:10px;cursor:pointer;font-family:"Oswald";font-weight:600;font-size:14px;padding:9px 16px;color:#04060e;background:linear-gradient(135deg,var(--cyan),var(--magenta));box-shadow:0 0 16px rgba(255,46,151,.25)}
+  .t3sim-apply:disabled{opacity:.5;cursor:not-allowed;filter:grayscale(.4)}
+  .t3sim-reset{border:1px solid var(--line-2);background:rgba(255,255,255,.04);color:var(--muted);border-radius:10px;cursor:pointer;font-size:13px;padding:9px 14px}
+  .t3sim-reset:hover{color:var(--ink);border-color:var(--magenta)}
   .top3-actions{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;padding:0 15px 15px}
   .top3-save{border:0;border-radius:12px;cursor:pointer;font-family:"Oswald";font-weight:600;font-size:16px;letter-spacing:.4px;padding:11px 18px;color:#04060e;background:linear-gradient(135deg,var(--cyan),var(--magenta));box-shadow:0 0 18px rgba(255,46,151,.28)}
   .top3-save:disabled{opacity:.55;cursor:not-allowed;filter:grayscale(.5)}
@@ -1605,17 +1619,36 @@ function wireTop3Dropdowns(){
 /* Simplified flags-only knockout bracket shown in the Top 3 tab to help the
    user plan their podium. Built live from the knockout data: R32 flags are
    filled, later rounds fill in automatically as winners are decided. */
+/* Set a Top 3 dropdown's value + button label programmatically (used by the
+   bracket simulator's "Use these for my Top 3"). */
+function applyTop3Slot(id,name){
+  const input=document.getElementById(id);if(input)input.value=name||"";
+  const dd=document.querySelector('.t3-dd[data-target="'+id+'"]');if(!dd)return;
+  const btn=dd.querySelector(".t3-dd-btn");if(!btn)return;
+  if(name){
+    const t={name:name,flag:(teamFlagMap()[name]||"")};
+    btn.innerHTML=t3FlagHtml(t)+'<span class="t3-dd-name">'+esc(name)+'</span><span class="t3-dd-caret">▾</span>';
+    dd.querySelectorAll(".t3-dd-opt").forEach(o=>o.classList.toggle("sel",o.getAttribute("data-val")===name));
+  }else{
+    btn.innerHTML='<span class="t3-dd-name placeholder">Select team</span><span class="t3-dd-caret">▾</span>';
+  }
+}
+
+/* Interactive flags-only bracket inside the Top 3 tab. Tap a flag to advance
+   that team; winners flow to the next round, semifinal losers drop into the
+   3rd-place match, and the simulated podium is shown live. This is a local
+   "what-if" sandbox: it never changes real results or your saved prediction. */
 function renderTop3Bracket(){
   const kos=allEffectiveMatches().filter(isKnockout);
   if(!kos.length)return null;
-  const byId={};kos.forEach(m=>byId[String(m.id)]=m);
   const feeders=id=>kos.filter(m=>String(m.winnerTo)===String(id))
     .sort((a,b)=>((a.winnerSlot==="home")?0:1)-((b.winnerSlot==="home")?0:1)||ko(a)-ko(b));
   const FINAL=kos.find(m=>m.round==="Final");
   if(!FINAL)return null;
-  const sfFeed=feeders(FINAL.id);                 // [SF home, SF away]
+  const THIRD=kos.find(m=>m.round==="3rd Place Playoff");
+  const sfFeed=feeders(FINAL.id);
   if(sfFeed.length<2)return null;
-  const leftRoot=sfFeed[1],rightRoot=sfFeed[0];   // away half on the left (matches the official layout)
+  const leftRoot=sfFeed[1],rightRoot=sfFeed[0];
   function subtree(root){
     const r32=[],r16=[],qf=[],sf=[root];
     feeders(root.id).forEach(q=>{qf.push(q);
@@ -1630,59 +1663,118 @@ function renderTop3Bracket(){
   const BW=30,FW=22,FH=15,CG=3,PV=5,BH=2*FH+CG+2*PV,LEAFGAP=12,TOP=24;
   const W=466,colL={r32:6,r16:58,qf:110,sf:162},FINX=216,FINW=34;
   const colR={r32:W-6-BW,r16:W-58-BW,qf:W-110-BW,sf:W-162-BW};
-  const pos={}; // id -> {x, yc}
+  const pos={};
   function placeSide(S,cols){
     S.r32.forEach((m,i)=>{pos[m.id]={x:cols.r32,yc:TOP+i*(BH+LEAFGAP)+BH/2};});
-    const up=(nodes,childCol,col)=>nodes.forEach(n=>{const fs=feeders(n.id);const ys=fs.map(f=>pos[f.id].yc);pos[n.id]={x:col,yc:ys.reduce((a,b)=>a+b,0)/ys.length};});
-    up(S.r16,cols.r32,cols.r16);up(S.qf,cols.r16,cols.qf);up(S.sf,cols.qf,cols.sf);
+    const up=(nodes,col)=>nodes.forEach(n=>{const ys=feeders(n.id).map(f=>pos[f.id].yc);pos[n.id]={x:col,yc:ys.reduce((a,b)=>a+b,0)/ys.length};});
+    up(S.r16,cols.r16);up(S.qf,cols.qf);up(S.sf,cols.sf);
   }
   placeSide(L,colL);placeSide(R,colR);
   const finalYc=(pos[leftRoot.id].yc+pos[rightRoot.id].yc)/2;
   pos[FINAL.id]={x:FINX,yc:finalYc};
+  const THIRDYC=finalYc+92;
+  if(THIRD)pos[THIRD.id]={x:FINX,yc:THIRDYC};
   const H=TOP+8*(BH+LEAFGAP)-LEAFGAP+8;
 
-  // ---- svg pieces ----
+  // ---- static connectors / titles ----
   const lineCol="rgba(0,229,255,.42)";
   const conn=[];
-  function elbowL(parent,fs){const px=pos[parent].x,py=pos[parent].yc;fs.forEach(f=>{const fp=pos[f.id];const fx=fp.x+BW;const mid=(fx+px)/2;conn.push(`<path d="M${fx} ${fp.yc} H${mid} V${py} H${px}" fill="none" stroke="${lineCol}" stroke-width="1.4"/>`);});}
-  function elbowR(parent,fs){const px=pos[parent].x+BW,py=pos[parent].yc;fs.forEach(f=>{const fp=pos[f.id];const fx=fp.x;const mid=(fx+px)/2;conn.push(`<path d="M${fx} ${fp.yc} H${mid} V${py} H${px}" fill="none" stroke="${lineCol}" stroke-width="1.4"/>`);});}
+  const elbowL=(parent,fs)=>{const px=pos[parent].x,py=pos[parent].yc;fs.forEach(f=>{const fp=pos[f.id],fx=fp.x+BW,mid=(fx+px)/2;conn.push(`<path d="M${fx} ${fp.yc} H${mid} V${py} H${px}" fill="none" stroke="${lineCol}" stroke-width="1.4"/>`);});};
+  const elbowR=(parent,fs)=>{const px=pos[parent].x+BW,py=pos[parent].yc;fs.forEach(f=>{const fp=pos[f.id],fx=fp.x,mid=(fx+px)/2;conn.push(`<path d="M${fx} ${fp.yc} H${mid} V${py} H${px}" fill="none" stroke="${lineCol}" stroke-width="1.4"/>`);});};
   [...L.r16,...L.qf,...L.sf].forEach(n=>elbowL(n.id,feeders(n.id)));
   [...R.r16,...R.qf,...R.sf].forEach(n=>elbowR(n.id,feeders(n.id)));
-  // SF -> final
   {const lp=pos[leftRoot.id],fx=lp.x+BW,px=FINX,mid=(fx+px)/2;conn.push(`<path d="M${fx} ${lp.yc} H${mid} V${finalYc} H${px}" fill="none" stroke="${lineCol}" stroke-width="1.4"/>`);}
   {const rp=pos[rightRoot.id],fx=rp.x,px=FINX+FINW,mid=(fx+px)/2;conn.push(`<path d="M${fx} ${rp.yc} H${mid} V${finalYc} H${px}" fill="none" stroke="${lineCol}" stroke-width="1.4"/>`);}
-
-  function chip(name,flag,x,y){
-    const real=name&&!isPlaceholderTeam(name);
-    if(real){
-      const iso=flagIso(flag,name);
-      if(iso)return `<image href="https://flagcdn.com/w40/${iso}.png" x="${x}" y="${y}" width="${FW}" height="${FH}" preserveAspectRatio="xMidYMid slice"/><rect x="${x}" y="${y}" width="${FW}" height="${FH}" rx="2" fill="none" stroke="rgba(0,0,0,.5)" stroke-width="1"/>`;
-      return `<text x="${x+FW/2}" y="${y+FH-2}" font-size="13" text-anchor="middle">${flag||"🏳️"}</text>`;
-    }
-    return `<rect x="${x}" y="${y}" width="${FW}" height="${FH}" rx="2" fill="rgba(255,255,255,.05)" stroke="rgba(255,255,255,.14)" stroke-width="1"/>`;
-  }
-  function box(m,bw){
-    const x=pos[m.id].x,yc=pos[m.id].yc,by=yc-BH/2,bwid=bw||BW;
-    const cx=x+(bwid-FW)/2;
-    return `<rect x="${x}" y="${by}" width="${bwid}" height="${BH}" rx="6" fill="rgba(11,18,31,.92)" stroke="rgba(255,255,255,.12)" stroke-width="1"/>`
-      +chip(m.home,m.homeFlag,cx,by+PV)
-      +chip(m.away,m.awayFlag,cx,by+PV+FH+CG);
-  }
-  const boxes=[];
-  [...L.r32,...L.r16,...L.qf,...L.sf,...R.r32,...R.r16,...R.qf,...R.sf].forEach(m=>boxes.push(box(m)));
-  boxes.push(box(FINAL,FINW));
-  // round titles
   const tt=(x,t)=>`<text x="${x}" y="14" font-size="7.5" fill="rgba(255,255,255,.55)" text-anchor="middle" font-weight="700" letter-spacing="0.5">${t}</text>`;
   const titles=[tt(colL.r32+BW/2,"R32"),tt(colL.r16+BW/2,"R16"),tt(colL.qf+BW/2,"QF"),tt(colL.sf+BW/2,"SF"),
                 tt(FINX+FINW/2,"FINAL"),
                 tt(colR.sf+BW/2,"SF"),tt(colR.qf+BW/2,"QF"),tt(colR.r16+BW/2,"R16"),tt(colR.r32+BW/2,"R32")].join("");
-  const trophy=`<text x="${FINX+FINW/2}" y="${finalYc-BH/2-4}" font-size="13" text-anchor="middle">🏆</text>`;
+  const trophy=`<text x="${FINX+FINW/2}" y="${finalYc-BH/2-5}" font-size="13" text-anchor="middle">🏆</text>`;
+
+  // ---- simulation state ----
+  const sim=(window.__top3Sim=window.__top3Sim||{});
+  const r32all=[...L.r32,...R.r32];
+  function compute(){
+    const part={};kos.forEach(m=>{part[m.id]={home:null,away:null};});
+    r32all.forEach(m=>{
+      part[m.id].home=(m.home&&!isPlaceholderTeam(m.home))?{name:m.home,flag:m.homeFlag}:null;
+      part[m.id].away=(m.away&&!isPlaceholderTeam(m.away))?{name:m.away,flag:m.awayFlag}:null;
+    });
+    const order=[...L.r32,...R.r32,...L.r16,...R.r16,...L.qf,...R.qf,...L.sf,...R.sf,FINAL];
+    order.forEach(m=>{
+      const p=part[m.id];let w=sim[m.id];
+      if(w&&!((p.home&&p.home.name===w)||(p.away&&p.away.name===w))){delete sim[m.id];w=null;}
+      if(w){
+        const winner=(p.home&&p.home.name===w)?p.home:p.away;
+        const loser=(p.home&&p.home.name===w)?p.away:p.home;
+        if(m.winnerTo&&m.winnerSlot&&part[m.winnerTo])part[m.winnerTo][m.winnerSlot]=winner;
+        if(m.loserTo&&m.loserSlot&&part[m.loserTo])part[m.loserTo][m.loserSlot]=loser||null;
+      }
+    });
+    if(THIRD){const p=part[THIRD.id],w=sim[THIRD.id];if(w&&!((p.home&&p.home.name===w)||(p.away&&p.away.name===w)))delete sim[THIRD.id];}
+    return part;
+  }
+  function chipG(mid,part,x,y){
+    if(!part)return `<rect x="${x}" y="${y}" width="${FW}" height="${FH}" rx="2" fill="rgba(255,255,255,.05)" stroke="rgba(255,255,255,.14)" stroke-width="1"/>`;
+    const sel=sim[mid];
+    const state=sel?(sel===part.name?"win":"lose"):"none";
+    const iso=flagIso(part.flag,part.name);
+    const flagSvg=iso?`<image href="https://flagcdn.com/w40/${iso}.png" x="${x}" y="${y}" width="${FW}" height="${FH}" preserveAspectRatio="xMidYMid slice"/>`
+                     :`<text x="${x+FW/2}" y="${y+FH-2}" font-size="13" text-anchor="middle">${part.flag||"🏳️"}</text>`;
+    const border=state==="win"?`stroke="rgba(43,255,136,.95)" stroke-width="2"`:`stroke="rgba(0,0,0,.5)" stroke-width="1"`;
+    const op=state==="lose"?` opacity="0.36"`:"";
+    return `<g data-match="${esc(mid)}" data-team="${esc(part.name)}" style="cursor:pointer">`
+      +`<rect x="${x-2}" y="${y-1}" width="${FW+4}" height="${FH+2}" fill="transparent" pointer-events="all"/>`
+      +`<g${op}>${flagSvg}<rect x="${x}" y="${y}" width="${FW}" height="${FH}" rx="2" fill="none" ${border}/></g></g>`;
+  }
+  function box(m,pp,bw){
+    const x=pos[m.id].x,yc=pos[m.id].yc,by=yc-BH/2,bwid=bw||BW,cx=x+(bwid-FW)/2;
+    return `<rect x="${x}" y="${by}" width="${bwid}" height="${BH}" rx="6" fill="rgba(11,18,31,.92)" stroke="rgba(255,255,255,.12)" stroke-width="1"/>`
+      +chipG(m.id,pp.home,cx,by+PV)+chipG(m.id,pp.away,cx,by+PV+FH+CG);
+  }
+  function flagMini(name){const iso=ISO[name];return iso?`<img class="t3sim-flagimg" src="https://flagcdn.com/w20/${iso}.png" alt="">`:`<span>${teamFlagMap()[name]||""}</span>`;}
+  function podiumHtml(part){
+    const champ=sim[FINAL.id]||"";const fp=part[FINAL.id];
+    const runner=champ?((fp.home&&fp.home.name===champ)?(fp.away&&fp.away.name):(fp.home&&fp.home.name)):"";
+    const third=THIRD?(sim[THIRD.id]||""):"";
+    const cell=(medal,name)=>`<div class="t3sim-cell"><span class="t3sim-medal">${medal}</span>${name?flagMini(name)+`<span class="t3sim-team">${esc(name)}</span>`:'<span class="t3sim-empty">— pick —</span>'}</div>`;
+    const ready=champ&&runner&&third;
+    const apply=top3State()==="open"?`<button type="button" class="t3sim-apply" data-action="applyTop3" ${ready?"":"disabled"}>Use these for my Top 3</button>`:"";
+    return `<div class="t3sim-podium">${cell("🥇",champ)}${cell("🥈",runner||"")}${cell("🥉",third)}</div>
+      <div class="t3sim-actions">${apply}<button type="button" class="t3sim-reset" data-action="resetSim">↺ Reset</button></div>`;
+  }
 
   const wrap=el("div","top3-bracket");
-  wrap.innerHTML=`<div class="top3-bracket-cap">🗺️ Road to the final — the bracket so far. Use it to plan your podium.</div>
-    <div class="top3-bracket-scroll"><svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Knockout bracket">
-      ${conn.join("")}${titles}${trophy}${boxes.join("")}
-    </svg></div>`;
+  let lastPart={};
+  function draw(){
+    const part=compute();lastPart=part;
+    const boxes=[...L.r32,...R.r32,...L.r16,...R.r16,...L.qf,...R.qf,...L.sf,...R.sf].map(m=>box(m,part[m.id],BW)).join("");
+    const finalBox=box(FINAL,part[FINAL.id],FINW);
+    const thirdBox=THIRD?box(THIRD,part[THIRD.id],FINW):"";
+    const thirdLbl=THIRD?`<text x="${FINX+FINW/2}" y="${THIRDYC-BH/2-4}" font-size="7.5" fill="rgba(255,255,255,.55)" text-anchor="middle" font-weight="700">3RD</text>`:"";
+    const svg=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Interactive bracket">${conn.join("")}${titles}${trophy}${thirdLbl}${boxes}${finalBox}${thirdBox}</svg>`;
+    wrap.innerHTML=`<div class="top3-bracket-cap">🗺️ Tap a flag to send that team through. Play out the whole bracket to study every path — it's a what-if and won't affect results.</div>
+      <div class="top3-bracket-scroll">${svg}</div>${podiumHtml(part)}`;
+  }
+  wrap.addEventListener("click",e=>{
+    const act=e.target.closest("[data-action]");
+    if(act){
+      const a=act.getAttribute("data-action");
+      if(a==="resetSim"){Object.keys(sim).forEach(k=>delete sim[k]);draw();}
+      else if(a==="applyTop3"){
+        const champ=sim[FINAL.id],fp=lastPart[FINAL.id]||{};
+        const runner=champ?((fp.home&&fp.home.name===champ)?(fp.away&&fp.away.name):(fp.home&&fp.home.name)):null;
+        const third=THIRD?sim[THIRD.id]:null;
+        if(!champ||!runner||!third){toast("Pick the final winner and the 3rd-place winner first");return;}
+        applyTop3Slot("top3First",champ);applyTop3Slot("top3Second",runner);applyTop3Slot("top3Third",third);
+        toast("Filled from your simulation — review and Save");
+      }
+      return;
+    }
+    const g=e.target.closest("[data-match][data-team]");
+    if(g){const mid=g.getAttribute("data-match"),team=g.getAttribute("data-team");if(mid&&team){sim[mid]=team;draw();}}
+  });
+  draw();
   return wrap;
 }
 
