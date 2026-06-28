@@ -350,6 +350,10 @@
   .t3-dd-opt{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:8px;cursor:pointer;font-size:14px}
   .t3-dd-opt:hover{background:rgba(0,229,255,.10)}
   .t3-dd-opt.sel{background:rgba(0,229,255,.16)}
+  .top3-bracket{margin:4px 15px 16px;border:1px solid rgba(0,229,255,.18);border-radius:14px;background:radial-gradient(circle at 50% 40%,rgba(255,46,151,.08),transparent 55%),linear-gradient(180deg,rgba(255,255,255,.025),rgba(255,255,255,.01));padding:10px 10px 12px}
+  .top3-bracket-cap{font-size:12px;color:var(--muted);text-align:center;margin-bottom:8px;line-height:1.4}
+  .top3-bracket-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .top3-bracket-scroll svg{width:100%;min-width:340px;max-width:560px;height:auto;display:block;margin:0 auto}
   .top3-actions{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;padding:0 15px 15px}
   .top3-save{border:0;border-radius:12px;cursor:pointer;font-family:"Oswald";font-weight:600;font-size:16px;letter-spacing:.4px;padding:11px 18px;color:#04060e;background:linear-gradient(135deg,var(--cyan),var(--magenta));box-shadow:0 0 18px rgba(255,46,151,.28)}
   .top3-save:disabled{opacity:.55;cursor:not-allowed;filter:grayscale(.5)}
@@ -1598,6 +1602,90 @@ function wireTop3Dropdowns(){
   if(!window.__t3DocClose){window.__t3DocClose=true;document.addEventListener("click",closeAllT3Menus);}
 }
 
+/* Simplified flags-only knockout bracket shown in the Top 3 tab to help the
+   user plan their podium. Built live from the knockout data: R32 flags are
+   filled, later rounds fill in automatically as winners are decided. */
+function renderTop3Bracket(){
+  const kos=allEffectiveMatches().filter(isKnockout);
+  if(!kos.length)return null;
+  const byId={};kos.forEach(m=>byId[String(m.id)]=m);
+  const feeders=id=>kos.filter(m=>String(m.winnerTo)===String(id))
+    .sort((a,b)=>((a.winnerSlot==="home")?0:1)-((b.winnerSlot==="home")?0:1)||ko(a)-ko(b));
+  const FINAL=kos.find(m=>m.round==="Final");
+  if(!FINAL)return null;
+  const sfFeed=feeders(FINAL.id);                 // [SF home, SF away]
+  if(sfFeed.length<2)return null;
+  const leftRoot=sfFeed[1],rightRoot=sfFeed[0];   // away half on the left (matches the official layout)
+  function subtree(root){
+    const r32=[],r16=[],qf=[],sf=[root];
+    feeders(root.id).forEach(q=>{qf.push(q);
+      feeders(q.id).forEach(s=>{r16.push(s);
+        feeders(s.id).forEach(l=>{r32.push(l);});});});
+    return {r32,r16,qf,sf};
+  }
+  const L=subtree(leftRoot),R=subtree(rightRoot);
+  if(L.r32.length<8||R.r32.length<8)return null;
+
+  // ---- geometry ----
+  const BW=30,FW=22,FH=15,CG=3,PV=5,BH=2*FH+CG+2*PV,LEAFGAP=12,TOP=24;
+  const W=466,colL={r32:6,r16:58,qf:110,sf:162},FINX=216,FINW=34;
+  const colR={r32:W-6-BW,r16:W-58-BW,qf:W-110-BW,sf:W-162-BW};
+  const pos={}; // id -> {x, yc}
+  function placeSide(S,cols){
+    S.r32.forEach((m,i)=>{pos[m.id]={x:cols.r32,yc:TOP+i*(BH+LEAFGAP)+BH/2};});
+    const up=(nodes,childCol,col)=>nodes.forEach(n=>{const fs=feeders(n.id);const ys=fs.map(f=>pos[f.id].yc);pos[n.id]={x:col,yc:ys.reduce((a,b)=>a+b,0)/ys.length};});
+    up(S.r16,cols.r32,cols.r16);up(S.qf,cols.r16,cols.qf);up(S.sf,cols.qf,cols.sf);
+  }
+  placeSide(L,colL);placeSide(R,colR);
+  const finalYc=(pos[leftRoot.id].yc+pos[rightRoot.id].yc)/2;
+  pos[FINAL.id]={x:FINX,yc:finalYc};
+  const H=TOP+8*(BH+LEAFGAP)-LEAFGAP+8;
+
+  // ---- svg pieces ----
+  const lineCol="rgba(0,229,255,.42)";
+  const conn=[];
+  function elbowL(parent,fs){const px=pos[parent].x,py=pos[parent].yc;fs.forEach(f=>{const fp=pos[f.id];const fx=fp.x+BW;const mid=(fx+px)/2;conn.push(`<path d="M${fx} ${fp.yc} H${mid} V${py} H${px}" fill="none" stroke="${lineCol}" stroke-width="1.4"/>`);});}
+  function elbowR(parent,fs){const px=pos[parent].x+BW,py=pos[parent].yc;fs.forEach(f=>{const fp=pos[f.id];const fx=fp.x;const mid=(fx+px)/2;conn.push(`<path d="M${fx} ${fp.yc} H${mid} V${py} H${px}" fill="none" stroke="${lineCol}" stroke-width="1.4"/>`);});}
+  [...L.r16,...L.qf,...L.sf].forEach(n=>elbowL(n.id,feeders(n.id)));
+  [...R.r16,...R.qf,...R.sf].forEach(n=>elbowR(n.id,feeders(n.id)));
+  // SF -> final
+  {const lp=pos[leftRoot.id],fx=lp.x+BW,px=FINX,mid=(fx+px)/2;conn.push(`<path d="M${fx} ${lp.yc} H${mid} V${finalYc} H${px}" fill="none" stroke="${lineCol}" stroke-width="1.4"/>`);}
+  {const rp=pos[rightRoot.id],fx=rp.x,px=FINX+FINW,mid=(fx+px)/2;conn.push(`<path d="M${fx} ${rp.yc} H${mid} V${finalYc} H${px}" fill="none" stroke="${lineCol}" stroke-width="1.4"/>`);}
+
+  function chip(name,flag,x,y){
+    const real=name&&!isPlaceholderTeam(name);
+    if(real){
+      const iso=flagIso(flag,name);
+      if(iso)return `<image href="https://flagcdn.com/w40/${iso}.png" x="${x}" y="${y}" width="${FW}" height="${FH}" preserveAspectRatio="xMidYMid slice"/><rect x="${x}" y="${y}" width="${FW}" height="${FH}" rx="2" fill="none" stroke="rgba(0,0,0,.5)" stroke-width="1"/>`;
+      return `<text x="${x+FW/2}" y="${y+FH-2}" font-size="13" text-anchor="middle">${flag||"🏳️"}</text>`;
+    }
+    return `<rect x="${x}" y="${y}" width="${FW}" height="${FH}" rx="2" fill="rgba(255,255,255,.05)" stroke="rgba(255,255,255,.14)" stroke-width="1"/>`;
+  }
+  function box(m,bw){
+    const x=pos[m.id].x,yc=pos[m.id].yc,by=yc-BH/2,bwid=bw||BW;
+    const cx=x+(bwid-FW)/2;
+    return `<rect x="${x}" y="${by}" width="${bwid}" height="${BH}" rx="6" fill="rgba(11,18,31,.92)" stroke="rgba(255,255,255,.12)" stroke-width="1"/>`
+      +chip(m.home,m.homeFlag,cx,by+PV)
+      +chip(m.away,m.awayFlag,cx,by+PV+FH+CG);
+  }
+  const boxes=[];
+  [...L.r32,...L.r16,...L.qf,...L.sf,...R.r32,...R.r16,...R.qf,...R.sf].forEach(m=>boxes.push(box(m)));
+  boxes.push(box(FINAL,FINW));
+  // round titles
+  const tt=(x,t)=>`<text x="${x}" y="14" font-size="7.5" fill="rgba(255,255,255,.55)" text-anchor="middle" font-weight="700" letter-spacing="0.5">${t}</text>`;
+  const titles=[tt(colL.r32+BW/2,"R32"),tt(colL.r16+BW/2,"R16"),tt(colL.qf+BW/2,"QF"),tt(colL.sf+BW/2,"SF"),
+                tt(FINX+FINW/2,"FINAL"),
+                tt(colR.sf+BW/2,"SF"),tt(colR.qf+BW/2,"QF"),tt(colR.r16+BW/2,"R16"),tt(colR.r32+BW/2,"R32")].join("");
+  const trophy=`<text x="${FINX+FINW/2}" y="${finalYc-BH/2-4}" font-size="13" text-anchor="middle">🏆</text>`;
+
+  const wrap=el("div","top3-bracket");
+  wrap.innerHTML=`<div class="top3-bracket-cap">🗺️ Road to the final — the bracket so far. Use it to plan your podium.</div>
+    <div class="top3-bracket-scroll"><svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Knockout bracket">
+      ${conn.join("")}${titles}${trophy}${boxes.join("")}
+    </svg></div>`;
+  return wrap;
+}
+
 function renderTop3(){
   const layout=el("div","top3-feature-layout");
   const panel=el("div","panel");
@@ -1610,6 +1698,8 @@ function renderTop3(){
     e.innerHTML=`<div class="big">Top 3 opens on ${fmtTop3Date(CFG.top3.openAt)}</div><div>Come back in <b data-top3-countdown="open">--:--:--</b> to predict 1st, 2nd and 3rd winners.</div>`;
     panel.appendChild(e);
   }else{
+    const bracket=renderTop3Bracket();
+    if(bracket)panel.appendChild(bracket);
     panel.insertAdjacentHTML("beforeend",`<div class="top3-grid">
       ${teamSelectHtml("top3First","🥇 1st rank · "+CFG.top3.firstPts+" pts",mine.first||"",closed,"rank-1")}
       ${teamSelectHtml("top3Second","🥈 2nd rank · "+CFG.top3.secondPts+" pts",mine.second||"",closed,"rank-2")}
