@@ -2042,6 +2042,13 @@ function renderTree(){
   const sf=matches.filter(m=>m.round==="Semifinal");
   const final=matches.find(m=>m.round==="Final");
   const third=matches.find(m=>m.round==="3rd Place Playoff");
+  // Order each round by the real bracket (feeder tree) so teams sit in the
+  // correct half/position, matching the official bracket — not by kickoff.
+  const sides=bracketSides(matches);
+  const colsLeft=sides?{r32:sides.left.r32,r16:sides.left.r16,qf:sides.left.qf,sf:sides.left.sf}
+                      :{r32:splitTreeSide(r32,"left"),r16:splitTreeSide(r16,"left"),qf:splitTreeSide(qf,"left"),sf:splitTreeSide(sf,"left")};
+  const colsRight=sides?{r32:sides.right.r32,r16:sides.right.r16,qf:sides.right.qf,sf:sides.right.sf}
+                      :{r32:splitTreeSide(r32,"right"),r16:splitTreeSide(r16,"right"),qf:splitTreeSide(qf,"right"),sf:splitTreeSide(sf,"right")};
 
   const ctrl=el("div","tree-zoom");
   ctrl.innerHTML=`<button type="button" data-z="out" title="Zoom out">−</button><button type="button" data-z="fit" title="Fit to screen">Fit</button><button type="button" data-z="in" title="Zoom in">+</button><span class="tree-zoom-hint">Pinch / Ctrl+scroll to zoom · drag to pan</span>`;
@@ -2050,15 +2057,15 @@ function renderTree(){
   const scroll=el("div","tree-scroll");
   const sizer=el("div","tree-sizer");
   const board=el("div","tree-board");
-  board.appendChild(renderTreeColumn("ROUND OF 32",splitTreeSide(r32,"left"),"r32 left"));
-  board.appendChild(renderTreeColumn("R16",splitTreeSide(r16,"left"),"r16 left"));
-  board.appendChild(renderTreeColumn("QF",splitTreeSide(qf,"left"),"qf left"));
-  board.appendChild(renderTreeColumn("SF",splitTreeSide(sf,"left"),"sf left"));
+  board.appendChild(renderTreeColumn("ROUND OF 32",colsLeft.r32,"r32 left"));
+  board.appendChild(renderTreeColumn("R16",colsLeft.r16,"r16 left"));
+  board.appendChild(renderTreeColumn("QF",colsLeft.qf,"qf left"));
+  board.appendChild(renderTreeColumn("SF",colsLeft.sf,"sf left"));
   board.appendChild(renderTreeCenter(final,third));
-  board.appendChild(renderTreeColumn("SF",splitTreeSide(sf,"right"),"sf right"));
-  board.appendChild(renderTreeColumn("QF",splitTreeSide(qf,"right"),"qf right"));
-  board.appendChild(renderTreeColumn("R16",splitTreeSide(r16,"right"),"r16 right"));
-  board.appendChild(renderTreeColumn("ROUND OF 32",splitTreeSide(r32,"right"),"r32 right"));
+  board.appendChild(renderTreeColumn("SF",colsRight.sf,"sf right"));
+  board.appendChild(renderTreeColumn("QF",colsRight.qf,"qf right"));
+  board.appendChild(renderTreeColumn("R16",colsRight.r16,"r16 right"));
+  board.appendChild(renderTreeColumn("ROUND OF 32",colsRight.r32,"r32 right"));
   sizer.appendChild(board);scroll.appendChild(sizer);panel.appendChild(scroll);
 
   ctrl.querySelectorAll("button").forEach(btn=>btn.onclick=()=>{
@@ -2133,6 +2140,25 @@ function splitTreeSide(list,side){
   const mid=Math.ceil(list.length/2);
   const part=side==="left"?list.slice(0,mid):list.slice(mid);
   return side==="right"?part.slice().reverse():part;
+}
+/* Derive the left/right bracket halves and the ordered matches per round from
+   the real feeder structure (winnerTo/winnerSlot), so the tree positions match
+   the official bracket. Returns null if the bracket can't be fully resolved. */
+function bracketSides(kos){
+  const feeders=id=>kos.filter(m=>String(m.winnerTo)===String(id))
+    .sort((a,b)=>((a.winnerSlot==="home")?0:1)-((b.winnerSlot==="home")?0:1)||ko(a)-ko(b));
+  const FINAL=kos.find(m=>m.round==="Final");
+  if(!FINAL)return null;
+  const sf=feeders(FINAL.id);
+  if(sf.length<2)return null;
+  const sub=root=>{
+    const r32=[],r16=[],qf=[],sfa=[root];
+    feeders(root.id).forEach(q=>{qf.push(q);feeders(q.id).forEach(s=>{r16.push(s);feeders(s.id).forEach(l=>r32.push(l));});});
+    return {r32,r16,qf,sf:sfa};
+  };
+  const left=sub(sf[1]),right=sub(sf[0]); // away half on the left, to match the official layout
+  if(left.r32.length<8||right.r32.length<8)return null;
+  return {left,right};
 }
 function renderTreeColumn(title,matches,cls){
   const col=el("div","tree-column "+cls);
