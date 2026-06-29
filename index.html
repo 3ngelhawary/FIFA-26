@@ -638,6 +638,7 @@ let activeTab="today";
 let authMode="register";
 let savedTimer=null;
 let boardProjected=false;
+let orgTop3PlayerCode="";     // organizer: which player's Top 3 is being entered
 let treeUserZoom=1;
 let treeTabOpen=false;
 let LANG=localStorage.getItem("egec_lang")||"en";
@@ -2555,6 +2556,47 @@ function renderOrg(){
   }
   wrap.appendChild(pPanel);
 
+  /* ---- Top 3 picks for a player (enter for anyone who missed the window) ---- */
+  const mPanel=el("div","panel");mPanel.style.marginTop="16px";
+  const mh=el("h2");mh.innerHTML=`<span>⚙ Top 3 picks</span><span class="meta">enter for a player who missed it</span>`;mPanel.appendChild(mh);
+  const allPlayers=Object.values(Store.players()).sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
+  if(orgTop3PlayerCode&&!allPlayers.some(p=>p.code===orgTop3PlayerCode))orgTop3PlayerCode="";
+  const missingCount=allPlayers.filter(p=>!hasCompleteTop3(Store.myTop3(p.code))).length;
+  if(!allPlayers.length){
+    const e=el("div","empty");e.style.margin="14px";e.innerHTML='<div class="big">No players yet</div><div>Add a player above first.</div>';
+    mPanel.appendChild(e);
+  }else{
+    const psel=el("div","org-add");
+    const opts=allPlayers.map(p=>{
+      const done=hasCompleteTop3(Store.myTop3(p.code));
+      return `<option value="${p.code}"${p.code===orgTop3PlayerCode?" selected":""}>${esc(p.name)} ${done?"· ✓ has Top 3":"· — missing"}</option>`;
+    }).join("");
+    psel.innerHTML=`<select id="orgPickPlayer" class="top3-select" style="flex:1">
+        <option value="">Select a player…</option>${opts}
+      </select>`;
+    mPanel.appendChild(psel);
+    const note=el("div","top3-note");note.style.padding="10px 15px 0";
+    note.textContent=missingCount?`${missingCount} player${missingCount===1?"":"s"} still missing a Top 3.`:"Every player has a Top 3 saved.";
+    mPanel.appendChild(note);
+
+    if(orgTop3PlayerCode){
+      const pl=Store.players()[orgTop3PlayerCode];
+      const cur=Store.myTop3(orgTop3PlayerCode);
+      mPanel.insertAdjacentHTML("beforeend",`<div class="top3-grid">
+        ${teamSelectHtml("orgPickFirst","🥇 1st rank · "+CFG.top3.firstPts+" pts",cur.first||"",false,"rank-1")}
+        ${teamSelectHtml("orgPickSecond","🥈 2nd rank · "+CFG.top3.secondPts+" pts",cur.second||"",false,"rank-2")}
+        ${teamSelectHtml("orgPickThird","🥉 3rd rank · "+CFG.top3.thirdPts+" pts",cur.third||"",false,"rank-3")}
+      </div>`);
+      const ma=el("div","top3-actions");
+      ma.innerHTML=`<button class="top3-save" id="orgPickSave">Save Top 3 for ${esc(pl?pl.name:"player")}</button><button class="org-clear" id="orgPickClear" title="Clear this player's Top 3">×</button>`;
+      mPanel.appendChild(ma);
+      const mn=el("div","top3-note");
+      mn.textContent=hasCompleteTop3(cur)?"This player already has a Top 3 — saving will overwrite it.":"This counts as the player's own prediction and is scored normally.";
+      mPanel.appendChild(mn);
+    }
+  }
+  wrap.appendChild(mPanel);
+
   /* ---- Top 3 final result ---- */
   const tPanel=el("div","panel");tPanel.style.marginTop="16px";
   const th=el("h2");th.innerHTML=`<span>⚙ Top 3 final result</span><span class="meta">used for bonus scoring</span>`;tPanel.appendChild(th);
@@ -2611,6 +2653,27 @@ function renderOrg(){
     };
     const top3Clear=$("#orgTop3Clear");
     if(top3Clear)top3Clear.onclick=async()=>{await Store.clearTop3Result();toast("Final Top 3 cleared");renderApp();};
+
+    /* ---- Top 3 picks for a player ---- */
+    const pickPlayer=$("#orgPickPlayer");
+    if(pickPlayer)pickPlayer.onchange=()=>{orgTop3PlayerCode=pickPlayer.value;renderApp();};
+    const pickSave=$("#orgPickSave");
+    if(pickSave)pickSave.onclick=async()=>{
+      const pl=Store.players()[orgTop3PlayerCode];
+      if(!pl){toast("Select a player first");return;}
+      const t={first:top3Val("#orgPickFirst"),second:top3Val("#orgPickSecond"),third:top3Val("#orgPickThird")};
+      if(!hasCompleteTop3(t)){toast("Select all three teams");return;}
+      if(!hasUniqueTop3(t)){toast("Top 3 must be three different teams");return;}
+      await Store.saveTop3(pl.code,pl.name,t);toast("Top 3 saved for "+pl.name);renderApp();
+    };
+    const pickClear=$("#orgPickClear");
+    if(pickClear)pickClear.onclick=async()=>{
+      const pl=Store.players()[orgTop3PlayerCode];if(!pl)return;
+      if(!confirm(`Clear ${pl.name}'s Top 3 prediction?`))return;
+      await Store.saveTop3(pl.code,pl.name,{});toast(pl.name+"'s Top 3 cleared");renderApp();
+    };
+
+    wireTop3Dropdowns();
     const rd=(id)=>{const h=parseInt($("#oh-"+id).value,10),a=parseInt($("#oa-"+id).value,10);return{h,a,ok:!(isNaN(h)||isNaN(a))};};
     wrap.querySelectorAll("[data-live]").forEach(b=>b.onclick=async()=>{const id=b.getAttribute("data-live");const s=rd(id);if(!s.ok){toast("Enter both scores");return;}await Store.setResult(id,s.h,s.a,"live");toast("Live score updated");renderApp();});
     wrap.querySelectorAll("[data-final]").forEach(b=>b.onclick=async()=>{
