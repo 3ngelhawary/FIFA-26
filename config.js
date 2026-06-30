@@ -28,10 +28,10 @@ window.CONFIG = {
   top3: {
     openAt: "2026-06-28T00:00:00+03:00",
     closeAt: "2026-06-28T22:00:00+03:00",
-    firstPts: 100,
-    secondPts: 75,
-    thirdPts: 50,
-    exactOrderBonus: 100
+    firstPts: 30,
+    secondPts: 20,
+    thirdPts: 10,
+    exactOrderBonus: 25
   },
 
   // --- Team boost (Egypt ×2) ----------------------------------------------
