@@ -815,6 +815,8 @@ function resolvedMatch(id,stack){
     if(r.home)m.home=r.home;if(r.away)m.away=r.away;
     if(r.homeFlag)m.homeFlag=r.homeFlag;if(r.awayFlag)m.awayFlag=r.awayFlag;
     m.homeScore=r.homeScore;m.awayScore=r.awayScore;m.status=r.status||m.status;
+    if(r.homePenScore!==undefined)m.homePenScore=r.homePenScore;
+    if(r.awayPenScore!==undefined)m.awayPenScore=r.awayPenScore;
     if(r.advance!==undefined)m.advance=r.advance;
     m.liveMinute=r.liveMinute;m.liveText=r.liveText;
     if(r.kickoff)m.kickoff=r.kickoff;
@@ -968,6 +970,11 @@ function scorePick(pick,m){
 function wentToPenalties(m){
   return isKnockout(m)&&m.status==="finished"&&m.homeScore!=null&&m.awayScore!=null
     &&m.homeScore===m.awayScore&&(m.advance==="home"||m.advance==="away");
+}
+function penaltyDisplay(m){
+  const show=isKnockout(m)&&(wentToPenalties(m)||liveState(m)==="live");
+  if(!show||m.homePenScore==null||m.awayPenScore==null)return "";
+  return `Pens ${m.homePenScore}-${m.awayPenScore}`;
 }
 function predictedAdvancer(pick){
   const p=effectivePick(pick);
@@ -1183,6 +1190,59 @@ function flagEl(name,emoji){
   const s=el("span","flag-emo");s.textContent=emoji||"🏳️";return s;
 }
 
+
+function scoreValue(node,side){
+  if(!node)return null;
+  const keys=side==="home"?["home","homeTeam"]:["away","awayTeam"];
+  for(const key of keys){
+    if(node[key]==null)continue;
+    const value=Number(node[key]);
+    if(Number.isFinite(value))return value;
+  }
+  return null;
+}
+function scorePair(node){
+  const home=scoreValue(node,"home"),away=scoreValue(node,"away");
+  return home==null||away==null?null:{home,away};
+}
+function addScorePairs(a,b){return a&&b?{home:a.home+b.home,away:a.away+b.away}:null;}
+function subtractScorePairs(a,b){
+  if(!a||!b)return null;
+  const pair={home:a.home-b.home,away:a.away-b.away};
+  return pair.home>=0&&pair.away>=0?pair:null;
+}
+function scoreAfter120(apiMatch){
+  const score=apiMatch&&apiMatch.score?apiMatch.score:{};
+  const duration=score.duration||"REGULAR";
+  const fullTime=scorePair(score.fullTime);
+  const regularTime=scorePair(score.regularTime);
+  const extraTime=scorePair(score.extraTime);
+  const penalties=scorePair(score.penalties);
+  if(duration==="PENALTY_SHOOTOUT"||penalties){
+    return addScorePairs(regularTime,extraTime)||subtractScorePairs(fullTime,penalties)||fullTime;
+  }
+  if(duration==="EXTRA_TIME")return addScorePairs(regularTime,extraTime)||fullTime;
+  return fullTime;
+}
+function penaltyScorePair(apiMatch){return scorePair(apiMatch&&apiMatch.score?apiMatch.score.penalties:null);}
+function winnerSideFromApi(apiMatch){
+  const winner=(apiMatch&&apiMatch.score&&apiMatch.score.winner)||"";
+  if(winner==="HOME_TEAM"||winner==="HOME")return "home";
+  if(winner==="AWAY_TEAM"||winner==="AWAY")return "away";
+  return null;
+}
+function penaltyWinnerSide(apiMatch){
+  const p=penaltyScorePair(apiMatch);
+  if(p){if(p.home>p.away)return "home";if(p.away>p.home)return "away";}
+  return winnerSideFromApi(apiMatch);
+}
+function actualAdvanceSideFromApi(appMatch,apiMatch,score120){
+  if(!isKnockout(appMatch)||!score120)return null;
+  if(score120.home>score120.away)return "home";
+  if(score120.away>score120.home)return "away";
+  return penaltyWinnerSide(apiMatch);
+}
+
 /* ---------------- Data loading ---------------- */
 async function loadMatches(){
   try{const r=await fetch("matches.json",{cache:"no-store"});if(r.ok){const j=await r.json();if(j&&Array.isArray(j.matches))MATCHES=j.matches;else MATCHES=EMBEDDED.matches;}else MATCHES=EMBEDDED.matches;}
@@ -1198,8 +1258,16 @@ async function mergeLive(){
       if(am.homeTeam&&am.homeTeam.name&&!/^TBD/i.test(am.homeTeam.name))m.home=am.homeTeam.name;
       if(am.awayTeam&&am.awayTeam.name&&!/^TBD/i.test(am.awayTeam.name))m.away=am.awayTeam.name;
       if(am.utcDate)m.kickoff=am.utcDate;
-      if(am.status==="FINISHED")m.status="finished";else if(am.status==="IN_PLAY"||am.status==="PAUSED")m.status="live";
-      if(am.score&&am.score.fullTime){if(am.score.fullTime.home!=null)m.homeScore=am.score.fullTime.home;if(am.score.fullTime.away!=null)m.awayScore=am.score.fullTime.away;}});
+      if(am.status==="FINISHED")m.status="finished";else if(am.status==="IN_PLAY"||am.status==="PAUSED"||am.status==="EXTRA_TIME"||am.status==="PENALTY_SHOOTOUT")m.status="live";
+      const score120=scoreAfter120(am);
+      if(score120){m.homeScore=score120.home;m.awayScore=score120.away;}
+      const pens=penaltyScorePair(am);
+      if(pens){m.homePenScore=pens.home;m.awayPenScore=pens.away;}
+      else{delete m.homePenScore;delete m.awayPenScore;}
+      const adv=actualAdvanceSideFromApi(m,am,score120);
+      if(adv)m.advance=adv;
+      if(am.status==="PENALTY_SHOOTOUT"){m.liveText="PEN";m.liveMinute=null;}
+    });
   }catch(e){}
 }
 
@@ -1914,7 +1982,10 @@ function renderCard(m){
   const center=el("div","center");
   if(state==="upcoming"){center.innerHTML=`<div class="vs">VS</div><div class="ko">${fmtKO(m)}</div>`;}
   else if(state==="pending"&&!hasScore){center.innerHTML=`<div class="score" style="color:var(--faint)">–<span class="sep">-</span>–</div><div class="ko">awaiting result</div>`;}
-  else{center.innerHTML=`<div class="score"><span class="${out==='home'?'s-win':out==='draw'?'s-draw':out?'s-lose':''}">${m.homeScore??0}</span><span class="sep">-</span><span class="${out==='away'?'s-win':out==='draw'?'s-draw':out?'s-lose':''}">${m.awayScore??0}</span></div>`;}
+  else{
+    const penText=penaltyDisplay(m);
+    center.innerHTML=`<div class="score"><span class="${out==='home'?'s-win':out==='draw'?'s-draw':out?'s-lose':''}">${m.homeScore??0}</span><span class="sep">-</span><span class="${out==='away'?'s-win':out==='draw'?'s-draw':out?'s-lose':''}">${m.awayScore??0}</span></div>${penText?`<div class="ko">${esc(penText)}</div>`:""}`;
+  }
   const away=el("div","team away "+aC);
   const an=el("span","tname");an.textContent=m.away;away.appendChild(an);
   away.appendChild(flagEl(m.away,m.awayFlag));
@@ -2083,7 +2154,8 @@ function renderMyPicks(){
     const lvlPick=pick.h!=null&&(+pick.h===+pick.a);
     const penWho=pick.pen==="home"?m.home:pick.pen==="away"?m.away:null;
     const penTxt=isKnockout(m)&&lvlPick?(" · 🥅 "+(penWho||"shootout: pick a winner")):"";
-    sub.textContent=roundDisplay(m)+" · "+(m.status==="finished"?("Full time "+(m.homeScore??0)+"-"+(m.awayScore??0)):locked?"Locked":fmtKO(m))+penTxt;
+    const penResult=penaltyDisplay(m);
+    sub.textContent=roundDisplay(m)+" · "+(m.status==="finished"?("Full time "+(m.homeScore??0)+"-"+(m.awayScore??0)+(penResult?" · "+penResult:"")):locked?"Locked":fmtKO(m))+penTxt;
     info.appendChild(teams);info.appendChild(sub);row.appendChild(info);
 
     const ctrl=el("div","mp-ctrl");
@@ -2285,7 +2357,7 @@ function renderTreeMatch(m,isCenter){
   const win=resultWinnerSide(m);
   const pen=m.status==="finished"&&m.homeScore!=null&&m.homeScore===m.awayScore&&(m.advance==="home"||m.advance==="away");
   const head=el("div","tree-match-head");
-  head.innerHTML=`<b>${esc(shortMatchName(m))}</b><span>${pen?"PENS · ":""}${fmtKO(m)}</span>`;
+  head.innerHTML=`<b>${esc(shortMatchName(m))}</b><span>${pen?((penaltyDisplay(m)||"PENS")+" · "):""}${fmtKO(m)}</span>`;
   box.appendChild(head);
   box.appendChild(renderTreeTeam(m.home,m.homeScore,m.homeFlag,win==="home",pen&&win==="home"));
   box.appendChild(renderTreeTeam(m.away,m.awayScore,m.awayFlag,win==="away",pen&&win==="away"));
