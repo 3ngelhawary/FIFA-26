@@ -168,7 +168,7 @@ function scoreAfter120(match) {
   const extraTime = scorePair(score.extraTime);
   const penalties = scorePair(score.penalties);
 
-  if (duration === "PENALTY_SHOOTOUT") {
+  if (duration === "PENALTY_SHOOTOUT" || penalties) {
     return addScorePairs(regularTime, extraTime)
       || subtractScorePairs(fullTime, penalties)
       || fullTime;
@@ -283,6 +283,15 @@ async function main() {
       }
       updateData.homeScore = homeScore;
       updateData.awayScore = awayScore;
+
+      const penalties = scorePair(am.score?.penalties);
+      if (penalties) {
+        updateData.homePenScore = penalties.home;
+        updateData.awayPenScore = penalties.away;
+      } else {
+        updateData.homePenScore = null;
+        updateData.awayPenScore = null;
+      }
 
       if (status === "finished" && isKnockout(m)) {
         updateData.advance = actualAdvanceSide(m, am, score120);
