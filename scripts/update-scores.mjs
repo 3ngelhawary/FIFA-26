@@ -112,6 +112,104 @@ function getLiveMinute(kickoff) {
   return null;
 }
 
+function isKnockout(match) {
+  return !!(match && (match.round || match.group === "KO"));
+}
+
+function scoreValue(node, side) {
+  if (!node) return null;
+
+  const keys = side === "home" ? ["home", "homeTeam"] : ["away", "awayTeam"];
+
+  for (const key of keys) {
+    if (node[key] == null) continue;
+
+    const value = Number(node[key]);
+    if (Number.isFinite(value)) return value;
+  }
+
+  return null;
+}
+
+function scorePair(node) {
+  const home = scoreValue(node, "home");
+  const away = scoreValue(node, "away");
+
+  if (home == null || away == null) return null;
+
+  return { home, away };
+}
+
+function addScorePairs(a, b) {
+  if (!a || !b) return null;
+
+  return {
+    home: a.home + b.home,
+    away: a.away + b.away
+  };
+}
+
+function subtractScorePairs(a, b) {
+  if (!a || !b) return null;
+
+  const pair = {
+    home: a.home - b.home,
+    away: a.away - b.away
+  };
+
+  return pair.home >= 0 && pair.away >= 0 ? pair : null;
+}
+
+function scoreAfter120(match) {
+  const score = match.score || {};
+  const duration = score.duration || "REGULAR";
+  const fullTime = scorePair(score.fullTime);
+  const regularTime = scorePair(score.regularTime);
+  const extraTime = scorePair(score.extraTime);
+  const penalties = scorePair(score.penalties);
+
+  if (duration === "PENALTY_SHOOTOUT") {
+    return addScorePairs(regularTime, extraTime)
+      || subtractScorePairs(fullTime, penalties)
+      || fullTime;
+  }
+
+  if (duration === "EXTRA_TIME") {
+    return addScorePairs(regularTime, extraTime) || fullTime;
+  }
+
+  return fullTime;
+}
+
+function winnerSideFromApi(match) {
+  const winner = match.score?.winner || "";
+
+  if (winner === "HOME_TEAM" || winner === "HOME") return "home";
+  if (winner === "AWAY_TEAM" || winner === "AWAY") return "away";
+
+  return null;
+}
+
+function penaltyWinnerSide(match) {
+  const penalties = scorePair(match.score?.penalties);
+
+  if (penalties) {
+    if (penalties.home > penalties.away) return "home";
+    if (penalties.away > penalties.home) return "away";
+  }
+
+  return winnerSideFromApi(match);
+}
+
+function actualAdvanceSide(ours, apiMatch, score120) {
+  if (!isKnockout(ours) || !score120) return null;
+
+  if (score120.home > score120.away) return "home";
+  if (score120.away > score120.home) return "away";
+
+  return penaltyWinnerSide(apiMatch);
+}
+
 async function main() {
   const ours = JSON.parse(fs.readFileSync("matches.json", "utf8")).matches || [];
 
@@ -159,13 +257,13 @@ async function main() {
 
     if (am.status === "FINISHED") {
       status = "finished";
-    } else if (am.status === "IN_PLAY" || am.status === "PAUSED") {
+    } else if (["IN_PLAY", "PAUSED", "EXTRA_TIME", "PENALTY_SHOOTOUT"].includes(am.status)) {
       status = "live";
     }
 
-    const ft = am.score?.fullTime || {};
-    const homeScore = ft.home;
-    const awayScore = ft.away;
+    const score120 = scoreAfter120(am);
+    const homeScore = score120?.home;
+    const awayScore = score120?.away;
     const homeName = am.homeTeam?.name || "";
     const awayName = am.awayTeam?.name || "";
 
@@ -185,6 +283,10 @@ async function main() {
       }
       updateData.homeScore = homeScore;
       updateData.awayScore = awayScore;
+
+      if (status === "finished" && isKnockout(m)) {
+        updateData.advance = actualAdvanceSide(m, am, score120);
+      }
     }
 
     const hasFixtureUpdate = updateData.home || updateData.away || updateData.kickoff;
@@ -194,10 +296,12 @@ async function main() {
     }
 
     if (status === "live") {
-      const liveMinute = getLiveMinute(m.kickoff);
+      const liveMinute = getLiveMinute(am.utcDate || m.kickoff);
 
       updateData.liveMinute = liveMinute;
-      updateData.liveText = liveMinute ? `${liveMinute}'` : "LIVE";
+      updateData.liveText = am.status === "PENALTY_SHOOTOUT"
+        ? "PEN"
+        : liveMinute ? `${liveMinute}'` : "LIVE";
     } else {
       updateData.liveMinute = null;
       updateData.liveText = null;
@@ -210,9 +314,10 @@ async function main() {
     const homeLabel = updateData.home || m.home;
     const awayLabel = updateData.away || m.away;
     const scoreLabel = status === "scheduled" ? "fixture synced" : `${updateData.homeScore}-${updateData.awayScore}`;
+    const advanceLabel = updateData.advance ? ` advance=${updateData.advance}` : "";
 
     console.log(
-      `Updated: ${homeLabel} ${scoreLabel} ${awayLabel} [${status}] ${
+      `Updated: ${homeLabel} ${scoreLabel} ${awayLabel} [${status}]${advanceLabel} ${
         updateData.liveText || ""
       }`
     );
