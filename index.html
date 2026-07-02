@@ -553,6 +553,21 @@
   .boost-btn{width:100%;cursor:pointer;font-family:"Oswald";font-weight:700;font-size:16px;letter-spacing:.5px;
     border:0;border-radius:12px;padding:13px;color:#1a1407;background:linear-gradient(180deg,#ffe24a,#e8b400)}
   .boost-btn:hover{filter:brightness(1.06)}
+  /* WhatsApp group invite notice */
+  .wa-card{width:100%;max-width:420px;text-align:center;border-radius:20px;padding:26px 22px;
+    background:linear-gradient(180deg,#0d1f16,#0c0e1a);border:1px solid rgba(37,211,102,.5);
+    box-shadow:0 24px 70px rgba(0,0,0,.6),0 0 44px rgba(37,211,102,.22)}
+  .wa-icon{line-height:0;display:flex;justify-content:center;margin-bottom:2px}
+  .wa-title{font-family:"Oswald";font-size:30px;font-weight:700;letter-spacing:1px;margin:8px 0 4px;
+    color:#25d366;text-shadow:0 0 16px rgba(37,211,102,.45)}
+  .wa-copy{font-size:14px;color:var(--ink);line-height:1.7;margin:6px 0 18px}
+  .wa-btn{width:100%;cursor:pointer;font-family:"Oswald";font-weight:700;font-size:16px;letter-spacing:.5px;
+    display:flex;align-items:center;justify-content:center;gap:9px;text-decoration:none;
+    border:0;border-radius:12px;padding:13px;color:#052e16;background:linear-gradient(180deg,#2ee06f,#1eae55)}
+  .wa-btn:hover{filter:brightness(1.06)}
+  .wa-skip{margin-top:12px;display:inline-block;cursor:pointer;background:none;border:0;
+    color:var(--muted);font-size:12.5px;letter-spacing:.3px}
+  .wa-skip:hover{color:var(--ink)}
   /* my-picks rows */
   .mp-row{border-left:3px solid var(--rc,var(--line))}
   /* organizer rows */
@@ -1487,7 +1502,7 @@ function renderApp(){
   renderHero();
   renderTop3Reminder();
   renderTop3HomePopup();
-  maybeShowBoostNotice();
+  maybeShowWhatsAppNotice();
   const view=$("#view");
   if(activeTab!=="tree")treeTabOpen=false;
   if(activeTab==="board"){view.appendChild(renderBoard());return;}
@@ -1601,6 +1616,35 @@ function maybeShowBoostNotice(){
   </div>`;
   document.body.appendChild(modal);
   const ok=$("#boostOk");if(ok)ok.onclick=close;
+}
+
+/* ---- WhatsApp group invite (shown once per login session) ---- */
+const WA_GROUP_URL="https://chat.whatsapp.com/IicvhpoyWXD7FOnNSN0vup?mode=gi_t";
+function whatsappIcon(px){
+  return `<svg width="${px}" height="${px}" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" aria-label="WhatsApp" role="img" style="vertical-align:middle">
+    <path fill="#25D366" d="M16 0a16 16 0 0 0-13.8 24l-2.2 8 8.2-2.1A16 16 0 1 0 16 0z"/>
+    <path fill="#fff" d="M23.6 19.1c-.4-.2-2.4-1.2-2.7-1.3-.4-.1-.6-.2-.9.2s-1 1.3-1.2 1.5-.4.3-.8.1a10.9 10.9 0 0 1-3.2-2 12 12 0 0 1-2.2-2.8c-.2-.4 0-.6.2-.8l.6-.7c.2-.2.2-.4.4-.6s.1-.5 0-.7-.9-2.1-1.2-2.9c-.3-.8-.6-.7-.9-.7h-.7c-.3 0-.7.1-1 .5a4 4 0 0 0-1.3 3c0 1.8 1.3 3.5 1.5 3.7s2.6 4 6.3 5.6c2.2 1 3.1 1 4.2.9.7 0 2.4-1 2.7-1.9.3-.9.3-1.7.2-1.9s-.3-.2-.7-.4z"/>
+  </svg>`;
+}
+function whatsappNoticeKey(){return "egec_wa_notice_"+(ME?ME.code:"");}
+function maybeShowWhatsAppNotice(){
+  if(!ME)return;
+  if(sessionStorage.getItem(whatsappNoticeKey())==="1")return; // once per login session
+  if(document.querySelector(".boost-modal"))return;
+  const modal=el("div","boost-modal");modal.setAttribute("role","dialog");modal.setAttribute("aria-modal","true");
+  const close=()=>{sessionStorage.setItem(whatsappNoticeKey(),"1");document.removeEventListener("keydown",escClose);modal.remove();};
+  const escClose=e=>{if(e.key==="Escape")close();};document.addEventListener("keydown",escClose);
+  modal.onclick=e=>{if(e.target===modal)close();};
+  modal.innerHTML=`<div class="wa-card">
+    <div class="wa-icon">${whatsappIcon(56)}</div>
+    <div class="wa-title">Maximize the fun! 🎉</div>
+    <p class="wa-copy">${whatsappIcon(15)} Join our WhatsApp group today!</p>
+    <a class="wa-btn" id="waJoin" href="${WA_GROUP_URL}" target="_blank" rel="noopener noreferrer">${whatsappIcon(20)} Join the group</a>
+    <button class="wa-skip" id="waSkip" type="button">Maybe later</button>
+  </div>`;
+  document.body.appendChild(modal);
+  const join=$("#waJoin");if(join)join.onclick=close;
+  const skip=$("#waSkip");if(skip)skip.onclick=close;
 }
 
 function top3PopupKey(){return "egec_top3_popup_"+ME.code+"_"+top3CloseAt();}
