@@ -33,3 +33,12 @@ jobs:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           FOOTBALL_TOKEN: ${{ secrets.FOOTBALL_TOKEN }}
           COMPETITION: WC
+
+      # Tamper monitor: snapshots predictions/scores each run and writes anything
+      # suspicious to the `flags` collection (shown in the organizer Flags panel).
+      # `if: always()` so it still runs even if the score step above failed.
+      - run: node scripts/monitor.mjs
+        if: always()
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          MONITOR_LOCK_OFFSET_MIN: "60"
