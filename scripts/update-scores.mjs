@@ -193,11 +193,15 @@ function winnerSideFromApi(match) {
 function penaltyWinnerSide(match) {
   const penalties = scorePair(match.score?.penalties);
 
-  if (penalties) {
-    if (penalties.home > penalties.away) return "home";
-    if (penalties.away > penalties.home) return "away";
+  // A decisive shootout tells us the winner directly.
+  if (penalties && penalties.home !== penalties.away) {
+    return penalties.home > penalties.away ? "home" : "away";
   }
 
+  // No penalties yet, or a LEVEL snapshot caught mid-shootout (e.g. 4-4):
+  // don't guess from the tied count — fall back to the feed's declared winner
+  // (score.winner). If it hasn't published one yet, return null so the caller
+  // leaves `advance` untouched instead of freezing an unresolved value.
   return winnerSideFromApi(match);
 }
 
@@ -285,16 +289,26 @@ async function main() {
       updateData.awayScore = awayScore;
 
       const penalties = scorePair(am.score?.penalties);
-      if (penalties) {
-        updateData.homePenScore = penalties.home;
-        updateData.awayPenScore = penalties.away;
-      } else {
+      if (!penalties) {
         updateData.homePenScore = null;
         updateData.awayPenScore = null;
+      } else if (penalties.home !== penalties.away || winnerSideFromApi(am)) {
+        // Decisive shootout, or the feed has declared a winner -> record it.
+        updateData.homePenScore = penalties.home;
+        updateData.awayPenScore = penalties.away;
       }
+      // Otherwise: a LEVEL snapshot caught mid-shootout with no winner yet —
+      // leave the stored pen scores untouched rather than freezing a tied 4-4.
 
       if (status === "finished" && isKnockout(m)) {
-        updateData.advance = actualAdvanceSide(m, am, score120);
+        // Only write `advance` when we can actually name the side that went
+        // through. If the shootout winner is still unknown (feed lag, or a
+        // level mid-shootout snapshot), leave the field alone — with
+        // {merge:true} an omitted field keeps whatever is already stored, so
+        // we never overwrite a correct `advance` with null and freeze the
+        // match in an unresolved state.
+        const advance = actualAdvanceSide(m, am, score120);
+        if (advance) updateData.advance = advance;
       }
     }
 
