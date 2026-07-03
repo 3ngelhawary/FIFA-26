@@ -427,6 +427,21 @@
   /* World Cup Tree */
   .tree-note{margin:0 15px 14px;color:var(--muted);font-size:12.5px;line-height:1.55}
   .tree-admin{margin:0 15px 15px;border:1px solid rgba(255,230,0,.28);background:rgba(255,230,0,.06);border-radius:12px;padding:10px 12px;color:#ffe9a3;font-size:12px;line-height:1.5}
+  /* Flags panel (organizer monitoring) */
+  .flag-row{display:flex;gap:10px;align-items:flex-start;padding:11px 15px;border-bottom:1px solid var(--line)}
+  .flag-row:last-child{border-bottom:0}
+  .flag-dot{flex:none;width:9px;height:9px;border-radius:50%;margin-top:5px}
+  .flag-dot.high{background:var(--lose);box-shadow:0 0 8px rgba(255,45,85,.6)}
+  .flag-dot.med{background:#ffb020;box-shadow:0 0 8px rgba(255,176,32,.5)}
+  .flag-dot.low{background:var(--muted)}
+  .flag-dot.info{background:var(--cyan)}
+  .flag-body{min-width:0;flex:1}
+  .flag-msg{font-weight:700;font-size:13.5px;line-height:1.35}
+  .flag-meta{margin-top:3px;font-size:11.5px;color:var(--muted);line-height:1.5;word-break:break-word}
+  .flag-meta b{color:var(--ink);font-family:"Inter"}
+  .flag-when{margin-top:3px;font-size:10.5px;color:var(--faint)}
+  .flag-clean{padding:16px 15px;color:var(--muted);font-size:13px;text-align:center}
+  .flag-clean b{color:var(--win)}
   .tree-scroll{overflow:hidden;padding:0 13px 16px;scrollbar-width:thin;touch-action:none}
   .tree-scroll.pannable{cursor:grab}
   .tree-scroll.grabbing{cursor:grabbing}
@@ -683,8 +698,8 @@ const TOP3_DOC_ID="__top3__";
 const Store={
   ready:false, error:"", errDetail:"",
   db:null, fs:null,
-  cache:{players:{},preds:{},results:{}},
-  loaded:{players:false,preds:false,results:false},
+  cache:{players:{},preds:{},results:{},flags:{}},
+  loaded:{players:false,preds:false,results:false,flags:false},
 
   async init(){
     const cfg=CFG.storage.firebase||{};
@@ -697,13 +712,14 @@ const Store={
       const sub=(col,key)=>f.onSnapshot(f.collection(this.db,col),
         s=>{ this.cache[key]={}; s.forEach(d=>this.cache[key][d.id]=d.data()); this.loaded[key]=true; render(); },
         err=>{ this.error="rules"; this.errDetail=err.message||String(err); render(); });
-      sub("players","players"); sub("predictions","preds"); sub("results","results");
+      sub("players","players"); sub("predictions","preds"); sub("results","results"); sub("flags","flags");
     }catch(e){ this.error="init"; this.errDetail=(e&&e.message)||String(e); }
   },
 
   players(){return this.cache.players;},
   predsAll(){return this.cache.preds;},
   resultsAll(){return this.cache.results;},
+  flagsAll(){return this.cache.flags;},
   getByCode(code){const p=this.players();return p[code]?{name:p[code].name,code}:null;},
 
   async addPlayer(name){
@@ -721,7 +737,7 @@ const Store={
     const cur=(this.cache.preds[code]&&this.cache.preds[code].picks)||{};
     const prev=cur[matchId]||{};
     cur[matchId]=Object.assign({},prev,{h,a},extra||{});
-    await this.fs.setDoc(this.fs.doc(this.db,"predictions",code),{name,picks:cur},{merge:true});
+    await this.fs.setDoc(this.fs.doc(this.db,"predictions",code),{name,picks:cur,updatedAt:this.fs.serverTimestamp()},{merge:true});
   },
 
   // Knockout shootout pick: who the player thinks advances when they
@@ -730,11 +746,11 @@ const Store={
     const cur=(this.cache.preds[code]&&this.cache.preds[code].picks)||{};
     const prev=cur[matchId]||{h:0,a:0};
     cur[matchId]=Object.assign({},prev,{pen:side});
-    await this.fs.setDoc(this.fs.doc(this.db,"predictions",code),{name,picks:cur},{merge:true});
+    await this.fs.setDoc(this.fs.doc(this.db,"predictions",code),{name,picks:cur,updatedAt:this.fs.serverTimestamp()},{merge:true});
   },
 
   async saveTop3(code,name,top3){
-    await this.fs.setDoc(this.fs.doc(this.db,"predictions",code),{name,top3,top3UpdatedAt:Date.now()},{merge:true});
+    await this.fs.setDoc(this.fs.doc(this.db,"predictions",code),{name,top3,top3UpdatedAt:Date.now(),updatedAt:this.fs.serverTimestamp()},{merge:true});
   },
 
   async setResult(matchId,h,a,status,advance){
@@ -2657,6 +2673,60 @@ function renderRoster(){
   return panel;
 }
 
+function renderFlagsPanel(){
+  const panel=el("div","panel");
+  const h=el("h2");h.innerHTML=`<span>🚩 Flags</span><span class="meta">automatic tamper watch</span>`;panel.appendChild(h);
+
+  const all=Object.entries(Store.flagsAll()||{}).map(([id,f])=>Object.assign({id},f));
+  // newest first (createdAt is a Firestore Timestamp; fall back to runAt)
+  const tms=f=>{const c=f.createdAt;if(c&&typeof c.seconds==="number")return c.seconds*1000;if(typeof c==="number")return c;if(f.runAt){const t=Date.parse(f.runAt);if(!isNaN(t))return t;}return 0;};
+  all.sort((a,b)=>tms(b)-tms(a));
+
+  const alerts=all.filter(f=>f.type!=="baseline");
+  const baseline=all.find(f=>f.type==="baseline");
+
+  if(!Store.loaded.flags){
+    const d=el("div","flag-clean");d.textContent="Loading monitor…";panel.appendChild(d);return panel;
+  }
+  if(!all.length){
+    const d=el("div","flag-clean");
+    d.innerHTML="Monitoring is not active yet. It starts flagging once the checker runs on your schedule.";
+    panel.appendChild(d);return panel;
+  }
+  if(!alerts.length){
+    const d=el("div","flag-clean");
+    d.innerHTML="<b>No suspicious activity detected.</b>";
+    if(baseline)d.innerHTML+=`<div class="flag-when" style="margin-top:6px">Watching for changes since ${fmtFlagTime(tms(baseline))}.</div>`;
+    panel.appendChild(d);return panel;
+  }
+
+  const sevClass=s=>s==="high"?"high":s==="med"?"med":s==="info"?"info":"low";
+  alerts.slice(0,100).forEach(f=>{
+    const row=el("div","flag-row");
+    const dot=el("div","flag-dot "+sevClass(f.severity));
+    const body=el("div","flag-body");
+    const parts=[];
+    if(f.matchLabel)parts.push(`Match: <b>${esc(f.matchLabel)}</b>`);
+    if(f.playerName||f.playerCode)parts.push(`Player: <b>${esc(f.playerName||"?")}</b>${f.playerCode?` (${esc(f.playerCode)})`:""}`);
+    if(f.detail)parts.push(esc(f.detail));
+    body.innerHTML=`<div class="flag-msg">${esc(f.message||f.type||"Flag")}</div>`+
+      (parts.length?`<div class="flag-meta">${parts.join(" · ")}</div>`:"")+
+      `<div class="flag-when">${fmtFlagTime(tms(f))}</div>`;
+    row.appendChild(dot);row.appendChild(body);panel.appendChild(row);
+  });
+  if(baseline){
+    const foot=el("div","flag-when");foot.style.padding="10px 15px";
+    foot.textContent=`Watching for changes since ${fmtFlagTime(tms(baseline))}.`;
+    panel.appendChild(foot);
+  }
+  return panel;
+}
+function fmtFlagTime(ms){
+  if(!ms)return "";
+  try{return new Date(ms).toLocaleString([], {month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});}
+  catch(e){return new Date(ms).toISOString();}
+}
+
 function renderOrg(){
   const wrap=el("div");
 
@@ -2665,6 +2735,9 @@ function renderOrg(){
   notice.style.margin="0 0 16px";
   notice.innerHTML="🔒 <b>Read-only organizer view.</b> You can reveal every player's hidden predictions here, but match scores and results can't be edited from the app — final scores update automatically. If this login ever leaks, no one can change any score.";
   wrap.appendChild(notice);
+
+  /* ---- Flags: suspicious-activity monitor (written server-side) ---- */
+  wrap.appendChild(renderFlagsPanel());
 
   const players=Object.values(Store.players()).sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
   const preds=Store.predsAll();
