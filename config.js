@@ -48,12 +48,24 @@ window.CONFIG = {
   },
 
   // --- Organizer (admin) ----------------------------------------------------
-  // Organizer mode now needs TWO things: (1) you must be logged in as the one
-  // authorised account whose login code equals `organizerUserCode`, AND (2) you
-  // must then enter `adminCode`. Even if the password leaks, no other account
-  // can open the organizer view — and the organizer view is read-only anyway.
-  adminCode: "EGEC@WC26",
-  organizerUserCode: "8K62Y5",
+  // These are SHA-256 HASHES, not the real password/code — so opening this file
+  // no longer reveals either secret. The app hashes what's typed/logged-in and
+  // compares. (This only stops casual reading; a determined person can still
+  // bypass any browser-side check, which is why the REAL protection is the
+  // Firestore security rules in firestore.rules — publish those.)
+  //
+  // Organizer mode needs BOTH: (1) be logged in as the one authorised account
+  // whose login code hashes to organizerUserCodeHash, AND (2) enter the password
+  // that hashes to adminHash.
+  //
+  // To change either secret, hash the new value with SHA-256 and paste the hex
+  // here. Quick way in your browser console:
+  //   crypto.subtle.digest("SHA-256", new TextEncoder().encode("YOUR_SECRET"))
+  //     .then(b=>console.log([...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")))
+  //
+  // Current values: password "EGEC@WC26", organizer login code "8K62Y5".
+  adminHash: "1ca84b95596540d83681efc027efb2ffc904ec442e33686aafcc0a375bce5d83",
+  organizerUserCodeHash: "b79c8b31cb67751c8164a2335eaa34b6f1b325180fb7844b332961a8cdf1af4a",
 
   // --- Live scores (optional) ----------------------------------------------
   // The page always reads matches.json. Paste a football-data.org token to
