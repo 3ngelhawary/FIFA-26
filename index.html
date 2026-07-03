@@ -125,6 +125,13 @@
   .hero-layout{display:flex;align-items:center;justify-content:space-between;gap:16px}
   .hero-main{min-width:0;flex:1}
   .eyebrow{font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:var(--magenta);font-weight:700}
+  /* Hidden organizer entry point — looks like plain text. Normal cursor, no
+     text-selection on multi-click, and touch-action:manipulation stops phones
+     from zooming on the rapid triple-tap. The padding is a safe tap margin. */
+  .lock-x{cursor:default;color:inherit;display:inline-block;padding:3px 8px;margin:0 -2px;
+    -webkit-user-select:none;-moz-user-select:none;user-select:none;-webkit-touch-callout:none;
+    touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+  .lock-x:hover{cursor:default;color:inherit}
   .hero-cta{font-family:"Oswald";font-weight:600;font-size:clamp(19px,4.4vw,28px);margin:4px 0 2px;letter-spacing:.3px}
   .hero-clock{font-family:"Oswald";font-weight:700;font-variant-numeric:tabular-nums;color:var(--cyan);text-shadow:0 0 12px rgba(0,229,255,.55)}
   .hero-clock.urgent{color:var(--lose);text-shadow:0 0 12px rgba(255,45,85,.6)}
@@ -634,7 +641,7 @@ const ISO = {
 const EMBEDDED={"matches":[{"id":"g20-ned-swe","group":"F","home":"Netherlands","away":"Sweden","homeFlag":"🇳🇱","awayFlag":"🇸🇪","kickoff":"2026-06-20T16:00:00Z","venue":"Houston","status":"finished","homeScore":5,"awayScore":1},{"id":"g20-ger-civ","group":"E","home":"Germany","away":"Ivory Coast","homeFlag":"🇩🇪","awayFlag":"🇨🇮","kickoff":"2026-06-20T20:00:00Z","venue":"MetLife","status":"finished","homeScore":2,"awayScore":1},{"id":"g20-ecu-cuw","group":"E","home":"Ecuador","away":"Curaçao","homeFlag":"🇪🇨","awayFlag":"🇨🇼","kickoff":"2026-06-20T23:00:00Z","venue":"Philadelphia","status":"finished","homeScore":0,"awayScore":0},{"id":"g21-tun-jpn","group":"F","home":"Tunisia","away":"Japan","homeFlag":"🇹🇳","awayFlag":"🇯🇵","kickoff":"2026-06-21T17:00:00Z","venue":"Kansas City","status":"finished","homeScore":0,"awayScore":4},{"id":"g21-esp-ksa","group":"H","home":"Spain","away":"Saudi Arabia","homeFlag":"🇪🇸","awayFlag":"🇸🇦","kickoff":"2026-06-21T19:00:00Z","venue":"Atlanta","status":"finished","homeScore":4,"awayScore":0},{"id":"g21-bel-irn","group":"G","home":"Belgium","away":"IR Iran","homeFlag":"🇧🇪","awayFlag":"🇮🇷","kickoff":"2026-06-21T21:00:00Z","venue":"Los Angeles","status":"finished","homeScore":0,"awayScore":0},{"id":"g21-uru-cpv","group":"H","home":"Uruguay","away":"Cabo Verde","homeFlag":"🇺🇾","awayFlag":"🇨🇻","kickoff":"2026-06-21T23:00:00Z","venue":"Miami","status":"finished","homeScore":2,"awayScore":2},{"id":"g21-egy-nzl","group":"G","home":"Egypt","away":"New Zealand","homeFlag":"🇪🇬","awayFlag":"🇳🇿","kickoff":"2026-06-22T01:00:00Z","venue":"Vancouver","status":"finished","homeScore":3,"awayScore":1},{"id":"g22-arg-aut","group":"J","home":"Argentina","away":"Austria","homeFlag":"🇦🇷","awayFlag":"🇦🇹","kickoff":"2026-06-22T17:00:00Z","venue":"Arlington","status":"finished","homeScore":2,"awayScore":0},{"id":"g22-fra-irq","group":"I","home":"France","away":"Iraq","homeFlag":"🇫🇷","awayFlag":"🇮🇶","kickoff":"2026-06-22T21:00:00Z","venue":"Philadelphia","status":"finished","homeScore":3,"awayScore":0},{"id":"g22-nor-sen","group":"I","home":"Norway","away":"Senegal","homeFlag":"🇳🇴","awayFlag":"🇸🇳","kickoff":"2026-06-23T00:00:00Z","venue":"New York/NJ","status":"finished","homeScore":3,"awayScore":2},{"id":"g22-jor-alg","group":"J","home":"Jordan","away":"Algeria","homeFlag":"🇯🇴","awayFlag":"🇩🇿","kickoff":"2026-06-23T03:00:00Z","venue":"SF Bay Area","status":"finished","homeScore":1,"awayScore":2},{"id":"g23-por-uzb","group":"K","home":"Portugal","away":"Uzbekistan","homeFlag":"🇵🇹","awayFlag":"🇺🇿","kickoff":"2026-06-23T17:00:00Z","venue":"Houston","status":"finished","homeScore":5,"awayScore":0},{"id":"g23-eng-gha","group":"L","home":"England","away":"Ghana","homeFlag":"🏴","awayFlag":"🇬🇭","kickoff":"2026-06-23T20:00:00Z","venue":"Boston","status":"finished","homeScore":0,"awayScore":0},{"id":"g23-pan-cro","group":"L","home":"Panama","away":"Croatia","homeFlag":"🇵🇦","awayFlag":"🇭🇷","kickoff":"2026-06-23T23:00:00Z","venue":"Toronto","status":"finished","homeScore":0,"awayScore":1},{"id":"g23-col-cod","group":"K","home":"Colombia","away":"Congo DR","homeFlag":"🇨🇴","awayFlag":"🇨🇩","kickoff":"2026-06-24T02:00:00Z","venue":"Guadalajara Stadium","status":"finished","homeScore":1,"awayScore":0},{"id":"g24-bih-qat","group":"B","home":"Bosnia and Herzegovina","away":"Qatar","homeFlag":"🇧🇦","awayFlag":"🇶🇦","kickoff":"2026-06-24T19:00:00Z","venue":"Lumen Field, Seattle","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g24-sui-can","group":"B","home":"Switzerland","away":"Canada","homeFlag":"🇨🇭","awayFlag":"🇨🇦","kickoff":"2026-06-24T19:00:00Z","venue":"BC Place, Vancouver","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g24-mar-hai","group":"C","home":"Morocco","away":"Haiti","homeFlag":"🇲🇦","awayFlag":"🇭🇹","kickoff":"2026-06-24T22:00:00Z","venue":"MetLife Stadium","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g24-sco-bra","group":"C","home":"Scotland","away":"Brazil","homeFlag":"🏴","awayFlag":"🇧🇷","kickoff":"2026-06-24T22:00:00Z","venue":"Hard Rock Stadium, Miami","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g24-cze-mex","group":"A","home":"Czechia","away":"Mexico","homeFlag":"🇨🇿","awayFlag":"🇲🇽","kickoff":"2026-06-25T01:00:00Z","venue":"Dallas Stadium","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g24-rsa-kor","group":"A","home":"South Africa","away":"South Korea","homeFlag":"🇿🇦","awayFlag":"🇰🇷","kickoff":"2026-06-25T01:00:00Z","venue":"Atlanta Stadium","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g25-cuw-civ","group":"E","home":"Curaçao","away":"Ivory Coast","homeFlag":"🇨🇼","awayFlag":"🇨🇮","kickoff":"2026-06-25T20:00:00Z","venue":"Boston Stadium","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g25-ecu-ger","group":"E","home":"Ecuador","away":"Germany","homeFlag":"🇪🇨","awayFlag":"🇩🇪","kickoff":"2026-06-25T20:00:00Z","venue":"Toronto Stadium","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g25-jpn-swe","group":"F","home":"Japan","away":"Sweden","homeFlag":"🇯🇵","awayFlag":"🇸🇪","kickoff":"2026-06-25T23:00:00Z","venue":"Dallas Stadium","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g25-tun-ned","group":"F","home":"Tunisia","away":"Netherlands","homeFlag":"🇹🇳","awayFlag":"🇳🇱","kickoff":"2026-06-25T23:00:00Z","venue":"Kansas City Stadium","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g25-par-aus","group":"D","home":"Paraguay","away":"Australia","homeFlag":"🇵🇾","awayFlag":"🇦🇺","kickoff":"2026-06-26T02:00:00Z","venue":"Houston Stadium","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g25-tur-usa","group":"D","home":"Turkey","away":"United States","homeFlag":"🇹🇷","awayFlag":"🇺🇸","kickoff":"2026-06-26T02:00:00Z","venue":"Los Angeles Stadium","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g26-nor-fra","group":"I","home":"Norway","away":"France","homeFlag":"🇳🇴","awayFlag":"🇫🇷","kickoff":"2026-06-26T19:00:00Z","venue":"Seattle Stadium","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g26-sen-irq","group":"I","home":"Senegal","away":"Iraq","homeFlag":"🇸🇳","awayFlag":"🇮🇶","kickoff":"2026-06-26T19:00:00Z","venue":"Philadelphia Stadium","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g26-cpv-ksa","group":"H","home":"Cabo Verde","away":"Saudi Arabia","homeFlag":"🇨🇻","awayFlag":"🇸🇦","kickoff":"2026-06-27T00:00:00Z","venue":"Miami Stadium","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g26-uru-esp","group":"H","home":"Uruguay","away":"Spain","homeFlag":"🇺🇾","awayFlag":"🇪🇸","kickoff":"2026-06-27T00:00:00Z","venue":"Kansas City Stadium","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g26-egy-irn","group":"G","home":"Egypt","away":"IR Iran","homeFlag":"🇪🇬","awayFlag":"🇮🇷","kickoff":"2026-06-27T03:00:00Z","venue":"Vancouver","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g26-nzl-bel","group":"G","home":"New Zealand","away":"Belgium","homeFlag":"🇳🇿","awayFlag":"🇧🇪","kickoff":"2026-06-27T03:00:00Z","venue":"Los Angeles","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g27-cro-gha","group":"L","home":"Croatia","away":"Ghana","homeFlag":"🇭🇷","awayFlag":"🇬🇭","kickoff":"2026-06-27T21:00:00Z","venue":"Philadelphia Stadium","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g27-pan-eng","group":"L","home":"Panama","away":"England","homeFlag":"🇵🇦","awayFlag":"🏴","kickoff":"2026-06-27T21:00:00Z","venue":"Kansas City Stadium","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g27-cod-uzb","group":"K","home":"Congo DR","away":"Uzbekistan","homeFlag":"🇨🇩","awayFlag":"🇺🇿","kickoff":"2026-06-27T23:30:00Z","venue":"Dallas Stadium","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g27-col-por","group":"K","home":"Colombia","away":"Portugal","homeFlag":"🇨🇴","awayFlag":"🇵🇹","kickoff":"2026-06-27T23:30:00Z","venue":"Miami Stadium","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g28-alg-aut","group":"J","home":"Algeria","away":"Austria","homeFlag":"🇩🇿","awayFlag":"🇦🇹","kickoff":"2026-06-28T02:00:00Z","venue":"Vancouver Stadium","status":"scheduled","homeScore":null,"awayScore":null},{"id":"g28-jor-arg","group":"J","home":"Jordan","away":"Argentina","homeFlag":"🇯🇴","awayFlag":"🇦🇷","kickoff":"2026-06-28T02:00:00Z","venue":"New York/New Jersey Stadium","status":"scheduled","homeScore":null,"awayScore":null}]};
 
 const DEFAULTS={orgName:"EGEC",seasonLabel:"World Cup 2026",lockOffsetMinutes:60,
-  scoring:{exactScore:5,correctOutcome:3,correctGoalsBonus:1,advanceBonus:3},adminCode:"EGEC2026",
+  scoring:{exactScore:5,correctOutcome:3,correctGoalsBonus:1,advanceBonus:3},adminCode:"EGEC@WC26",organizerUserCode:"8K62Y5",
   top3:{openAt:"2026-06-28T00:00:00+03:00",closeAt:"2026-06-28T22:00:00+03:00",firstPts:100,secondPts:75,thirdPts:50,exactOrderBonus:100},
   boost:{enabled:true,team:"Egypt",multiplier:2,knockoutOnly:true},
   liveScores:{apiToken:"",competitionId:"WC"},storage:{mode:"local",firebase:{}},refreshMs:30000};
@@ -1115,7 +1122,7 @@ function predictorsFor(mm){
       const sc=scorePick(pk,m),adv=advanceScore(pk,m),pts=(sc.pts+adv.pts)*matchMultiplier(m);
       score={pts,kind:sc.kind==="hit"?"hit":pts>0?"part":"miss"};
     }
-    out.push({name:d.name||"?",code,pick:pk,isYou,reveal:locked||isYou,score});
+    out.push({name:d.name||"?",code,pick:pk,isYou,reveal:locked||isYou||isAdmin,score});
   });
   out.sort((a,b)=>(b.isYou-a.isYou)||((b.score?b.score.pts:0)-(a.score?a.score.pts:0))||a.name.localeCompare(b.name));
   return out;
@@ -1449,8 +1456,12 @@ function listFor(tab){
 
 function renderApp(){
   const root=$("#root");
+  // Security enforcement: if the admin flag is set but the current account is
+  // not the authorised organizer, revoke it immediately (covers a leftover
+  // session flag or a different user logging in on the same browser).
+  if(isAdmin&&!canBeAdmin()){isAdmin=false;sessionStorage.removeItem("egec_admin");if(activeTab==="org")activeTab="today";}
   const myPicks=Store.myPicks(ME.code);const myTop3=Store.myTop3(ME.code);const mine=totalFor(myPicks,myTop3);
-  const tabs=isAdmin?TABS.concat([{id:"org",label:"⚙ Organizer"}]):TABS;
+  const tabs=isAdmin?TABS.concat([{id:"org",label:"👁 Organizer"}]):TABS;
 
   root.innerHTML=`
   <header class="app"><div class="head-inner">
@@ -1479,13 +1490,13 @@ function renderApp(){
       </div>
       <div style="margin-top:9px">Picks lock <b>${CFG.lockOffsetMinutes} min</b> before kickoff · Top 3 exact order bonus <b>+${CFG.top3.exactOrderBonus}</b> · Shared across all devices</div>
       <div style="margin-top:7px;font-weight:700;color:#8b0000">Developed By A. ElHawary</div>
-      <div style="margin-top:7px">${isAdmin?'Organizer mode is on. ':''}<button class="link" id="orgLink">${isAdmin?"Exit organizer":"Organizer login"}</button></div>
+      <div style="margin-top:7px">${isAdmin?'Organizer mode is on. <button class="link" id="orgLink">Exit organizer</button>':''}</div>
     </div>
   </div>
   <div id="top3PopupMount"></div>`;
 
   $("#logoutBtn").onclick=logout;
-  $("#orgLink").onclick=toggleAdmin;
+  const _ol=$("#orgLink");if(_ol)_ol.onclick=toggleAdmin;
   $("#helpBtn").onclick=showHelp;
   const mp=$("#meProfile");if(mp)mp.onclick=()=>showMemberHistory(ME.code);
 
@@ -1535,7 +1546,7 @@ function renderHero(){
     const has=Store.myPicks(ME.code)[next.id]&&Store.myPicks(ME.code)[next.id].h!=null;
     box.innerHTML=`<div class="hero-layout">
       <div class="hero-main">
-        <div class="eyebrow">${has?"Pick is in — change it before lock":"Get your pick in"}</div>
+        <div class="eyebrow">${has?`Pick is in — change it before <span class="lock-x" id="lockTrigger">lock</span>`:"Get your pick in"}</div>
         <div class="hero-cta">${esc(next.home)} <span class="neon-cyan">v</span> ${esc(next.away)} · <span class="hero-clock" data-countdown="${next.id}">--:--:--</span></div>
         <div class="hero-sub">${has?"You can edit your scoreline until picks lock.":"Predict the scoreline before the countdown hits zero."}</div>
       </div>
@@ -1545,6 +1556,7 @@ function renderHero(){
         <div class="hero-prize-sub">Stay on top and claim the glory 🚀🔥</div>
       </div>
     </div>`;
+    const lockT=$("#lockTrigger");if(lockT)attachSecretTrigger(lockT);
   }else{
     box.innerHTML=`<div class="eyebrow neon-mag">Live now</div><div class="hero-cta">Matches in progress</div>`;
   }
@@ -2105,7 +2117,7 @@ function renderCard(m){
     const btn=el("button","reveal-btn");btn.type="button";
     btn.innerHTML=`<span>👥 ${locked?"Predictions":"Predicted by"} (${people.length})</span><span class="chev">›</span>`;
     const panel=el("div","reveal-panel");panel.style.display="none";
-    const cap=el("div","reveal-cap");cap.textContent=locked?"Scores revealed — picks are locked.":"Names only. Scores reveal when picks lock.";
+    const cap=el("div","reveal-cap");cap.textContent=locked?"Scores revealed — picks are locked.":(isAdmin?"Organizer view — all scores revealed.":"Names only. Scores reveal when picks lock.");
     panel.appendChild(cap);
     people.forEach(p=>{
       const r=el("div","pick-row"+(p.isYou?" you":""));
@@ -2635,18 +2647,20 @@ function renderRoster(){
 function renderOrg(){
   const wrap=el("div");
 
-  /* ---- Players management ---- */
-  const pPanel=el("div","panel");
-  const ph=el("h2");ph.innerHTML=`<span>⚙ Players</span><span class="meta">add · codes · remove</span>`;pPanel.appendChild(ph);
-
-  const add=el("div","org-add");
-  add.innerHTML=`<input id="orgName" placeholder="Add a player by name" autocomplete="off"/><button class="org-save" id="orgAddBtn">Add</button>`;
-  pPanel.appendChild(add);
+  /* ---- Read-only notice ---- */
+  const notice=el("div","tree-admin");
+  notice.style.margin="0 0 16px";
+  notice.innerHTML="🔒 <b>Read-only organizer view.</b> You can reveal every player's hidden predictions here, but match scores and results can't be edited from the app — final scores update automatically. If this login ever leaks, no one can change any score.";
+  wrap.appendChild(notice);
 
   const players=Object.values(Store.players()).sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
   const preds=Store.predsAll();
+
+  /* ---- Players roster (read-only) ---- */
+  const pPanel=el("div","panel");
+  const ph=el("h2");ph.innerHTML=`<span>👥 Players</span><span class="meta">${players.length} registered · read-only</span>`;pPanel.appendChild(ph);
   if(!players.length){
-    const e=el("div","empty");e.style.margin="14px";e.innerHTML='<div class="big">No players yet</div><div>Add colleagues above, or share the site so they register.</div>';
+    const e=el("div","empty");e.style.margin="14px";e.innerHTML='<div class="big">No players yet</div><div>Players appear here once they register.</div>';
     pPanel.appendChild(e);
   }else{
     players.forEach(p=>{
@@ -2659,157 +2673,90 @@ function renderOrg(){
       const actions=el("div","op-actions");
       const copy=el("button","op-copy");copy.type="button";copy.title="Copy code";copy.textContent="📋";
       copy.onclick=()=>{navigator.clipboard&&navigator.clipboard.writeText(p.code);toast("Copied "+p.name+"'s code");};
-      const del=el("button","mp-remove");del.type="button";del.title="Remove player";del.textContent="🗑";
-      del.onclick=async()=>{
-        if(!confirm(`Remove ${p.name}? This deletes their account, code and predictions. This can't be undone.`))return;
-        await Store.deletePlayer(p.code);
-        if(ME&&p.code===ME.code){logout();return;}
-        toast(p.name+" removed");renderApp();
-      };
-      actions.appendChild(copy);actions.appendChild(del);
+      actions.appendChild(copy);
       row.appendChild(av);row.appendChild(info);row.appendChild(actions);pPanel.appendChild(row);
     });
   }
   wrap.appendChild(pPanel);
 
-  /* ---- Top 3 picks for a player (enter for anyone who missed the window) ---- */
+  /* ---- All players' match predictions (hidden data revealed) ---- */
   const mPanel=el("div","panel");mPanel.style.marginTop="16px";
-  const mh=el("h2");mh.innerHTML=`<span>⚙ Top 3 picks</span><span class="meta">enter for a player who missed it</span>`;mPanel.appendChild(mh);
-  const allPlayers=Object.values(Store.players()).sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
-  if(orgTop3PlayerCode&&!allPlayers.some(p=>p.code===orgTop3PlayerCode))orgTop3PlayerCode="";
-  const missingCount=allPlayers.filter(p=>!hasCompleteTop3(Store.myTop3(p.code))).length;
-  if(!allPlayers.length){
-    const e=el("div","empty");e.style.margin="14px";e.innerHTML='<div class="big">No players yet</div><div>Add a player above first.</div>';
+  const mh=el("h2");mh.innerHTML=`<span>🔮 All predictions</span><span class="meta">every player · scores revealed</span>`;mPanel.appendChild(mh);
+  const arr=allEffectiveMatches().sort((a,b)=>ko(a)-ko(b));
+  let anyPreds=false;
+  arr.forEach(m=>{
+    const people=predictorsFor(m);
+    if(!people.length)return;
+    anyPreds=true;
+    const row=el("div","org-row "+roundClass(m));
+    const head=el("div","ot");
+    head.innerHTML=`${esc(m.home)} <span style="color:var(--faint)">v</span> ${esc(m.away)}${m.status==="finished"?` <b style="color:var(--cyan)">${m.homeScore}-${m.awayScore}</b>`:""}<br><span style="font-family:Inter;font-size:11px;color:var(--muted)">${roundDisplay(m)} · ${fmtKO(m)} · ${m.status}</span>`;
+    row.appendChild(head);
+    const list=el("div");list.style.gridColumn="1 / -1";list.style.marginTop="8px";
+    people.forEach(p=>{
+      const pr=el("div","pick-row"+(p.isYou?" you":""));
+      let right="";
+      if(p.reveal){
+        if(p.score){const cls=p.score.kind==="hit"?"hit":p.score.kind==="part"?"part":"miss";
+          right=`<span class="pp">${p.pick.h}-${p.pick.a}</span><span class="pts-badge ${cls}" style="font-size:11px;padding:2px 8px">${p.score.kind==="hit"?"+"+p.score.pts:p.score.pts>0?"+"+p.score.pts:"0"}</span>`;}
+        else right=`<span class="pp">${p.pick.h}-${p.pick.a}</span>`;
+      }else right=`<span class="hidden-sc">🔒 hidden</span>`;
+      pr.innerHTML=`<span class="pn">${esc(p.name)}${p.isYou?'<span class="tag me-tag">YOU</span>':''}</span>${right}`;
+      list.appendChild(pr);
+    });
+    row.appendChild(list);
+    mPanel.appendChild(row);
+  });
+  if(!anyPreds){
+    const e=el("div","empty");e.style.margin="14px";e.innerHTML='<div class="big">No predictions yet</div><div>Predictions from all players will appear here.</div>';
     mPanel.appendChild(e);
-  }else{
-    const psel=el("div","org-add");
-    const opts=allPlayers.map(p=>{
-      const done=hasCompleteTop3(Store.myTop3(p.code));
-      return `<option value="${p.code}"${p.code===orgTop3PlayerCode?" selected":""}>${esc(p.name)} ${done?"· ✓ has Top 3":"· — missing"}</option>`;
-    }).join("");
-    psel.innerHTML=`<select id="orgPickPlayer" class="top3-select" style="flex:1">
-        <option value="">Select a player…</option>${opts}
-      </select>`;
-    mPanel.appendChild(psel);
-    const note=el("div","top3-note");note.style.padding="10px 15px 0";
-    note.textContent=missingCount?`${missingCount} player${missingCount===1?"":"s"} still missing a Top 3.`:"Every player has a Top 3 saved.";
-    mPanel.appendChild(note);
-
-    if(orgTop3PlayerCode){
-      const pl=Store.players()[orgTop3PlayerCode];
-      const cur=Store.myTop3(orgTop3PlayerCode);
-      mPanel.insertAdjacentHTML("beforeend",`<div class="top3-grid">
-        ${teamSelectHtml("orgPickFirst","🥇 1st rank · "+CFG.top3.firstPts+" pts",cur.first||"",false,"rank-1")}
-        ${teamSelectHtml("orgPickSecond","🥈 2nd rank · "+CFG.top3.secondPts+" pts",cur.second||"",false,"rank-2")}
-        ${teamSelectHtml("orgPickThird","🥉 3rd rank · "+CFG.top3.thirdPts+" pts",cur.third||"",false,"rank-3")}
-      </div>`);
-      const ma=el("div","top3-actions");
-      ma.innerHTML=`<button class="top3-save" id="orgPickSave">Save Top 3 for ${esc(pl?pl.name:"player")}</button><button class="org-clear" id="orgPickClear" title="Clear this player's Top 3">×</button>`;
-      mPanel.appendChild(ma);
-      const mn=el("div","top3-note");
-      mn.textContent=hasCompleteTop3(cur)?"This player already has a Top 3 — saving will overwrite it.":"This counts as the player's own prediction and is scored normally.";
-      mPanel.appendChild(mn);
-    }
   }
   wrap.appendChild(mPanel);
 
-  /* ---- Top 3 final result ---- */
+  /* ---- Top 3 predictions (read-only) ---- */
   const tPanel=el("div","panel");tPanel.style.marginTop="16px";
-  const th=el("h2");th.innerHTML=`<span>⚙ Top 3 final result</span><span class="meta">used for bonus scoring</span>`;tPanel.appendChild(th);
+  const th=el("h2");th.innerHTML=`<span>🏅 Top 3 predictions</span><span class="meta">every player · read-only</span>`;tPanel.appendChild(th);
   const actual=Store.top3Result();
-  tPanel.insertAdjacentHTML("beforeend",`<div class="top3-grid">
-    ${teamSelectHtml("orgTop3First","1st winner",actual.first||"",false)}
-    ${teamSelectHtml("orgTop3Second","2nd winner",actual.second||"",false)}
-    ${teamSelectHtml("orgTop3Third","3rd winner",actual.third||"",false)}
-  </div>`);
-  const ta=el("div","top3-actions");
-  ta.innerHTML=`<button class="top3-save" id="orgTop3Save">Save Final Top 3</button><button class="org-clear" id="orgTop3Clear" title="Clear Top 3 result">×</button>`;
-  tPanel.appendChild(ta);
-  const tn=el("div","top3-note");tn.textContent="After saving, the live leaderboard immediately adds Top 3 points for all players.";tPanel.appendChild(tn);
+  const resNote=el("div","top3-note");resNote.style.padding="12px 15px";
+  resNote.innerHTML=hasCompleteTop3(actual)?`Official result: <b>${esc(actual.first)}</b> · <b>${esc(actual.second)}</b> · <b>${esc(actual.third)}</b>`:"Official Top 3 result not set yet.";
+  tPanel.appendChild(resNote);
+  if(players.length){
+    players.forEach(p=>{
+      const t=Store.myTop3(p.code);
+      const row=el("div","org-prow");
+      const info=el("div","op-info");
+      const body=hasCompleteTop3(t)?`${esc(t.first)} / ${esc(t.second)} / ${esc(t.third)}`:"— no Top 3 —";
+      info.innerHTML=`<div class="n">${esc(p.name)}</div><div class="op-code">${body}</div>`;
+      row.appendChild(info);tPanel.appendChild(row);
+    });
+  }
   wrap.appendChild(tPanel);
 
-  /* ---- Match results ---- */
-  const rPanel=el("div","panel");rPanel.style.marginTop="16px";
-  const rh=el("h2");rh.innerHTML=`<span>⚙ Match results</span><span class="meta">enter final scores</span>`;rPanel.appendChild(rh);
-  const arr=allEffectiveMatches().sort((a,b)=>ko(a)-ko(b));
-  arr.forEach(m=>{
-    const row=el("div","org-row "+roundClass(m));
-    const t=el("div","ot");t.innerHTML=`${esc(m.home)} <span style="color:var(--faint)">v</span> ${esc(m.away)}<br><span style="font-family:Inter;font-size:11px;color:var(--muted)">${roundDisplay(m)} · ${fmtKO(m)} · ${m.status}</span>`;
-    const ctrl=el("div","org-controls");
-    const penSel=isKnockout(m)?`<select class="mini org-pen" id="op-${m.id}" title="Penalty winner (only used if scores are level)">
-        <option value=""${m.advance?"":" selected"}>Pen: —</option>
-        <option value="home"${m.advance==="home"?" selected":""}>Pen: ${esc(m.home)}</option>
-        <option value="away"${m.advance==="away"?" selected":""}>Pen: ${esc(m.away)}</option>
-      </select>`:"";
-    ctrl.innerHTML=`<input class="mini" id="oh-${m.id}" type="number" min="0" value="${m.homeScore??""}" placeholder="-"/>
-      <input class="mini" id="oa-${m.id}" type="number" min="0" value="${m.awayScore??""}" placeholder="-"/>
-      ${penSel}
-      <button class="org-live" data-live="${m.id}">Live</button>
-      <button class="org-save" data-final="${m.id}">Final</button>
-      <button class="org-clear" data-clear="${m.id}" title="Clear result">×</button>`;
-    row.appendChild(t);row.appendChild(ctrl);rPanel.appendChild(row);
-  });
-  wrap.appendChild(rPanel);
-
-  setTimeout(()=>{
-    $("#orgAddBtn").onclick=async()=>{
-      const v=validateFullName($("#orgName").value);
-      if(!v.ok){toast(v.error);return;}
-      if(nameTaken(v.value)){toast("That name is already taken");return;}
-      const code=await Store.addPlayer(v.value);toast(v.value+" added · code "+code);$("#orgName").value="";renderApp();
-    };
-    const on=$("#orgName");if(on)on.addEventListener("input",()=>on.value=on.value.replace(NAME_FILTER,""));
-    const top3Val=id=>$(id)?$(id).value:"";
-    const top3Save=$("#orgTop3Save");
-    if(top3Save)top3Save.onclick=async()=>{
-      const t={first:top3Val("#orgTop3First"),second:top3Val("#orgTop3Second"),third:top3Val("#orgTop3Third")};
-      if(!hasCompleteTop3(t)){toast("Select all final Top 3 teams");return;}
-      if(!hasUniqueTop3(t)){toast("Final Top 3 must be three different teams");return;}
-      await Store.setTop3Result(t.first,t.second,t.third);toast("Final Top 3 saved");renderApp();
-    };
-    const top3Clear=$("#orgTop3Clear");
-    if(top3Clear)top3Clear.onclick=async()=>{await Store.clearTop3Result();toast("Final Top 3 cleared");renderApp();};
-
-    /* ---- Top 3 picks for a player ---- */
-    const pickPlayer=$("#orgPickPlayer");
-    if(pickPlayer)pickPlayer.onchange=()=>{orgTop3PlayerCode=pickPlayer.value;renderApp();};
-    const pickSave=$("#orgPickSave");
-    if(pickSave)pickSave.onclick=async()=>{
-      const pl=Store.players()[orgTop3PlayerCode];
-      if(!pl){toast("Select a player first");return;}
-      const t={first:top3Val("#orgPickFirst"),second:top3Val("#orgPickSecond"),third:top3Val("#orgPickThird")};
-      if(!hasCompleteTop3(t)){toast("Select all three teams");return;}
-      if(!hasUniqueTop3(t)){toast("Top 3 must be three different teams");return;}
-      await Store.saveTop3(pl.code,pl.name,t);toast("Top 3 saved for "+pl.name);renderApp();
-    };
-    const pickClear=$("#orgPickClear");
-    if(pickClear)pickClear.onclick=async()=>{
-      const pl=Store.players()[orgTop3PlayerCode];if(!pl)return;
-      if(!confirm(`Clear ${pl.name}'s Top 3 prediction?`))return;
-      await Store.saveTop3(pl.code,pl.name,{});toast(pl.name+"'s Top 3 cleared");renderApp();
-    };
-
-    wireTop3Dropdowns();
-    const rd=(id)=>{const h=parseInt($("#oh-"+id).value,10),a=parseInt($("#oa-"+id).value,10);return{h,a,ok:!(isNaN(h)||isNaN(a))};};
-    wrap.querySelectorAll("[data-live]").forEach(b=>b.onclick=async()=>{const id=b.getAttribute("data-live");const s=rd(id);if(!s.ok){toast("Enter both scores");return;}await Store.setResult(id,s.h,s.a,"live");toast("Live score updated");renderApp();});
-    wrap.querySelectorAll("[data-final]").forEach(b=>b.onclick=async()=>{
-      const id=b.getAttribute("data-final");const s=rd(id);if(!s.ok){toast("Enter both scores");return;}
-      const m=rawMatchById(id)||{};const knockout=isKnockout(m);
-      let advance=null;
-      if(knockout){
-        const selEl=$("#op-"+id);const sel=selEl?selEl.value:"";
-        if(s.h>s.a)advance="home";else if(s.a>s.h)advance="away";
-        else{ if(sel!=="home"&&sel!=="away"){toast("Level score — pick the penalty winner");return;} advance=sel; }
-      }
-      await Store.setResult(id,s.h,s.a,"finished",advance);toast("Final result saved");renderApp();
-    });
-    wrap.querySelectorAll("[data-clear]").forEach(b=>b.onclick=async()=>{const id=b.getAttribute("data-clear");await Store.clearResult(id);toast("Result cleared");renderApp();});
-  },0);
   return wrap;
 }
 
+/* Secret organizer entry: 3 taps/clicks on the hidden "lock" word within a
+   short window opens the organizer prompt. No visible button anywhere. */
+let _lockClicks=0,_lockTimer=null;
+function attachSecretTrigger(node){
+  const bump=(e)=>{
+    e.preventDefault();e.stopPropagation();
+    _lockClicks++;
+    clearTimeout(_lockTimer);
+    _lockTimer=setTimeout(()=>{_lockClicks=0;},1500);
+    if(_lockClicks>=3){_lockClicks=0;clearTimeout(_lockTimer);toggleAdmin();}
+  };
+  node.addEventListener("click",bump);
+}
+
+/* Second security factor: organizer mode is only available to the ONE
+   authorised account (login code === CFG.organizerUserCode). Even with the
+   correct password, no other account can enter organizer mode. */
+function canBeAdmin(){return !!(ME&&CFG.organizerUserCode&&ME.code===CFG.organizerUserCode);}
+
 function toggleAdmin(){
   if(isAdmin){isAdmin=false;sessionStorage.removeItem("egec_admin");if(activeTab==="org")activeTab="today";renderApp();return;}
+  if(!canBeAdmin()){toast("This account can't access organizer mode");return;}
   const code=prompt("Organizer code:");
   if(code==null)return;
   if(code===CFG.adminCode){isAdmin=true;sessionStorage.setItem("egec_admin","1");activeTab="org";renderApp();toast("Organizer mode on");}

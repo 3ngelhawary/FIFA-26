@@ -48,9 +48,12 @@ window.CONFIG = {
   },
 
   // --- Organizer (admin) ----------------------------------------------------
-  // Anyone who enters this code unlocks the Organizer panel, where they can
-  // enter match scores and add players. Change it before you share the app.
-  adminCode: "EGEC2026",
+  // Organizer mode now needs TWO things: (1) you must be logged in as the one
+  // authorised account whose login code equals `organizerUserCode`, AND (2) you
+  // must then enter `adminCode`. Even if the password leaks, no other account
+  // can open the organizer view — and the organizer view is read-only anyway.
+  adminCode: "EGEC@WC26",
+  organizerUserCode: "8K62Y5",
 
   // --- Live scores (optional) ----------------------------------------------
   // The page always reads matches.json. Paste a football-data.org token to
