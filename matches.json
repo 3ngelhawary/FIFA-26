@@ -217,9 +217,10 @@
       "awayFlag": "🇶🇦",
       "kickoff": "2026-06-24T19:00:00Z",
       "venue": "Lumen Field, Seattle",
-      "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null
+      "status": "finished",
+      "homeScore": 3,
+      "awayScore": 1,
+      "externalId": "66456926"
     },
     {
       "id": "g24-sui-can",
@@ -230,9 +231,10 @@
       "awayFlag": "🇨🇦",
       "kickoff": "2026-06-24T19:00:00Z",
       "venue": "BC Place, Vancouver",
-      "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null
+      "status": "finished",
+      "homeScore": 2,
+      "awayScore": 1,
+      "externalId": "66456924"
     },
     {
       "id": "g24-mar-hai",
@@ -243,9 +245,10 @@
       "awayFlag": "🇭🇹",
       "kickoff": "2026-06-24T22:00:00Z",
       "venue": "MetLife Stadium",
-      "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null
+      "status": "finished",
+      "homeScore": 4,
+      "awayScore": 2,
+      "externalId": "66456938"
     },
     {
       "id": "g24-sco-bra",
@@ -256,9 +259,10 @@
       "awayFlag": "🇧🇷",
       "kickoff": "2026-06-24T22:00:00Z",
       "venue": "Hard Rock Stadium, Miami",
-      "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null
+      "status": "finished",
+      "homeScore": 0,
+      "awayScore": 3,
+      "externalId": "66456936"
     },
     {
       "id": "g24-cze-mex",
@@ -269,9 +273,10 @@
       "awayFlag": "🇲🇽",
       "kickoff": "2026-06-25T01:00:00Z",
       "venue": "Dallas Stadium",
-      "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null
+      "status": "finished",
+      "homeScore": 0,
+      "awayScore": 3,
+      "externalId": "66456912"
     },
     {
       "id": "g24-rsa-kor",
@@ -282,9 +287,10 @@
       "awayFlag": "🇰🇷",
       "kickoff": "2026-06-25T01:00:00Z",
       "venue": "Atlanta Stadium",
-      "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null
+      "status": "finished",
+      "homeScore": 1,
+      "awayScore": 0,
+      "externalId": "66456914"
     },
     {
       "id": "g25-cuw-civ",
@@ -295,9 +301,10 @@
       "awayFlag": "🇨🇮",
       "kickoff": "2026-06-25T20:00:00Z",
       "venue": "Boston Stadium",
-      "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null
+      "status": "finished",
+      "homeScore": 0,
+      "awayScore": 2,
+      "externalId": "66457080"
     },
     {
       "id": "g25-ecu-ger",
@@ -308,9 +315,10 @@
       "awayFlag": "🇩🇪",
       "kickoff": "2026-06-25T20:00:00Z",
       "venue": "Toronto Stadium",
-      "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null
+      "status": "finished",
+      "homeScore": 2,
+      "awayScore": 1,
+      "externalId": "66457078"
     },
     {
       "id": "g25-jpn-swe",
@@ -321,9 +329,10 @@
       "awayFlag": "🇸🇪",
       "kickoff": "2026-06-25T23:00:00Z",
       "venue": "Dallas Stadium",
-      "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null
+      "status": "finished",
+      "homeScore": 1,
+      "awayScore": 1,
+      "externalId": "66456978"
     },
     {
       "id": "g25-tun-ned",
@@ -334,9 +343,10 @@
       "awayFlag": "🇳🇱",
       "kickoff": "2026-06-25T23:00:00Z",
       "venue": "Kansas City Stadium",
-      "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null
+      "status": "finished",
+      "homeScore": 1,
+      "awayScore": 3,
+      "externalId": "66456976"
     },
     {
       "id": "g25-par-aus",
@@ -347,9 +357,10 @@
       "awayFlag": "🇦🇺",
       "kickoff": "2026-06-26T02:00:00Z",
       "venue": "Houston Stadium",
-      "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null
+      "status": "finished",
+      "homeScore": 0,
+      "awayScore": 0,
+      "externalId": "66456950"
     },
     {
       "id": "g25-tur-usa",
@@ -360,9 +371,10 @@
       "awayFlag": "🇺🇸",
       "kickoff": "2026-06-26T02:00:00Z",
       "venue": "Los Angeles Stadium",
-      "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null
+      "status": "finished",
+      "homeScore": 3,
+      "awayScore": 2,
+      "externalId": "66456948"
     },
     {
       "id": "g26-nor-fra",
@@ -373,9 +385,10 @@
       "awayFlag": "🇫🇷",
       "kickoff": "2026-06-26T19:00:00Z",
       "venue": "Seattle Stadium",
-      "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null
+      "status": "finished",
+      "homeScore": 1,
+      "awayScore": 4,
+      "externalId": "66457014"
     },
     {
       "id": "g26-sen-irq",
@@ -386,9 +399,10 @@
       "awayFlag": "🇮🇶",
       "kickoff": "2026-06-26T19:00:00Z",
       "venue": "Philadelphia Stadium",
-      "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null
+      "status": "finished",
+      "homeScore": 5,
+      "awayScore": 0,
+      "externalId": "66457016"
     },
     {
       "id": "g26-cpv-ksa",
@@ -399,9 +413,10 @@
       "awayFlag": "🇸🇦",
       "kickoff": "2026-06-27T00:00:00Z",
       "venue": "Miami Stadium",
-      "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null
+      "status": "finished",
+      "homeScore": 0,
+      "awayScore": 0,
+      "externalId": "66457004"
     },
     {
       "id": "g26-uru-esp",
@@ -412,9 +427,10 @@
       "awayFlag": "🇪🇸",
       "kickoff": "2026-06-27T00:00:00Z",
       "venue": "Kansas City Stadium",
-      "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null
+      "status": "finished",
+      "homeScore": 0,
+      "awayScore": 1,
+      "externalId": "66457002"
     },
     {
       "id": "g26-egy-irn",
@@ -425,9 +441,10 @@
       "awayFlag": "🇮🇷",
       "kickoff": "2026-06-27T03:00:00Z",
       "venue": "Vancouver",
-      "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null
+      "status": "finished",
+      "homeScore": 1,
+      "awayScore": 1,
+      "externalId": "66456992"
     },
     {
       "id": "g26-nzl-bel",
@@ -438,9 +455,10 @@
       "awayFlag": "🇧🇪",
       "kickoff": "2026-06-27T03:00:00Z",
       "venue": "Los Angeles",
-      "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null
+      "status": "finished",
+      "homeScore": 1,
+      "awayScore": 5,
+      "externalId": "66456990"
     },
     {
       "id": "g27-cro-gha",
@@ -451,9 +469,10 @@
       "awayFlag": "🇬🇭",
       "kickoff": "2026-06-27T21:00:00Z",
       "venue": "Philadelphia Stadium",
-      "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null
+      "status": "finished",
+      "homeScore": 2,
+      "awayScore": 1,
+      "externalId": "66457052"
     },
     {
       "id": "g27-pan-eng",
@@ -464,9 +483,10 @@
       "awayFlag": "🏴",
       "kickoff": "2026-06-27T21:00:00Z",
       "venue": "Kansas City Stadium",
-      "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null
+      "status": "finished",
+      "homeScore": 0,
+      "awayScore": 2,
+      "externalId": "66457050"
     },
     {
       "id": "g27-cod-uzb",
@@ -477,9 +497,10 @@
       "awayFlag": "🇺🇿",
       "kickoff": "2026-06-27T23:30:00Z",
       "venue": "Dallas Stadium",
-      "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null
+      "status": "finished",
+      "homeScore": 3,
+      "awayScore": 1,
+      "externalId": "66457040"
     },
     {
       "id": "g27-col-por",
@@ -490,9 +511,10 @@
       "awayFlag": "🇵🇹",
       "kickoff": "2026-06-27T23:30:00Z",
       "venue": "Miami Stadium",
-      "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null
+      "status": "finished",
+      "homeScore": 0,
+      "awayScore": 0,
+      "externalId": "66457038"
     },
     {
       "id": "g28-alg-aut",
@@ -503,9 +525,10 @@
       "awayFlag": "🇦🇹",
       "kickoff": "2026-06-28T02:00:00Z",
       "venue": "Vancouver Stadium",
-      "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null
+      "status": "finished",
+      "homeScore": 3,
+      "awayScore": 3,
+      "externalId": "66457028"
     },
     {
       "id": "g28-jor-arg",
@@ -516,9 +539,10 @@
       "awayFlag": "🇦🇷",
       "kickoff": "2026-06-28T02:00:00Z",
       "venue": "New York/New Jersey Stadium",
-      "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null
+      "status": "finished",
+      "homeScore": 1,
+      "awayScore": 3,
+      "externalId": "66457026"
     },
     {
       "id": "53452545",
@@ -531,11 +555,12 @@
       "awayFlag": "🇨🇦",
       "kickoff": "2026-06-28T19:00:00Z",
       "venue": "Los Angeles",
-      "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null,
+      "status": "finished",
+      "homeScore": 0,
+      "awayScore": 1,
       "winnerTo": "53452511",
-      "winnerSlot": "home"
+      "winnerSlot": "home",
+      "advance": "away"
     },
     {
       "id": "53452557",
@@ -548,11 +573,12 @@
       "awayFlag": "🇯🇵",
       "kickoff": "2026-06-29T17:00:00Z",
       "venue": "Boston",
-      "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null,
+      "status": "finished",
+      "homeScore": 2,
+      "awayScore": 1,
       "winnerTo": "53452517",
-      "winnerSlot": "home"
+      "winnerSlot": "home",
+      "advance": "home"
     },
     {
       "id": "53452541",
@@ -565,11 +591,14 @@
       "awayFlag": "🇵🇾",
       "kickoff": "2026-06-29T20:00:00Z",
       "venue": "Charlotte",
-      "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null,
+      "status": "finished",
+      "homeScore": 1,
+      "awayScore": 1,
       "winnerTo": "53452509",
-      "winnerSlot": "home"
+      "winnerSlot": "home",
+      "advance": "away",
+      "homePenScore": 3,
+      "awayPenScore": 4
     },
     {
       "id": "53452547",
@@ -582,11 +611,14 @@
       "awayFlag": "🇲🇦",
       "kickoff": "2026-06-30T01:00:00Z",
       "venue": "Monterrey",
-      "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null,
+      "status": "finished",
+      "homeScore": 1,
+      "awayScore": 1,
       "winnerTo": "53452511",
-      "winnerSlot": "away"
+      "winnerSlot": "away",
+      "advance": "away",
+      "homePenScore": 2,
+      "awayPenScore": 3
     },
     {
       "id": "53452561",
@@ -599,11 +631,12 @@
       "awayFlag": "🇳🇴",
       "kickoff": "2026-06-30T17:00:00Z",
       "venue": "Dallas",
-      "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null,
+      "status": "finished",
+      "homeScore": 1,
+      "awayScore": 2,
       "winnerTo": "53452517",
-      "winnerSlot": "away"
+      "winnerSlot": "away",
+      "advance": "away"
     },
     {
       "id": "53452543",
@@ -616,11 +649,12 @@
       "awayFlag": "🇸🇪",
       "kickoff": "2026-07-01T09:00:00Z",
       "venue": "Atlanta",
-      "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null,
+      "status": "finished",
+      "homeScore": 3,
+      "awayScore": 0,
       "winnerTo": "53452509",
-      "winnerSlot": "away"
+      "winnerSlot": "away",
+      "advance": "home"
     },
     {
       "id": "53452563",
@@ -633,11 +667,12 @@
       "awayFlag": "🇪🇨",
       "kickoff": "2026-07-01T01:00:00Z",
       "venue": "Mexico City",
-      "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null,
+      "status": "finished",
+      "homeScore": 2,
+      "awayScore": 0,
       "winnerTo": "53452519",
-      "winnerSlot": "home"
+      "winnerSlot": "home",
+      "advance": "home"
     },
     {
       "id": "53452565",
@@ -650,11 +685,12 @@
       "awayFlag": "🇨🇩",
       "kickoff": "2026-07-01T16:00:00Z",
       "venue": "New York/New Jersey",
-      "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null,
+      "status": "finished",
+      "homeScore": 2,
+      "awayScore": 1,
       "winnerTo": "53452519",
-      "winnerSlot": "away"
+      "winnerSlot": "away",
+      "advance": "home"
     },
     {
       "id": "53452555",
@@ -667,11 +703,12 @@
       "awayFlag": "🇸🇳",
       "kickoff": "2026-07-01T20:00:00Z",
       "venue": "San Francisco Bay Area",
-      "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null,
+      "status": "finished",
+      "homeScore": 3,
+      "awayScore": 2,
       "winnerTo": "53452515",
-      "winnerSlot": "away"
+      "winnerSlot": "away",
+      "advance": "home"
     },
     {
       "id": "53452553",
@@ -684,11 +721,12 @@
       "awayFlag": "🇧🇦",
       "kickoff": "2026-07-02T00:00:00Z",
       "venue": "Dallas",
-      "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null,
+      "status": "finished",
+      "homeScore": 2,
+      "awayScore": 0,
       "winnerTo": "53452515",
-      "winnerSlot": "home"
+      "winnerSlot": "home",
+      "advance": "home"
     },
     {
       "id": "53452551",
@@ -701,11 +739,12 @@
       "awayFlag": "🇦🇹",
       "kickoff": "2026-07-02T19:00:00Z",
       "venue": "Toronto",
-      "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null,
+      "status": "finished",
+      "homeScore": 3,
+      "awayScore": 0,
       "winnerTo": "53452513",
-      "winnerSlot": "away"
+      "winnerSlot": "away",
+      "advance": "home"
     },
     {
       "id": "53452549",
@@ -718,11 +757,12 @@
       "awayFlag": "🇭🇷",
       "kickoff": "2026-07-02T23:00:00Z",
       "venue": "Seattle",
-      "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null,
+      "status": "finished",
+      "homeScore": 2,
+      "awayScore": 1,
       "winnerTo": "53452513",
-      "winnerSlot": "home"
+      "winnerSlot": "home",
+      "advance": "home"
     },
     {
       "id": "53452505",
@@ -735,11 +775,12 @@
       "awayFlag": "🇩🇿",
       "kickoff": "2026-07-03T03:00:00Z",
       "venue": "Los Angeles",
-      "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null,
+      "status": "finished",
+      "homeScore": 2,
+      "awayScore": 0,
       "winnerTo": "53452523",
-      "winnerSlot": "home"
+      "winnerSlot": "home",
+      "advance": "home"
     },
     {
       "id": "53452503",
@@ -752,11 +793,14 @@
       "awayFlag": "🇪🇬",
       "kickoff": "2026-07-03T18:00:00Z",
       "venue": "Miami",
-      "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null,
+      "status": "finished",
+      "homeScore": 1,
+      "awayScore": 1,
       "winnerTo": "53452521",
-      "winnerSlot": "away"
+      "winnerSlot": "away",
+      "advance": "away",
+      "homePenScore": 2,
+      "awayPenScore": 4
     },
     {
       "id": "53452569",
@@ -787,11 +831,12 @@
       "awayFlag": "🇬🇭",
       "kickoff": "2026-07-04T01:30:00Z",
       "venue": "Houston",
-      "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null,
+      "status": "finished",
+      "homeScore": 1,
+      "awayScore": 0,
       "winnerTo": "53452523",
-      "winnerSlot": "away"
+      "winnerSlot": "away",
+      "advance": "home"
     },
     {
       "id": "53452511",
@@ -804,9 +849,9 @@
       "awayFlag": "",
       "kickoff": "2026-07-04T17:00:00Z",
       "venue": "Philadelphia",
-      "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null,
+      "status": "finished",
+      "homeScore": 0,
+      "awayScore": 3,
       "homeSource": {
         "matchId": "53452545",
         "type": "winner"
@@ -816,7 +861,8 @@
         "type": "winner"
       },
       "winnerTo": "53452525",
-      "winnerSlot": "away"
+      "winnerSlot": "away",
+      "advance": "away"
     },
     {
       "id": "53452509",
