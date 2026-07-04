@@ -769,9 +769,10 @@
       "awayFlag": "🇨🇻",
       "kickoff": "2026-07-03T22:00:00Z",
       "venue": "Kansas City",
-      "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null,
+      "status": "finished",
+      "homeScore": 3,
+      "awayScore": 2,
+      "advance": "home",
       "winnerTo": "53452521",
       "winnerSlot": "home"
     },
