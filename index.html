@@ -828,7 +828,12 @@ function friendlyMatchName(x){
 function cleanTreeText(name){
   return String(name||"").replace(/\b\d{6,}\b/g,id=>KO_LABELS[id]||id);
 }
-function isPlaceholderTeam(name){return /^(TBD|Winner of|Loser of|\d+(st|nd|rd|th) Group|[123]rd Group|[12]nd Group|[12]st Group)/i.test(String(name||""));}
+function isPlaceholderTeam(name){
+  const s=String(name||"").trim();
+  if(!s)return true;
+  return /^(TBD|TBC|TBA|To be (confirmed|decided|determined|announced)|Winner of|Winners of|Loser of|Losers of|\d+(st|nd|rd|th) Group|[123]rd Group|[12]nd Group|[12]st Group)/i.test(s);
+}
+function isConcreteTeamName(name){return !isPlaceholderTeam(name);}
 function hasPlaceholderTeams(m){return isPlaceholderTeam(m.home)||isPlaceholderTeam(m.away);}
 function roundDisplay(m){return isKnockout(m)?(m.round||"Knockout"):"Group "+m.group;}
 /* per-round color class, used on match cards (all tabs) and the bracket */
@@ -864,8 +869,10 @@ function resolvedMatch(id,stack){
   m.home=hp.name;m.homeFlag=hp.flag;m.away=ap.name;m.awayFlag=ap.flag;
   const r=Store.resultsAll()[id];
   if(r){
-    if(r.home)m.home=r.home;if(r.away)m.away=r.away;
-    if(r.homeFlag)m.homeFlag=r.homeFlag;if(r.awayFlag)m.awayFlag=r.awayFlag;
+    const useHome=r.home&&(isConcreteTeamName(r.home)||!isConcreteTeamName(m.home));
+    const useAway=r.away&&(isConcreteTeamName(r.away)||!isConcreteTeamName(m.away));
+    if(useHome)m.home=r.home;if(useAway)m.away=r.away;
+    if(useHome&&r.homeFlag)m.homeFlag=r.homeFlag;if(useAway&&r.awayFlag)m.awayFlag=r.awayFlag;
     m.homeScore=r.homeScore;m.awayScore=r.awayScore;m.status=r.status||m.status;
     if(r.homePenScore!==undefined)m.homePenScore=r.homePenScore;
     if(r.awayPenScore!==undefined)m.awayPenScore=r.awayPenScore;
@@ -1307,8 +1314,8 @@ async function mergeLive(){
     if(!r.ok)return;const data=await r.json();const by={},byId={};
     (data.matches||[]).forEach(am=>{by[(am.homeTeam.name+"|"+am.awayTeam.name).toLowerCase()]=am;byId[String(am.id)]=am;});
     MATCHES.forEach(m=>{const am=byId[String(m.externalId||m.id)]||by[(m.home+"|"+m.away).toLowerCase()];if(!am)return;
-      if(am.homeTeam&&am.homeTeam.name&&!/^TBD/i.test(am.homeTeam.name))m.home=am.homeTeam.name;
-      if(am.awayTeam&&am.awayTeam.name&&!/^TBD/i.test(am.awayTeam.name))m.away=am.awayTeam.name;
+      if(am.homeTeam&&isConcreteTeamName(am.homeTeam.name))m.home=am.homeTeam.name;
+      if(am.awayTeam&&isConcreteTeamName(am.awayTeam.name))m.away=am.awayTeam.name;
       if(am.utcDate)m.kickoff=am.utcDate;
       if(am.status==="FINISHED")m.status="finished";else if(am.status==="IN_PLAY"||am.status==="PAUSED"||am.status==="EXTRA_TIME"||am.status==="PENALTY_SHOOTOUT")m.status="live";
       const score120=scoreAfter120(am);
@@ -2069,6 +2076,7 @@ function renderCard(m){
     const rm=resolvedMatch(m.id);
     if(rm){dHome=rm.home;dHomeFlag=rm.homeFlag;dAway=rm.away;dAwayFlag=rm.awayFlag;}
   }
+  const displayHasPlaceholder=isPlaceholderTeam(dHome)||isPlaceholderTeam(dAway);
 
   const sb=el("div","scoreboard");
   const home=el("div","team home "+hC);
@@ -2106,7 +2114,7 @@ function renderCard(m){
       line.appendChild(bb);
     }
     pred.appendChild(line);
-  }else if(isKnockout(m)&&hasPlaceholderTeams(m)){
+  }else if(isKnockout(m)&&displayHasPlaceholder){
     const note=el("div","locked-note");
     note.innerHTML=`<span class="status pending"><span class="dot"></span></span> Teams not confirmed yet · prediction opens after bracket sync`;
     pred.appendChild(note);
