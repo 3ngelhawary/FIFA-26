@@ -176,6 +176,7 @@
     box-shadow:0 2px 8px rgba(0,0,0,.5)}
   .flag-emo{font-size:28px;line-height:1;flex:0 0 auto}
   .tname{font-family:"Oswald";font-weight:600;font-size:18px;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .tname.placeholder{color:var(--faint);font-weight:500;text-transform:none;letter-spacing:0}
   .center{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:92px}
   .score{font-family:"Oswald";font-weight:700;font-size:36px;font-variant-numeric:tabular-nums;line-height:1;display:flex;align-items:center;gap:6px}
   .score .sep{color:var(--faint)}
@@ -2060,10 +2061,19 @@ function renderCard(m){
   const hC=out==="home"?"win":out==="draw"?"draw":out?"lose":"";
   const aC=out==="away"?"win":out==="draw"?"draw":out?"lose":"";
 
+  // Resolve knockout placeholders ("Winner of 53452541") to the real qualified
+  // team once its feeder match is decided, or a readable "Winner of R32-03"
+  // label until then — never show a raw internal match ID on the card.
+  let dHome=m.home,dHomeFlag=m.homeFlag,dAway=m.away,dAwayFlag=m.awayFlag;
+  if(isKnockout(m)&&hasPlaceholderTeams(m)){
+    const rm=resolvedMatch(m.id);
+    if(rm){dHome=rm.home;dHomeFlag=rm.homeFlag;dAway=rm.away;dAwayFlag=rm.awayFlag;}
+  }
+
   const sb=el("div","scoreboard");
   const home=el("div","team home "+hC);
-  home.appendChild(flagEl(m.home,m.homeFlag));
-  const hn=el("span","tname");hn.textContent=m.home;home.appendChild(hn);
+  home.appendChild(flagEl(dHome,dHomeFlag));
+  const hn=el("span","tname"+(isPlaceholderTeam(dHome)?" placeholder":""));hn.textContent=dHome;home.appendChild(hn);
   const center=el("div","center");
   if(state==="upcoming"){center.innerHTML=`<div class="vs">VS</div><div class="ko">${fmtKO(m)}</div>`;}
   else if(state==="pending"&&!hasScore){center.innerHTML=`<div class="score" style="color:var(--faint)">–<span class="sep">-</span>–</div><div class="ko">awaiting result</div>`;}
@@ -2072,8 +2082,8 @@ function renderCard(m){
     center.innerHTML=`<div class="score"><span class="${out==='home'?'s-win':out==='draw'?'s-draw':out?'s-lose':''}">${m.homeScore??0}</span><span class="sep">-</span><span class="${out==='away'?'s-win':out==='draw'?'s-draw':out?'s-lose':''}">${m.awayScore??0}</span></div>${penText?`<div class="ko">${esc(penText)}</div>`:""}`;
   }
   const away=el("div","team away "+aC);
-  const an=el("span","tname");an.textContent=m.away;away.appendChild(an);
-  away.appendChild(flagEl(m.away,m.awayFlag));
+  const an=el("span","tname"+(isPlaceholderTeam(dAway)?" placeholder":""));an.textContent=dAway;away.appendChild(an);
+  away.appendChild(flagEl(dAway,dAwayFlag));
   sb.appendChild(home);sb.appendChild(center);sb.appendChild(away);card.appendChild(sb);
 
   const pred=el("div","pred");
