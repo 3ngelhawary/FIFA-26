@@ -1,3 +1,4 @@
+// File: update-scores.mjs
 /* =============================================================================
    Auto score updater for the EGEC World Cup Predictor.
    Repo path: scripts/update-scores.mjs
@@ -24,62 +25,67 @@ if (!TOKEN) {
   process.exit(1);
 }
 
+function appFirebaseProjectId() {
+  try {
+    const configText = fs.readFileSync("config.js", "utf8");
+    const match = configText.match(/projectId\s*:\s*["']([^"']+)["']/);
+    return match ? match[1] : "";
+  } catch {
+    return "";
+  }
+}
+
+const APP_PROJECT_ID = appFirebaseProjectId();
+
+if (APP_PROJECT_ID && APP_PROJECT_ID !== SA.project_id) {
+  console.error(
+    `Firebase project mismatch: website uses ${APP_PROJECT_ID}, service account uses ${SA.project_id}`
+  );
+  process.exit(1);
+}
+
 admin.initializeApp({
   credential: admin.credential.cert(SA)
 });
 
 const db = admin.firestore();
 
-// Every spelling a feed might use for a country must normalize to ONE token,
-// and that token must equal what matches.json normalizes to. norm() strips
-// everything except a-z, so hyphens/accents/"and"/"the" all collapse away —
-// but only the forms listed here are aliased to a canonical token.
 const ALIAS = {
-  // Iran  (matches.json uses "IR Iran")
   iran: "iran",
   iriran: "iran",
   islamicrepublicofiran: "iran",
 
-  // DR Congo  (matches.json uses "Congo DR")
   congodr: "drcongo",
   drcongo: "drcongo",
   democraticrepublicofcongo: "drcongo",
   democraticrepublicofthecongo: "drcongo",
   drcongozaire: "drcongo",
 
-  // Cape Verde  (matches.json uses "Cabo Verde")
   caboverde: "capeverde",
   capeverde: "capeverde",
 
-  // Curaçao
   curacao: "curacao",
   curacaoo: "curacao",
 
-  // Türkiye  (matches.json uses "Turkey")
   turkiye: "turkey",
   turkey: "turkey",
 
-  // South Korea
   korearepublic: "southkorea",
   republicofkorea: "southkorea",
   southkorea: "southkorea",
 
-  // USA  (matches.json uses "United States")
   unitedstates: "usa",
   unitedstatesofamerica: "usa",
   usa: "usa",
 
-  // Côte d'Ivoire  (matches.json uses "Ivory Coast")
   cotedivoire: "ivorycoast",
   ivorycoast: "ivorycoast",
 
-  // Bosnia and Herzegovina  (feeds often render "Bosnia-Herzegovina")
   bosniaandherzegovina: "bosnia",
   bosniaherzegovina: "bosnia",
   bosniaherzegowina: "bosnia",
   bosnia: "bosnia",
 
-  // Czechia  (feeds may still use "Czech Republic")
   czechia: "czechia",
   czechrepublic: "czechia"
 };
@@ -193,15 +199,10 @@ function winnerSideFromApi(match) {
 function penaltyWinnerSide(match) {
   const penalties = scorePair(match.score?.penalties);
 
-  // A decisive shootout tells us the winner directly.
   if (penalties && penalties.home !== penalties.away) {
     return penalties.home > penalties.away ? "home" : "away";
   }
 
-  // No penalties yet, or a LEVEL snapshot caught mid-shootout (e.g. 4-4):
-  // don't guess from the tied count — fall back to the feed's declared winner
-  // (score.winner). If it hasn't published one yet, return null so the caller
-  // leaves `advance` untouched instead of freezing an unresolved value.
   return winnerSideFromApi(match);
 }
 
@@ -214,139 +215,291 @@ function actualAdvanceSide(ours, apiMatch, score120) {
   return penaltyWinnerSide(apiMatch);
 }
 
-async function main() {
-  const ours = JSON.parse(fs.readFileSync("matches.json", "utf8")).matches || [];
+function apiStatusToAppStatus(apiStatus) {
+  if (apiStatus === "FINISHED") return "finished";
 
-  const res = await fetch(
-    `https://api.football-data.org/v4/competitions/${COMP}/matches`,
-    {
-      headers: {
-        "X-Auth-Token": TOKEN
-      }
-    }
+  if (["IN_PLAY", "PAUSED", "EXTRA_TIME", "PENALTY_SHOOTOUT"].includes(apiStatus)) {
+    return "live";
+  }
+
+  return "scheduled";
+}
+
+function localStatusToAppStatus(localStatus) {
+  if (localStatus === "finished") return "finished";
+  if (localStatus === "live") return "live";
+  return "scheduled";
+}
+
+function validLocalScore(match) {
+  return match.homeScore != null
+    && match.awayScore != null
+    && Number.isFinite(Number(match.homeScore))
+    && Number.isFinite(Number(match.awayScore));
+}
+
+function applyCommonFields(updateData, home, away, kickoff, homeFlag, awayFlag) {
+  if (home && !/^TBD/i.test(home)) updateData.home = home;
+  if (away && !/^TBD/i.test(away)) updateData.away = away;
+  if (homeFlag) updateData.homeFlag = homeFlag;
+  if (awayFlag) updateData.awayFlag = awayFlag;
+  if (kickoff) updateData.kickoff = kickoff;
+}
+
+function clearScoreFields(updateData) {
+  updateData.homeScore = null;
+  updateData.awayScore = null;
+  updateData.homePenScore = null;
+  updateData.awayPenScore = null;
+  updateData.advance = null;
+}
+
+function buildLocalUpdate(match) {
+  const status = localStatusToAppStatus(match.status);
+  const updateData = {
+    status,
+    source: "matches.json",
+    updatedAt: admin.firestore.FieldValue.serverTimestamp()
+  };
+
+  applyCommonFields(
+    updateData,
+    match.home,
+    match.away,
+    match.kickoff,
+    match.homeFlag,
+    match.awayFlag
   );
 
+  if (status === "finished" && validLocalScore(match)) {
+    updateData.homeScore = Number(match.homeScore);
+    updateData.awayScore = Number(match.awayScore);
+
+    if (match.homePenScore != null && match.awayPenScore != null) {
+      updateData.homePenScore = Number(match.homePenScore);
+      updateData.awayPenScore = Number(match.awayPenScore);
+    } else {
+      updateData.homePenScore = null;
+      updateData.awayPenScore = null;
+    }
+
+    if (isKnockout(match) && (match.advance === "home" || match.advance === "away")) {
+      updateData.advance = match.advance;
+    }
+  } else {
+    clearScoreFields(updateData);
+  }
+
+  updateData.liveMinute = null;
+  updateData.liveText = null;
+
+  return updateData;
+}
+
+function buildApiUpdate(match, apiMatch) {
+  const status = apiStatusToAppStatus(apiMatch.status);
+  const score120 = scoreAfter120(apiMatch);
+  const homeScore = score120?.home;
+  const awayScore = score120?.away;
+  const homeName = apiMatch.homeTeam?.name || "";
+  const awayName = apiMatch.awayTeam?.name || "";
+
+  const updateData = {
+    status,
+    source: "football-data",
+    externalId: apiMatch.id || match.externalId || null,
+    updatedAt: admin.firestore.FieldValue.serverTimestamp()
+  };
+
+  applyCommonFields(
+    updateData,
+    homeName,
+    awayName,
+    apiMatch.utcDate,
+    match.homeFlag,
+    match.awayFlag
+  );
+
+  if (status !== "scheduled" && homeScore != null && awayScore != null) {
+    updateData.homeScore = homeScore;
+    updateData.awayScore = awayScore;
+
+    const penalties = scorePair(apiMatch.score?.penalties);
+    if (!penalties) {
+      updateData.homePenScore = null;
+      updateData.awayPenScore = null;
+    } else if (penalties.home !== penalties.away || winnerSideFromApi(apiMatch)) {
+      updateData.homePenScore = penalties.home;
+      updateData.awayPenScore = penalties.away;
+    }
+
+    if (status === "finished" && isKnockout(match)) {
+      const advance = actualAdvanceSide(match, apiMatch, score120);
+      if (advance) updateData.advance = advance;
+    }
+  } else {
+    clearScoreFields(updateData);
+  }
+
+  if (status === "live") {
+    const liveMinute = getLiveMinute(apiMatch.utcDate || match.kickoff);
+
+    updateData.liveMinute = liveMinute;
+    updateData.liveText = apiMatch.status === "PENALTY_SHOOTOUT"
+      ? "PEN"
+      : liveMinute ? `${liveMinute}'` : "LIVE";
+  } else {
+    updateData.liveMinute = null;
+    updateData.liveText = null;
+  }
+
+  return updateData;
+}
+
+function matchDateRange(matches) {
+  const times = matches
+    .map((match) => new Date(match.kickoff).getTime())
+    .filter((value) => Number.isFinite(value));
+
+  if (!times.length) return "";
+
+  const first = new Date(Math.min(...times));
+  const last = new Date(Math.max(...times));
+  first.setUTCDate(first.getUTCDate() - 1);
+  last.setUTCDate(last.getUTCDate() + 1);
+
+  return `?dateFrom=${first.toISOString().slice(0, 10)}&dateTo=${last.toISOString().slice(0, 10)}`;
+}
+
+function createApiIndexes(apiMatches) {
+  const byPair = {};
+  const byReversePair = {};
+  const byId = {};
+
+  for (const apiMatch of apiMatches) {
+    const homeKey = norm(apiMatch.homeTeam?.name);
+    const awayKey = norm(apiMatch.awayTeam?.name);
+    const key = `${homeKey}|${awayKey}`;
+    const reverseKey = `${awayKey}|${homeKey}`;
+
+    byPair[key] = apiMatch;
+    byReversePair[reverseKey] = apiMatch;
+    byId[String(apiMatch.id)] = apiMatch;
+  }
+
+  return { byPair, byReversePair, byId };
+}
+
+function findApiMatch(match, indexes) {
+  const key = `${norm(match.home)}|${norm(match.away)}`;
+  const externalId = match.externalId || (/^\d+$/.test(String(match.id)) ? match.id : "");
+
+  return (externalId && indexes.byId[String(externalId)])
+    || indexes.byPair[key]
+    || indexes.byReversePair[key]
+    || null;
+}
+
+function scoreLabel(updateData) {
+  if (updateData.status === "finished" || updateData.status === "live") {
+    if (updateData.homeScore != null && updateData.awayScore != null) {
+      return `${updateData.homeScore}-${updateData.awayScore}`;
+    }
+
+    return "no score yet";
+  }
+
+  return "fixture synced";
+}
+
+async function fetchApiMatches(dateRange) {
+  const url = `https://api.football-data.org/v4/competitions/${COMP}/matches${dateRange}`;
+
+  const res = await fetch(url, {
+    headers: {
+      "X-Auth-Token": TOKEN
+    }
+  });
+
   if (!res.ok) {
-    console.error("API error", res.status, await res.text());
-    process.exit(1);
+    const body = await res.text();
+    throw new Error(`API error ${res.status}: ${body}`);
   }
 
   const data = await res.json();
-  const api = data.matches || [];
+  return data.matches || [];
+}
 
-  console.log(`API returned ${api.length} matches for ${COMP}`);
+async function main() {
+  const ours = JSON.parse(fs.readFileSync("matches.json", "utf8")).matches || [];
+  const dateRange = matchDateRange(ours);
+  let api = [];
+  let apiFailed = false;
 
-  const byPair = {};
-  const byId = {};
-
-  for (const am of api) {
-    const key = `${norm(am.homeTeam?.name)}|${norm(am.awayTeam?.name)}`;
-    byPair[key] = am;
-    byId[String(am.id)] = am;
+  try {
+    api = await fetchApiMatches(dateRange);
+    console.log(`API returned ${api.length} matches for ${COMP}${dateRange}`);
+  } catch (error) {
+    apiFailed = true;
+    console.error(error.message);
+    console.error("Continuing with matches.json sync so every app match has a Firestore record.");
   }
 
+  const indexes = createApiIndexes(api);
   let writes = 0;
+  let apiMatches = 0;
+  let apiScoreWrites = 0;
+  let localWrites = 0;
+  let localScoreWrites = 0;
+  let missingApi = 0;
 
-  for (const m of ours) {
-    const key = `${norm(m.home)}|${norm(m.away)}`;
-    const externalId = m.externalId || (/^\d+$/.test(String(m.id)) ? m.id : "");
-    const am = (externalId && byId[String(externalId)]) || byPair[key];
+  for (const match of ours) {
+    const apiMatch = findApiMatch(match, indexes);
+    let updateData;
 
-    if (!am) {
-      console.log(`Skipped: ${m.home} vs ${m.away}`);
-      continue;
-    }
+    if (apiMatch) {
+      apiMatches++;
+      updateData = buildApiUpdate(match, apiMatch);
 
-    let status = "scheduled";
-
-    if (am.status === "FINISHED") {
-      status = "finished";
-    } else if (["IN_PLAY", "PAUSED", "EXTRA_TIME", "PENALTY_SHOOTOUT"].includes(am.status)) {
-      status = "live";
-    }
-
-    const score120 = scoreAfter120(am);
-    const homeScore = score120?.home;
-    const awayScore = score120?.away;
-    const homeName = am.homeTeam?.name || "";
-    const awayName = am.awayTeam?.name || "";
-
-    const updateData = {
-      status,
-      updatedAt: admin.firestore.FieldValue.serverTimestamp()
-    };
-
-    if (homeName && !/^TBD/i.test(homeName)) updateData.home = homeName;
-    if (awayName && !/^TBD/i.test(awayName)) updateData.away = awayName;
-    if (am.utcDate) updateData.kickoff = am.utcDate;
-
-    if (status !== "scheduled") {
-      if (homeScore == null || awayScore == null) {
-        console.log(`No score yet: ${m.home} vs ${m.away}`);
-        continue;
+      if (updateData.status === "scheduled" && match.status === "finished" && validLocalScore(match)) {
+        updateData = buildLocalUpdate(match);
+        localWrites++;
+        localScoreWrites++;
+      } else if (updateData.homeScore != null && updateData.awayScore != null) {
+        apiScoreWrites++;
       }
-      updateData.homeScore = homeScore;
-      updateData.awayScore = awayScore;
-
-      const penalties = scorePair(am.score?.penalties);
-      if (!penalties) {
-        updateData.homePenScore = null;
-        updateData.awayPenScore = null;
-      } else if (penalties.home !== penalties.away || winnerSideFromApi(am)) {
-        // Decisive shootout, or the feed has declared a winner -> record it.
-        updateData.homePenScore = penalties.home;
-        updateData.awayPenScore = penalties.away;
-      }
-      // Otherwise: a LEVEL snapshot caught mid-shootout with no winner yet —
-      // leave the stored pen scores untouched rather than freezing a tied 4-4.
-
-      if (status === "finished" && isKnockout(m)) {
-        // Only write `advance` when we can actually name the side that went
-        // through. If the shootout winner is still unknown (feed lag, or a
-        // level mid-shootout snapshot), leave the field alone — with
-        // {merge:true} an omitted field keeps whatever is already stored, so
-        // we never overwrite a correct `advance` with null and freeze the
-        // match in an unresolved state.
-        const advance = actualAdvanceSide(m, am, score120);
-        if (advance) updateData.advance = advance;
-      }
-    }
-
-    const hasFixtureUpdate = updateData.home || updateData.away || updateData.kickoff;
-    if (status === "scheduled" && !hasFixtureUpdate) {
-      console.log(`Not started: ${m.home} vs ${m.away}`);
-      continue;
-    }
-
-    if (status === "live") {
-      const liveMinute = getLiveMinute(am.utcDate || m.kickoff);
-
-      updateData.liveMinute = liveMinute;
-      updateData.liveText = am.status === "PENALTY_SHOOTOUT"
-        ? "PEN"
-        : liveMinute ? `${liveMinute}'` : "LIVE";
     } else {
-      updateData.liveMinute = null;
-      updateData.liveText = null;
+      missingApi++;
+      updateData = buildLocalUpdate(match);
+      localWrites++;
+
+      if (updateData.status === "finished" && validLocalScore(match)) {
+        localScoreWrites++;
+      }
+
+      console.log(`No API match: ${match.id} ${match.home} vs ${match.away}; synced from matches.json`);
     }
 
-    await db.collection("results").doc(m.id).set(updateData, { merge: true });
-
+    await db.collection("results").doc(match.id).set(updateData, { merge: true });
     writes++;
 
-    const homeLabel = updateData.home || m.home;
-    const awayLabel = updateData.away || m.away;
-    const scoreLabel = status === "scheduled" ? "fixture synced" : `${updateData.homeScore}-${updateData.awayScore}`;
+    const homeLabel = updateData.home || match.home;
+    const awayLabel = updateData.away || match.away;
     const advanceLabel = updateData.advance ? ` advance=${updateData.advance}` : "";
 
     console.log(
-      `Updated: ${homeLabel} ${scoreLabel} ${awayLabel} [${status}]${advanceLabel} ${
-        updateData.liveText || ""
-      }`
+      `Updated: ${match.id} ${homeLabel} ${scoreLabel(updateData)} ${awayLabel} `
+      + `[${updateData.status}] source=${updateData.source}${advanceLabel} ${updateData.liveText || ""}`
     );
   }
 
-  console.log(`Updated ${writes} result(s).`);
+  console.log(`Updated ${writes} Firestore result record(s).`);
+  console.log(`API matched ${apiMatches}/${ours.length}; missing API matches ${missingApi}.`);
+  console.log(`API score records ${apiScoreWrites}; matches.json score records ${localScoreWrites}.`);
+
+  if (apiFailed) {
+    process.exit(1);
+  }
 }
 
 main().catch((e) => {
