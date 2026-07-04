@@ -108,6 +108,24 @@ function norm(value) {
   return ALIAS[x] || x;
 }
 
+function isPlaceholderTeamName(value) {
+  const s = String(value || "").trim();
+
+  if (!s) return true;
+
+  return /^(TBD|TBC|TBA|To be (confirmed|decided|determined|announced)|Winner of|Winners of|Loser of|Losers of|\d+(st|nd|rd|th) Group|[123]rd Group|[12]nd Group|[12]st Group)/i.test(s);
+}
+
+function isConcreteTeamName(value) {
+  return !isPlaceholderTeamName(value);
+}
+
+function preferredTeamName(primary, fallback) {
+  if (isConcreteTeamName(primary)) return String(primary).trim();
+  if (isConcreteTeamName(fallback)) return String(fallback).trim();
+  return "";
+}
+
 function getLiveMinute(kickoff) {
   if (!kickoff) return null;
 
@@ -252,10 +270,10 @@ function validLocalScore(match) {
 }
 
 function applyCommonFields(updateData, home, away, kickoff, homeFlag, awayFlag) {
-  if (home && !/^TBD/i.test(home)) updateData.home = home;
-  if (away && !/^TBD/i.test(away)) updateData.away = away;
-  if (homeFlag) updateData.homeFlag = homeFlag;
-  if (awayFlag) updateData.awayFlag = awayFlag;
+  if (isConcreteTeamName(home)) updateData.home = String(home).trim();
+  if (isConcreteTeamName(away)) updateData.away = String(away).trim();
+  if (homeFlag && isConcreteTeamName(home)) updateData.homeFlag = homeFlag;
+  if (awayFlag && isConcreteTeamName(away)) updateData.awayFlag = awayFlag;
   if (kickoff) updateData.kickoff = kickoff;
 }
 
@@ -355,8 +373,8 @@ function buildApiUpdate(match, apiMatch) {
   const score120 = scoreAfter120(apiMatch);
   const homeScore = score120?.home;
   const awayScore = score120?.away;
-  const homeName = apiMatch.homeTeam?.name || "";
-  const awayName = apiMatch.awayTeam?.name || "";
+  const homeName = preferredTeamName(apiMatch.homeTeam?.name, match.home);
+  const awayName = preferredTeamName(apiMatch.awayTeam?.name, match.away);
 
   const updateData = {
     status,
