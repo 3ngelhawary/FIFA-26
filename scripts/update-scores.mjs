@@ -2,6 +2,14 @@
 /* =============================================================================
    Auto score updater for the EGEC World Cup Predictor.
    Repo path: scripts/update-scores.mjs
+
+   Correctness principle (IMPORTANT):
+   This job is MONOTONIC for results. It may add or upgrade a result
+   (scheduled -> live -> finished, fill in penalties/advance), but it must
+   NEVER erase or downgrade a result that is already stored. The feed
+   occasionally drops a match from its date window or returns a stale/partial
+   snapshot; without the regression guard below, a finished knockout result
+   (including `advance`) gets wiped back to nulls whenever that happens.
    ========================================================================== */
 
 import fs from "fs";
@@ -199,10 +207,15 @@ function winnerSideFromApi(match) {
 function penaltyWinnerSide(match) {
   const penalties = scorePair(match.score?.penalties);
 
+  // A decisive shootout tells us the winner directly.
   if (penalties && penalties.home !== penalties.away) {
     return penalties.home > penalties.away ? "home" : "away";
   }
 
+  // No penalties yet, or a LEVEL snapshot caught mid-shootout (e.g. 4-4):
+  // don't guess from the tied count — fall back to the feed's declared winner
+  // (score.winner). If it hasn't published one yet, return null so the caller
+  // leaves `advance` untouched instead of freezing an unresolved value.
   return winnerSideFromApi(match);
 }
 
@@ -254,6 +267,43 @@ function clearScoreFields(updateData) {
   updateData.advance = null;
 }
 
+/* ---------------------------------------------------------------------------
+   REGRESSION GUARD — the real fix.
+   Runs against the CURRENT Firestore doc right before every write. It strips
+   out any field in `updateData` that would erase or downgrade information that
+   is already stored, so a missing/partial/failed feed can never wipe a real
+   result. This is what makes `clearScoreFields` (and an empty API response)
+   safe: their nulls are dropped whenever a genuine value already exists.
+--------------------------------------------------------------------------- */
+const STATUS_RANK = { scheduled: 0, live: 1, finished: 2 };
+const PRESERVE_IF_NULLED = ["homeScore", "awayScore", "homePenScore", "awayPenScore", "advance"];
+
+function guardAgainstRegression(prev, updateData) {
+  if (!prev) return updateData;
+
+  const prevRank = STATUS_RANK[prev.status] ?? 0;
+  const nextRank = STATUS_RANK[updateData.status] ?? 0;
+
+  // Never downgrade status (finished -> live/scheduled, live -> scheduled).
+  // A downgrade means this run carries no fresher result, so also drop its
+  // live annotations rather than stamping stale minutes on a settled match.
+  if (updateData.status != null && nextRank < prevRank) {
+    delete updateData.status;
+    delete updateData.liveMinute;
+    delete updateData.liveText;
+  }
+
+  // Never overwrite an existing concrete value with null. A real advance /
+  // score / pen tally already recorded must survive a blank or partial feed.
+  for (const field of PRESERVE_IF_NULLED) {
+    if (updateData[field] === null && prev[field] != null) {
+      delete updateData[field];
+    }
+  }
+
+  return updateData;
+}
+
 function buildLocalUpdate(match) {
   const status = localStatusToAppStatus(match.status);
   const updateData = {
@@ -287,6 +337,10 @@ function buildLocalUpdate(match) {
       updateData.advance = match.advance;
     }
   } else {
+    // No local result to assert. We DELIBERATELY clear here for the first-time
+    // creation of a scheduled fixture — but the regression guard will strip
+    // these nulls (and the "scheduled" downgrade) whenever a real result is
+    // already stored, so this can no longer wipe a finished knockout.
     clearScoreFields(updateData);
   }
 
@@ -329,11 +383,17 @@ function buildApiUpdate(match, apiMatch) {
       updateData.homePenScore = null;
       updateData.awayPenScore = null;
     } else if (penalties.home !== penalties.away || winnerSideFromApi(apiMatch)) {
+      // Decisive shootout, or the feed has declared a winner -> record it.
       updateData.homePenScore = penalties.home;
       updateData.awayPenScore = penalties.away;
     }
+    // Otherwise: a LEVEL snapshot caught mid-shootout with no winner yet —
+    // leave pen scores out so we don't freeze a tied 4-4 into the result.
 
     if (status === "finished" && isKnockout(match)) {
+      // Only write `advance` when we can actually name the side that went
+      // through. If the winner is still unknown (feed lag / level snapshot),
+      // omit it — merge keeps whatever is stored instead of writing null.
       const advance = actualAdvanceSide(match, apiMatch, score120);
       if (advance) updateData.advance = advance;
     }
@@ -400,10 +460,10 @@ function findApiMatch(match, indexes) {
     || null;
 }
 
-function scoreLabel(updateData) {
-  if (updateData.status === "finished" || updateData.status === "live") {
-    if (updateData.homeScore != null && updateData.awayScore != null) {
-      return `${updateData.homeScore}-${updateData.awayScore}`;
+function scoreLabel(view) {
+  if (view.status === "finished" || view.status === "live") {
+    if (view.homeScore != null && view.awayScore != null) {
+      return `${view.homeScore}-${view.awayScore}`;
     }
 
     return "no score yet";
@@ -452,6 +512,7 @@ async function main() {
   let localWrites = 0;
   let localScoreWrites = 0;
   let missingApi = 0;
+  let preserved = 0;
 
   for (const match of ours) {
     const apiMatch = findApiMatch(match, indexes);
@@ -480,22 +541,34 @@ async function main() {
       console.log(`No API match: ${match.id} ${match.home} vs ${match.away}; synced from matches.json`);
     }
 
-    await db.collection("results").doc(match.id).set(updateData, { merge: true });
+    // Read the stored doc and strip anything that would erase/downgrade it.
+    const resultRef = db.collection("results").doc(match.id);
+    const prevSnap = await resultRef.get();
+    const prev = prevSnap.exists ? prevSnap.data() : null;
+
+    const before = JSON.stringify(updateData);
+    guardAgainstRegression(prev, updateData);
+    if (JSON.stringify(updateData) !== before) preserved++;
+
+    await resultRef.set(updateData, { merge: true });
     writes++;
 
-    const homeLabel = updateData.home || match.home;
-    const awayLabel = updateData.away || match.away;
-    const advanceLabel = updateData.advance ? ` advance=${updateData.advance}` : "";
+    // Log the POST-MERGE view so the output reflects what is actually stored.
+    const merged = { ...(prev || {}), ...updateData };
+    const homeLabel = merged.home || match.home;
+    const awayLabel = merged.away || match.away;
+    const advanceLabel = merged.advance ? ` advance=${merged.advance}` : "";
 
     console.log(
-      `Updated: ${match.id} ${homeLabel} ${scoreLabel(updateData)} ${awayLabel} `
-      + `[${updateData.status}] source=${updateData.source}${advanceLabel} ${updateData.liveText || ""}`
+      `Updated: ${match.id} ${homeLabel} ${scoreLabel(merged)} ${awayLabel} `
+      + `[${merged.status || "scheduled"}] source=${updateData.source}${advanceLabel} ${merged.liveText || ""}`
     );
   }
 
   console.log(`Updated ${writes} Firestore result record(s).`);
   console.log(`API matched ${apiMatches}/${ours.length}; missing API matches ${missingApi}.`);
   console.log(`API score records ${apiScoreWrites}; matches.json score records ${localScoreWrites}.`);
+  console.log(`Regression guard preserved existing data on ${preserved} record(s).`);
 
   if (apiFailed) {
     process.exit(1);
