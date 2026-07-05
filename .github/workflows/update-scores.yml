@@ -36,6 +36,7 @@ jobs:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           FOOTBALL_TOKEN: ${{ secrets.FOOTBALL_TOKEN }}
           COMPETITION: WC
+          SEASON: "2026"
 
       - name: Commit refreshed match results
         run: |
