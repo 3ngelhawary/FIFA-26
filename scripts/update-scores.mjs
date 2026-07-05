@@ -478,6 +478,58 @@ function findApiMatch(match, indexes) {
     || null;
 }
 
+
+function setOrDelete(target, field, value) {
+  if (value === undefined || value === null || value === "") {
+    delete target[field];
+  } else {
+    target[field] = value;
+  }
+}
+
+function applyMergedResultToLocalMatch(match, merged) {
+  if (!match || !merged) return;
+
+  if (isConcreteTeamName(merged.home)) match.home = String(merged.home).trim();
+  if (isConcreteTeamName(merged.away)) match.away = String(merged.away).trim();
+  if (merged.homeFlag && isConcreteTeamName(match.home)) match.homeFlag = merged.homeFlag;
+  if (merged.awayFlag && isConcreteTeamName(match.away)) match.awayFlag = merged.awayFlag;
+  if (merged.kickoff) match.kickoff = merged.kickoff;
+  if (merged.externalId) match.externalId = String(merged.externalId);
+
+  const status = localStatusToAppStatus(merged.status);
+  match.status = status;
+
+  if ((status === "finished" || status === "live")
+    && merged.homeScore != null
+    && merged.awayScore != null
+    && Number.isFinite(Number(merged.homeScore))
+    && Number.isFinite(Number(merged.awayScore))) {
+    match.homeScore = Number(merged.homeScore);
+    match.awayScore = Number(merged.awayScore);
+  } else {
+    delete match.homeScore;
+    delete match.awayScore;
+  }
+
+  setOrDelete(match, "homePenScore", merged.homePenScore != null ? Number(merged.homePenScore) : null);
+  setOrDelete(match, "awayPenScore", merged.awayPenScore != null ? Number(merged.awayPenScore) : null);
+  setOrDelete(match, "advance", merged.advance === "home" || merged.advance === "away" ? merged.advance : null);
+
+  if (status === "live") {
+    setOrDelete(match, "liveMinute", merged.liveMinute);
+    setOrDelete(match, "liveText", merged.liveText);
+  } else {
+    delete match.liveMinute;
+    delete match.liveText;
+  }
+}
+
+function writeMatchesJson(matches) {
+  const content = `${JSON.stringify({ matches }, null, 2)}\n`;
+  fs.writeFileSync("matches.json", content, "utf8");
+}
+
 function scoreLabel(view) {
   if (view.status === "finished" || view.status === "live") {
     if (view.homeScore != null && view.awayScore != null) {
@@ -573,6 +625,8 @@ async function main() {
 
     // Log the POST-MERGE view so the output reflects what is actually stored.
     const merged = { ...(prev || {}), ...updateData };
+    applyMergedResultToLocalMatch(match, merged);
+
     const homeLabel = merged.home || match.home;
     const awayLabel = merged.away || match.away;
     const advanceLabel = merged.advance ? ` advance=${merged.advance}` : "";
@@ -583,6 +637,8 @@ async function main() {
     );
   }
 
+  writeMatchesJson(ours);
+  console.log("matches.json refreshed from the merged result view.");
   console.log(`Updated ${writes} Firestore result record(s).`);
   console.log(`API matched ${apiMatches}/${ours.length}; missing API matches ${missingApi}.`);
   console.log(`API score records ${apiScoreWrites}; matches.json score records ${localScoreWrites}.`);
