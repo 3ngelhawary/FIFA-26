@@ -709,6 +709,18 @@ const Store={
       const a=await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
       const f=await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
       const app=a.initializeApp(cfg); this.db=f.getFirestore(app); this.fs=f;
+      const loadOnce=async(col,key)=>{
+        const s=await f.getDocs(f.collection(this.db,col));
+        this.cache[key]={};
+        s.forEach(d=>this.cache[key][d.id]=d.data());
+        this.loaded[key]=true;
+      };
+      await Promise.all([
+        loadOnce("players","players"),
+        loadOnce("predictions","preds"),
+        loadOnce("results","results"),
+        loadOnce("flags","flags")
+      ]);
       this.ready=true;
       const sub=(col,key)=>f.onSnapshot(f.collection(this.db,col),
         s=>{ this.cache[key]={}; s.forEach(d=>this.cache[key][d.id]=d.data()); this.loaded[key]=true; render(); },
@@ -864,6 +876,11 @@ function resolvedParticipant(source,fallbackName,fallbackFlag,stack,matchId){
   const side=source.type==="loser"?(win==="home"?"away":"home"):win;
   return{name:side==="home"?src.home:src.away,flag:side==="home"?src.homeFlag:src.awayFlag,placeholder:false};
 }
+function resultForMatch(match){
+  if(!match)return null;
+  const res=Store.resultsAll();
+  return res[match.id]||(match.externalId?res[String(match.externalId)]:null)||null;
+}
 function resolvedMatch(id,stack){
   const raw=rawMatchById(id);if(!raw)return null;
   stack=stack||{};if(stack[id])return Object.assign({},raw);stack[id]=true;
@@ -871,7 +888,7 @@ function resolvedMatch(id,stack){
   const hp=resolvedParticipant(raw.homeSource,raw.home,raw.homeFlag,stack,raw.id);
   const ap=resolvedParticipant(raw.awaySource,raw.away,raw.awayFlag,stack,raw.id);
   m.home=hp.name;m.homeFlag=hp.flag;m.away=ap.name;m.awayFlag=ap.flag;
-  const r=Store.resultsAll()[id];
+  const r=resultForMatch(raw);
   if(r){
     const useHome=r.home&&(isConcreteTeamName(r.home)||!isConcreteTeamName(m.home));
     const useAway=r.away&&(isConcreteTeamName(r.away)||!isConcreteTeamName(m.away));
@@ -905,9 +922,8 @@ function teamFlagMap(){
 function groupStanding(letter){
   const ms=MATCHES.filter(m=>!isKnockout(m)&&String(m.group).toUpperCase()===letter);
   if(!ms.length)return null;
-  const res=Store.resultsAll();
   const allDone=ms.every(m=>{
-    const r=res[m.id]||{};
+    const r=resultForMatch(m)||{};
     const stale=staleRemoteResult(m,r);
     const status=stale?m.status:(r.status||m.status);
     const hs=!stale&&r.homeScore!=null?r.homeScore:m.homeScore;
@@ -918,7 +934,7 @@ function groupStanding(letter){
   const table={};
   const ensure=(name,flag)=>{if(!table[name])table[name]={team:name,flag:flag||"",pts:0,gf:0,ga:0,gd:0};if(flag&&!table[name].flag)table[name].flag=flag;return table[name];};
   ms.forEach(m=>{
-    const r=res[m.id]||{};
+    const r=resultForMatch(m)||{};
     const stale=staleRemoteResult(m,r);
     const hs=!stale&&r.homeScore!=null?r.homeScore:m.homeScore;
     const as=!stale&&r.awayScore!=null?r.awayScore:m.awayScore;
@@ -1344,6 +1360,7 @@ async function mergeLive(){
 function render(){
   if(Store.error){ renderSetup(); return; }
   if(!Store.ready){ renderLoading("Connecting to the shared game…"); return; }
+  if(!Store.loaded.results){ renderLoading("Loading match results…"); return; }
   if(SESSION&&!ME){
     if(!Store.loaded.players){ renderLoading("Loading your account…"); return; }
     const p=Store.getByCode(SESSION);
