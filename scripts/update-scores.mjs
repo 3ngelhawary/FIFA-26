@@ -485,6 +485,128 @@ function findApiMatch(match, indexes) {
     || null;
 }
 
+function matchById(matches) {
+  const map = new Map();
+
+  for (const match of matches) {
+    map.set(String(match.id), match);
+  }
+
+  return map;
+}
+
+function winningSideFromLocal(match) {
+  if (!match) return null;
+
+  if (match.advance === "home" || match.advance === "away") return match.advance;
+
+  if (match.homeScore != null && match.awayScore != null) {
+    const home = Number(match.homeScore);
+    const away = Number(match.awayScore);
+
+    if (Number.isFinite(home) && Number.isFinite(away)) {
+      if (home > away) return "home";
+      if (away > home) return "away";
+    }
+  }
+
+  if (match.homePenScore != null && match.awayPenScore != null) {
+    const homePen = Number(match.homePenScore);
+    const awayPen = Number(match.awayPenScore);
+
+    if (Number.isFinite(homePen) && Number.isFinite(awayPen)) {
+      if (homePen > awayPen) return "home";
+      if (awayPen > homePen) return "away";
+    }
+  }
+
+  return null;
+}
+
+function sourceSideFromLocal(match, sourceType) {
+  const winner = winningSideFromLocal(match);
+
+  if (!winner) return null;
+  if (sourceType === "winner") return winner;
+  if (sourceType === "loser") return winner === "home" ? "away" : "home";
+
+  return null;
+}
+
+function resolveSourceParticipant(source, matchesById, depth = 0) {
+  if (!source || !source.matchId || depth > 20) return null;
+
+  const sourceMatch = matchesById.get(String(source.matchId));
+
+  if (!sourceMatch || localStatusToAppStatus(sourceMatch.status) !== "finished") return null;
+
+  const side = sourceSideFromLocal(sourceMatch, source.type);
+
+  if (!side) return null;
+
+  const name = sourceMatch[side];
+  const flag = sourceMatch[`${side}Flag`] || "";
+
+  if (isConcreteTeamName(name)) {
+    return { name: String(name).trim(), flag };
+  }
+
+  return resolveSourceParticipant(sourceMatch[`${side}Source`], matchesById, depth + 1);
+}
+
+function resolveBracketParticipants(matches) {
+  const matchesById = matchById(matches);
+  let changed = false;
+
+  for (const match of matches) {
+    const home = resolveSourceParticipant(match.homeSource, matchesById);
+    const away = resolveSourceParticipant(match.awaySource, matchesById);
+
+    if (home && match.home !== home.name) {
+      match.home = home.name;
+      match.homeFlag = home.flag;
+      changed = true;
+    }
+
+    if (away && match.away !== away.name) {
+      match.away = away.name;
+      match.awayFlag = away.flag;
+      changed = true;
+    }
+  }
+
+  return changed;
+}
+
+function resolveBracketParticipantsFully(matches) {
+  for (let i = 0; i < 12; i++) {
+    if (!resolveBracketParticipants(matches)) return;
+  }
+}
+
+async function loadStoredResults(matches) {
+  const refs = matches.map((match) => db.collection("results").doc(String(match.id)));
+  const snaps = refs.length ? await db.getAll(...refs) : [];
+  const stored = new Map();
+
+  for (let i = 0; i < snaps.length; i++) {
+    const snap = snaps[i];
+    if (snap.exists) stored.set(String(matches[i].id), snap.data());
+  }
+
+  return stored;
+}
+
+function applyStoredResultsToMatches(matches, storedResults) {
+  for (const match of matches) {
+    const stored = storedResults.get(String(match.id));
+
+    if (stored) {
+      applyMergedResultToLocalMatch(match, { ...match, ...stored });
+    }
+  }
+}
+
 function countBy(items, getter) {
   const counts = {};
 
@@ -665,6 +787,11 @@ async function fetchApiMatches(query) {
 
 async function main() {
   const ours = JSON.parse(fs.readFileSync("matches.json", "utf8")).matches || [];
+  const storedResults = await loadStoredResults(ours);
+
+  applyStoredResultsToMatches(ours, storedResults);
+  resolveBracketParticipantsFully(ours);
+
   const apiQuery = matchApiQuery(ours);
   let apiPayload = { matches: [] };
   let api = [];
@@ -699,6 +826,8 @@ async function main() {
   let preserved = 0;
 
   for (const match of ours) {
+    resolveBracketParticipantsFully(ours);
+
     const apiMatch = findApiMatch(match, indexes);
     let updateData;
 
@@ -725,10 +854,9 @@ async function main() {
       console.log(`No API match: ${match.id} ${match.home} vs ${match.away}; synced from matches.json`);
     }
 
-    // Read the stored doc and strip anything that would erase/downgrade it.
+    // Strip anything that would erase/downgrade a previously stored result.
     const resultRef = db.collection("results").doc(match.id);
-    const prevSnap = await resultRef.get();
-    const prev = prevSnap.exists ? prevSnap.data() : null;
+    const prev = storedResults.get(String(match.id)) || null;
 
     const before = JSON.stringify(updateData);
     guardAgainstRegression(prev, updateData);
@@ -739,7 +867,9 @@ async function main() {
 
     // Log the POST-MERGE view so the output reflects what is actually stored.
     const merged = { ...(prev || {}), ...updateData };
+    storedResults.set(String(match.id), merged);
     applyMergedResultToLocalMatch(match, merged);
+    resolveBracketParticipantsFully(ours);
 
     const homeLabel = merged.home || match.home;
     const awayLabel = merged.away || match.away;
