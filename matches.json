@@ -7,11 +7,12 @@
       "away": "Sweden",
       "homeFlag": "🇳🇱",
       "awayFlag": "🇸🇪",
-      "kickoff": "2026-06-20T16:00:00Z",
+      "kickoff": "2026-06-20T17:00:00Z",
       "venue": "Houston",
       "status": "finished",
       "homeScore": 5,
-      "awayScore": 1
+      "awayScore": 1,
+      "externalId": "537359"
     },
     {
       "id": "g20-ger-civ",
@@ -24,7 +25,8 @@
       "venue": "MetLife",
       "status": "finished",
       "homeScore": 2,
-      "awayScore": 1
+      "awayScore": 1,
+      "externalId": "537353"
     },
     {
       "id": "g20-ecu-cuw",
@@ -33,11 +35,12 @@
       "away": "Curaçao",
       "homeFlag": "🇪🇨",
       "awayFlag": "🇨🇼",
-      "kickoff": "2026-06-20T23:00:00Z",
+      "kickoff": "2026-06-21T00:00:00Z",
       "venue": "Philadelphia",
       "status": "finished",
       "homeScore": 0,
-      "awayScore": 0
+      "awayScore": 0,
+      "externalId": "537354"
     },
     {
       "id": "g21-tun-jpn",
@@ -46,11 +49,12 @@
       "away": "Japan",
       "homeFlag": "🇹🇳",
       "awayFlag": "🇯🇵",
-      "kickoff": "2026-06-21T17:00:00Z",
+      "kickoff": "2026-06-21T04:00:00Z",
       "venue": "Kansas City",
       "status": "finished",
       "homeScore": 0,
-      "awayScore": 4
+      "awayScore": 4,
+      "externalId": "537360"
     },
     {
       "id": "g21-esp-ksa",
@@ -59,24 +63,26 @@
       "away": "Saudi Arabia",
       "homeFlag": "🇪🇸",
       "awayFlag": "🇸🇦",
-      "kickoff": "2026-06-21T19:00:00Z",
+      "kickoff": "2026-06-21T16:00:00Z",
       "venue": "Atlanta",
       "status": "finished",
       "homeScore": 4,
-      "awayScore": 0
+      "awayScore": 0,
+      "externalId": "537371"
     },
     {
       "id": "g21-bel-irn",
       "group": "G",
       "home": "Belgium",
-      "away": "IR Iran",
+      "away": "Iran",
       "homeFlag": "🇧🇪",
       "awayFlag": "🇮🇷",
-      "kickoff": "2026-06-21T21:00:00Z",
+      "kickoff": "2026-06-21T19:00:00Z",
       "venue": "Los Angeles",
       "status": "finished",
       "homeScore": 0,
-      "awayScore": 0
+      "awayScore": 0,
+      "externalId": "537365"
     },
     {
       "id": "g21-uru-cpv",
@@ -94,15 +100,16 @@
     {
       "id": "g21-egy-nzl",
       "group": "G",
-      "home": "Egypt",
-      "away": "New Zealand",
+      "home": "New Zealand",
+      "away": "Egypt",
       "homeFlag": "🇪🇬",
       "awayFlag": "🇳🇿",
       "kickoff": "2026-06-22T01:00:00Z",
       "venue": "Vancouver",
       "status": "finished",
-      "homeScore": 3,
-      "awayScore": 1
+      "homeScore": 1,
+      "awayScore": 3,
+      "externalId": "537366"
     },
     {
       "id": "g22-arg-aut",
@@ -115,7 +122,8 @@
       "venue": "Arlington",
       "status": "finished",
       "homeScore": 2,
-      "awayScore": 0
+      "awayScore": 0,
+      "externalId": "537399"
     },
     {
       "id": "g22-fra-irq",
@@ -128,7 +136,8 @@
       "venue": "Philadelphia",
       "status": "finished",
       "homeScore": 3,
-      "awayScore": 0
+      "awayScore": 0,
+      "externalId": "537393"
     },
     {
       "id": "g22-nor-sen",
@@ -141,7 +150,8 @@
       "venue": "New York/NJ",
       "status": "finished",
       "homeScore": 3,
-      "awayScore": 2
+      "awayScore": 2,
+      "externalId": "537394"
     },
     {
       "id": "g22-jor-alg",
@@ -154,7 +164,8 @@
       "venue": "SF Bay Area",
       "status": "finished",
       "homeScore": 1,
-      "awayScore": 2
+      "awayScore": 2,
+      "externalId": "537400"
     },
     {
       "id": "g23-por-uzb",
@@ -167,7 +178,8 @@
       "venue": "Houston",
       "status": "finished",
       "homeScore": 5,
-      "awayScore": 0
+      "awayScore": 0,
+      "externalId": "537405"
     },
     {
       "id": "g23-eng-gha",
@@ -180,7 +192,8 @@
       "venue": "Boston",
       "status": "finished",
       "homeScore": 0,
-      "awayScore": 0
+      "awayScore": 0,
+      "externalId": "537411"
     },
     {
       "id": "g23-pan-cro",
@@ -193,7 +206,8 @@
       "venue": "Toronto",
       "status": "finished",
       "homeScore": 0,
-      "awayScore": 1
+      "awayScore": 1,
+      "externalId": "537412"
     },
     {
       "id": "g23-col-cod",
@@ -206,12 +220,13 @@
       "venue": "Guadalajara Stadium",
       "status": "finished",
       "homeScore": 1,
-      "awayScore": 0
+      "awayScore": 0,
+      "externalId": "537406"
     },
     {
       "id": "g24-bih-qat",
       "group": "B",
-      "home": "Bosnia and Herzegovina",
+      "home": "Bosnia-Herzegovina",
       "away": "Qatar",
       "homeFlag": "🇧🇦",
       "awayFlag": "🇶🇦",
@@ -220,7 +235,7 @@
       "status": "finished",
       "homeScore": 3,
       "awayScore": 1,
-      "externalId": "66456926"
+      "externalId": "537338"
     },
     {
       "id": "g24-sui-can",
@@ -234,7 +249,7 @@
       "status": "finished",
       "homeScore": 2,
       "awayScore": 1,
-      "externalId": "66456924"
+      "externalId": "537337"
     },
     {
       "id": "g24-mar-hai",
@@ -248,7 +263,7 @@
       "status": "finished",
       "homeScore": 4,
       "awayScore": 2,
-      "externalId": "66456938"
+      "externalId": "537344"
     },
     {
       "id": "g24-sco-bra",
@@ -262,7 +277,7 @@
       "status": "finished",
       "homeScore": 0,
       "awayScore": 3,
-      "externalId": "66456936"
+      "externalId": "537343"
     },
     {
       "id": "g24-cze-mex",
@@ -276,7 +291,7 @@
       "status": "finished",
       "homeScore": 0,
       "awayScore": 3,
-      "externalId": "66456912"
+      "externalId": "537331"
     },
     {
       "id": "g24-rsa-kor",
@@ -290,7 +305,7 @@
       "status": "finished",
       "homeScore": 1,
       "awayScore": 0,
-      "externalId": "66456914"
+      "externalId": "537332"
     },
     {
       "id": "g25-cuw-civ",
@@ -304,7 +319,7 @@
       "status": "finished",
       "homeScore": 0,
       "awayScore": 2,
-      "externalId": "66457080"
+      "externalId": "537356"
     },
     {
       "id": "g25-ecu-ger",
@@ -318,7 +333,7 @@
       "status": "finished",
       "homeScore": 2,
       "awayScore": 1,
-      "externalId": "66457078"
+      "externalId": "537355"
     },
     {
       "id": "g25-jpn-swe",
@@ -332,7 +347,7 @@
       "status": "finished",
       "homeScore": 1,
       "awayScore": 1,
-      "externalId": "66456978"
+      "externalId": "537362"
     },
     {
       "id": "g25-tun-ned",
@@ -346,7 +361,7 @@
       "status": "finished",
       "homeScore": 1,
       "awayScore": 3,
-      "externalId": "66456976"
+      "externalId": "537361"
     },
     {
       "id": "g25-par-aus",
@@ -360,7 +375,7 @@
       "status": "finished",
       "homeScore": 0,
       "awayScore": 0,
-      "externalId": "66456950"
+      "externalId": "537350"
     },
     {
       "id": "g25-tur-usa",
@@ -374,7 +389,7 @@
       "status": "finished",
       "homeScore": 3,
       "awayScore": 2,
-      "externalId": "66456948"
+      "externalId": "537349"
     },
     {
       "id": "g26-nor-fra",
@@ -388,7 +403,7 @@
       "status": "finished",
       "homeScore": 1,
       "awayScore": 4,
-      "externalId": "66457014"
+      "externalId": "537395"
     },
     {
       "id": "g26-sen-irq",
@@ -402,7 +417,7 @@
       "status": "finished",
       "homeScore": 5,
       "awayScore": 0,
-      "externalId": "66457016"
+      "externalId": "537396"
     },
     {
       "id": "g26-cpv-ksa",
@@ -430,13 +445,13 @@
       "status": "finished",
       "homeScore": 0,
       "awayScore": 1,
-      "externalId": "66457002"
+      "externalId": "537373"
     },
     {
       "id": "g26-egy-irn",
       "group": "G",
       "home": "Egypt",
-      "away": "IR Iran",
+      "away": "Iran",
       "homeFlag": "🇪🇬",
       "awayFlag": "🇮🇷",
       "kickoff": "2026-06-27T03:00:00Z",
@@ -444,7 +459,7 @@
       "status": "finished",
       "homeScore": 1,
       "awayScore": 1,
-      "externalId": "66456992"
+      "externalId": "537368"
     },
     {
       "id": "g26-nzl-bel",
@@ -458,7 +473,7 @@
       "status": "finished",
       "homeScore": 1,
       "awayScore": 5,
-      "externalId": "66456990"
+      "externalId": "537367"
     },
     {
       "id": "g27-cro-gha",
@@ -472,7 +487,7 @@
       "status": "finished",
       "homeScore": 2,
       "awayScore": 1,
-      "externalId": "66457052"
+      "externalId": "537414"
     },
     {
       "id": "g27-pan-eng",
@@ -486,7 +501,7 @@
       "status": "finished",
       "homeScore": 0,
       "awayScore": 2,
-      "externalId": "66457050"
+      "externalId": "537413"
     },
     {
       "id": "g27-cod-uzb",
@@ -500,7 +515,7 @@
       "status": "finished",
       "homeScore": 3,
       "awayScore": 1,
-      "externalId": "66457040"
+      "externalId": "537408"
     },
     {
       "id": "g27-col-por",
@@ -514,7 +529,7 @@
       "status": "finished",
       "homeScore": 0,
       "awayScore": 0,
-      "externalId": "66457038"
+      "externalId": "537407"
     },
     {
       "id": "g28-alg-aut",
@@ -528,7 +543,7 @@
       "status": "finished",
       "homeScore": 3,
       "awayScore": 3,
-      "externalId": "66457028"
+      "externalId": "537402"
     },
     {
       "id": "g28-jor-arg",
@@ -542,11 +557,11 @@
       "status": "finished",
       "homeScore": 1,
       "awayScore": 3,
-      "externalId": "66457026"
+      "externalId": "537401"
     },
     {
       "id": "53452545",
-      "externalId": "53452545",
+      "externalId": "537417",
       "group": "KO",
       "round": "Round of 32",
       "home": "South Africa",
@@ -564,7 +579,7 @@
     },
     {
       "id": "53452557",
-      "externalId": "53452557",
+      "externalId": "537423",
       "group": "KO",
       "round": "Round of 32",
       "home": "Brazil",
@@ -582,14 +597,14 @@
     },
     {
       "id": "53452541",
-      "externalId": "53452541",
+      "externalId": "537415",
       "group": "KO",
       "round": "Round of 32",
       "home": "Germany",
       "away": "Paraguay",
       "homeFlag": "🇩🇪",
       "awayFlag": "🇵🇾",
-      "kickoff": "2026-06-29T20:00:00Z",
+      "kickoff": "2026-06-29T20:30:00Z",
       "venue": "Charlotte",
       "status": "finished",
       "homeScore": 1,
@@ -602,7 +617,7 @@
     },
     {
       "id": "53452547",
-      "externalId": "53452547",
+      "externalId": "537418",
       "group": "KO",
       "round": "Round of 32",
       "home": "Netherlands",
@@ -622,7 +637,7 @@
     },
     {
       "id": "53452561",
-      "externalId": "53452561",
+      "externalId": "537424",
       "group": "KO",
       "round": "Round of 32",
       "home": "Ivory Coast",
@@ -640,14 +655,14 @@
     },
     {
       "id": "53452543",
-      "externalId": "53452543",
+      "externalId": "537416",
       "group": "KO",
       "round": "Round of 32",
       "home": "France",
       "away": "Sweden",
       "homeFlag": "🇫🇷",
       "awayFlag": "🇸🇪",
-      "kickoff": "2026-07-01T09:00:00Z",
+      "kickoff": "2026-06-30T21:00:00Z",
       "venue": "Atlanta",
       "status": "finished",
       "homeScore": 3,
@@ -658,14 +673,14 @@
     },
     {
       "id": "53452563",
-      "externalId": "53452563",
+      "externalId": "537425",
       "group": "KO",
       "round": "Round of 32",
       "home": "Mexico",
       "away": "Ecuador",
       "homeFlag": "🇲🇽",
       "awayFlag": "🇪🇨",
-      "kickoff": "2026-07-01T01:00:00Z",
+      "kickoff": "2026-07-01T02:00:00Z",
       "venue": "Mexico City",
       "status": "finished",
       "homeScore": 2,
@@ -676,7 +691,7 @@
     },
     {
       "id": "53452565",
-      "externalId": "53452565",
+      "externalId": "537426",
       "group": "KO",
       "round": "Round of 32",
       "home": "England",
@@ -694,7 +709,7 @@
     },
     {
       "id": "53452555",
-      "externalId": "53452555",
+      "externalId": "537422",
       "group": "KO",
       "round": "Round of 32",
       "home": "Belgium",
@@ -712,11 +727,11 @@
     },
     {
       "id": "53452553",
-      "externalId": "53452553",
+      "externalId": "537421",
       "group": "KO",
       "round": "Round of 32",
       "home": "United States",
-      "away": "Bosnia and Herzegovina",
+      "away": "Bosnia-Herzegovina",
       "homeFlag": "🇺🇸",
       "awayFlag": "🇧🇦",
       "kickoff": "2026-07-02T00:00:00Z",
@@ -730,7 +745,7 @@
     },
     {
       "id": "53452551",
-      "externalId": "53452551",
+      "externalId": "537420",
       "group": "KO",
       "round": "Round of 32",
       "home": "Spain",
@@ -748,7 +763,7 @@
     },
     {
       "id": "53452549",
-      "externalId": "53452549",
+      "externalId": "537419",
       "group": "KO",
       "round": "Round of 32",
       "home": "Portugal",
@@ -766,7 +781,7 @@
     },
     {
       "id": "53452505",
-      "externalId": "53452505",
+      "externalId": "537429",
       "group": "KO",
       "round": "Round of 32",
       "home": "Switzerland",
@@ -784,7 +799,7 @@
     },
     {
       "id": "53452503",
-      "externalId": "53452503",
+      "externalId": "537428",
       "group": "KO",
       "round": "Round of 32",
       "home": "Australia",
@@ -822,7 +837,7 @@
     },
     {
       "id": "53452507",
-      "externalId": "53452507",
+      "externalId": "537430",
       "group": "KO",
       "round": "Round of 32",
       "home": "Colombia",
@@ -840,13 +855,13 @@
     },
     {
       "id": "53452511",
-      "externalId": "53452511",
+      "externalId": "537376",
       "group": "KO",
       "round": "Round of 16",
-      "home": "Winner of 53452545",
-      "away": "Winner of 53452547",
-      "homeFlag": "",
-      "awayFlag": "",
+      "home": "Canada",
+      "away": "Morocco",
+      "homeFlag": "🇨🇦",
+      "awayFlag": "🇲🇦",
       "kickoff": "2026-07-04T17:00:00Z",
       "venue": "Philadelphia",
       "status": "finished",
@@ -866,18 +881,16 @@
     },
     {
       "id": "53452509",
-      "externalId": "53452509",
+      "externalId": "537375",
       "group": "KO",
       "round": "Round of 16",
-      "home": "Winner of 53452541",
-      "away": "Winner of 53452543",
-      "homeFlag": "",
-      "awayFlag": "",
+      "home": "Paraguay",
+      "away": "France",
+      "homeFlag": "🇵🇾",
+      "awayFlag": "🇫🇷",
       "kickoff": "2026-07-04T21:00:00Z",
       "venue": "Houston",
-      "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null,
+      "status": "finished",
       "homeSource": {
         "matchId": "53452541",
         "type": "winner"
@@ -887,22 +900,23 @@
         "type": "winner"
       },
       "winnerTo": "53452525",
-      "winnerSlot": "home"
+      "winnerSlot": "home",
+      "homeScore": 0,
+      "awayScore": 1,
+      "advance": "away"
     },
     {
       "id": "53452517",
-      "externalId": "53452517",
+      "externalId": "537377",
       "group": "KO",
       "round": "Round of 16",
-      "home": "Winner of 53452557",
-      "away": "Winner of 53452561",
-      "homeFlag": "",
-      "awayFlag": "",
+      "home": "Brazil",
+      "away": "Norway",
+      "homeFlag": "🇧🇷",
+      "awayFlag": "🇳🇴",
       "kickoff": "2026-07-05T20:00:00Z",
       "venue": "New York/New Jersey",
       "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null,
       "homeSource": {
         "matchId": "53452557",
         "type": "winner"
@@ -916,18 +930,16 @@
     },
     {
       "id": "53452519",
-      "externalId": "53452519",
+      "externalId": "537378",
       "group": "KO",
       "round": "Round of 16",
-      "home": "Winner of 53452563",
-      "away": "Winner of 53452565",
-      "homeFlag": "",
-      "awayFlag": "",
+      "home": "Mexico",
+      "away": "England",
+      "homeFlag": "🇲🇽",
+      "awayFlag": "🏴",
       "kickoff": "2026-07-06T00:00:00Z",
       "venue": "Dallas",
       "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null,
       "homeSource": {
         "matchId": "53452563",
         "type": "winner"
@@ -941,18 +953,16 @@
     },
     {
       "id": "53452513",
-      "externalId": "53452513",
+      "externalId": "537379",
       "group": "KO",
       "round": "Round of 16",
-      "home": "Winner of 53452549",
-      "away": "Winner of 53452551",
-      "homeFlag": "",
-      "awayFlag": "",
+      "home": "Portugal",
+      "away": "Spain",
+      "homeFlag": "🇵🇹",
+      "awayFlag": "🇪🇸",
       "kickoff": "2026-07-06T19:00:00Z",
       "venue": "Seattle",
       "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null,
       "homeSource": {
         "matchId": "53452549",
         "type": "winner"
@@ -966,18 +976,16 @@
     },
     {
       "id": "53452515",
-      "externalId": "53452515",
+      "externalId": "537380",
       "group": "KO",
       "round": "Round of 16",
-      "home": "Winner of 53452553",
-      "away": "Winner of 53452555",
-      "homeFlag": "",
-      "awayFlag": "",
+      "home": "United States",
+      "away": "Belgium",
+      "homeFlag": "🇺🇸",
+      "awayFlag": "🇧🇪",
       "kickoff": "2026-07-07T00:00:00Z",
       "venue": "Atlanta",
       "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null,
       "homeSource": {
         "matchId": "53452553",
         "type": "winner"
@@ -991,18 +999,16 @@
     },
     {
       "id": "53452521",
-      "externalId": "53452521",
+      "externalId": "537381",
       "group": "KO",
       "round": "Round of 16",
-      "home": "Winner of 53452569",
-      "away": "Winner of 53452503",
-      "homeFlag": "",
-      "awayFlag": "",
+      "home": "Argentina",
+      "away": "Egypt",
+      "homeFlag": "🇦🇷",
+      "awayFlag": "🇪🇬",
       "kickoff": "2026-07-07T16:00:00Z",
       "venue": "Vancouver",
       "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null,
       "homeSource": {
         "matchId": "53452569",
         "type": "winner"
@@ -1016,18 +1022,16 @@
     },
     {
       "id": "53452523",
-      "externalId": "53452523",
+      "externalId": "537382",
       "group": "KO",
       "round": "Round of 16",
-      "home": "Winner of 53452505",
-      "away": "Winner of 53452507",
-      "homeFlag": "",
-      "awayFlag": "",
+      "home": "Switzerland",
+      "away": "Colombia",
+      "homeFlag": "🇨🇭",
+      "awayFlag": "🇨🇴",
       "kickoff": "2026-07-07T20:00:00Z",
       "venue": "San Francisco Bay Area",
       "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null,
       "homeSource": {
         "matchId": "53452505",
         "type": "winner"
@@ -1041,18 +1045,16 @@
     },
     {
       "id": "53452525",
-      "externalId": "53452525",
+      "externalId": "537383",
       "group": "KO",
       "round": "Quarterfinal",
-      "home": "Winner of 53452509",
-      "away": "Winner of 53452511",
-      "homeFlag": "",
-      "awayFlag": "",
+      "home": "France",
+      "away": "Morocco",
+      "homeFlag": "🇫🇷",
+      "awayFlag": "🇲🇦",
       "kickoff": "2026-07-09T20:00:00Z",
       "venue": "Boston",
       "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null,
       "homeSource": {
         "matchId": "53452509",
         "type": "winner"
@@ -1076,8 +1078,6 @@
       "kickoff": "2026-07-10T19:00:00Z",
       "venue": "Los Angeles",
       "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null,
       "homeSource": {
         "matchId": "53452513",
         "type": "winner"
@@ -1101,8 +1101,6 @@
       "kickoff": "2026-07-11T21:00:00Z",
       "venue": "Miami",
       "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null,
       "homeSource": {
         "matchId": "53452517",
         "type": "winner"
@@ -1126,8 +1124,6 @@
       "kickoff": "2026-07-12T01:00:00Z",
       "venue": "Kansas City",
       "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null,
       "homeSource": {
         "matchId": "53452521",
         "type": "winner"
@@ -1151,8 +1147,6 @@
       "kickoff": "2026-07-14T19:00:00Z",
       "venue": "Dallas",
       "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null,
       "homeSource": {
         "matchId": "53452525",
         "type": "winner"
@@ -1178,8 +1172,6 @@
       "kickoff": "2026-07-15T19:00:00Z",
       "venue": "Atlanta",
       "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null,
       "homeSource": {
         "matchId": "53452529",
         "type": "winner"
@@ -1205,8 +1197,6 @@
       "kickoff": "2026-07-18T21:00:00Z",
       "venue": "Miami",
       "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null,
       "homeSource": {
         "matchId": "53452533",
         "type": "loser"
@@ -1228,8 +1218,6 @@
       "kickoff": "2026-07-19T19:00:00Z",
       "venue": "New York/New Jersey",
       "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null,
       "homeSource": {
         "matchId": "53452533",
         "type": "winner"
