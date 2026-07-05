@@ -22,6 +22,8 @@ const SA = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT || "{}");
 const TOKEN = (process.env.FOOTBALL_TOKEN || "").trim().replace(/\s+/g, "");
 
 const COMP = process.env.COMPETITION || "WC";
+const SEASON = (process.env.SEASON || process.env.FOOTBALL_SEASON || "2026").trim();
+const MATCH_SETTLE_MS = 4 * 60 * 60 * 1000;
 
 if (!SA.project_id) {
   console.error("Missing FIREBASE_SERVICE_ACCOUNT secret");
@@ -434,7 +436,7 @@ function buildApiUpdate(match, apiMatch) {
   return updateData;
 }
 
-function matchDateRange(matches) {
+function matchApiQuery(matches) {
   const times = matches
     .map((match) => new Date(match.kickoff).getTime())
     .filter((value) => Number.isFinite(value));
@@ -446,7 +448,12 @@ function matchDateRange(matches) {
   first.setUTCDate(first.getUTCDate() - 1);
   last.setUTCDate(last.getUTCDate() + 1);
 
-  return `?dateFrom=${first.toISOString().slice(0, 10)}&dateTo=${last.toISOString().slice(0, 10)}`;
+  const params = new URLSearchParams();
+  if (SEASON) params.set("season", SEASON);
+  params.set("dateFrom", first.toISOString().slice(0, 10));
+  params.set("dateTo", last.toISOString().slice(0, 10));
+
+  return `?${params.toString()}`;
 }
 
 function createApiIndexes(apiMatches) {
@@ -476,6 +483,103 @@ function findApiMatch(match, indexes) {
     || indexes.byPair[key]
     || indexes.byReversePair[key]
     || null;
+}
+
+function countBy(items, getter) {
+  const counts = {};
+
+  for (const item of items) {
+    const key = getter(item) || "UNKNOWN";
+    counts[key] = (counts[key] || 0) + 1;
+  }
+
+  return counts;
+}
+
+function compactCounts(counts) {
+  return Object.keys(counts)
+    .sort()
+    .map((key) => `${key}:${counts[key]}`)
+    .join(", ") || "none";
+}
+
+function matchHasSettledByTime(match) {
+  const kickoffTime = new Date(match.kickoff).getTime();
+
+  return Number.isFinite(kickoffTime) && Date.now() >= kickoffTime + MATCH_SETTLE_MS;
+}
+
+function apiHasUsableScore(apiMatch) {
+  const status = apiStatusToAppStatus(apiMatch?.status);
+  const score120 = scoreAfter120(apiMatch || {});
+
+  return (status === "finished" || status === "live")
+    && score120?.home != null
+    && score120?.away != null;
+}
+
+function logApiDiagnostics(query, payload) {
+  const api = payload.matches || [];
+  const resultSet = payload.resultSet || {};
+  const filters = payload.filters || {};
+  const competition = payload.competition || {};
+  const season = payload.season || {};
+
+  console.log(`API endpoint: /v4/competitions/${COMP}/matches${query}`);
+  console.log(`API competition: ${competition.name || COMP} (${competition.code || COMP})`);
+  console.log(`API season: ${season.startDate || "unknown"} to ${season.endDate || "unknown"}`);
+  console.log(`API filters: ${JSON.stringify(filters)}`);
+  console.log(`API resultSet: ${JSON.stringify(resultSet)}`);
+  console.log(`API status counts: ${compactCounts(countBy(api, (match) => match.status))}`);
+  console.log(
+    `API returned IDs sample: ${api.slice(0, 12).map((match) => match.id).join(", ") || "none"}`
+  );
+}
+
+function validateApiCoverage(ours, api, indexes) {
+  const errors = [];
+
+  if (!api.length) {
+    errors.push(`API returned 0 matches for COMPETITION=${COMP}, SEASON=${SEASON}.`);
+  }
+
+  const settledLocalPending = ours.filter((match) => {
+    return localStatusToAppStatus(match.status) !== "finished" && matchHasSettledByTime(match);
+  });
+
+  const missingSettled = [];
+  const unusableSettled = [];
+
+  for (const match of settledLocalPending) {
+    const apiMatch = findApiMatch(match, indexes);
+
+    if (!apiMatch) {
+      missingSettled.push(match);
+      continue;
+    }
+
+    if (!apiHasUsableScore(apiMatch)) {
+      unusableSettled.push({ match, apiMatch });
+    }
+  }
+
+  if (missingSettled.length) {
+    errors.push(
+      "API did not match settled app fixtures: "
+      + missingSettled.map((match) => `${match.id} ${match.home} vs ${match.away}`).join("; ")
+    );
+  }
+
+  if (unusableSettled.length) {
+    errors.push(
+      "API matched settled fixtures but did not provide finished/live scores: "
+      + unusableSettled.map(({ match, apiMatch }) => {
+        return `${match.id} apiId=${apiMatch.id} apiStatus=${apiMatch.status}`;
+      }).join("; ")
+    );
+  }
+
+  return errors;
 }
 
 
@@ -542,8 +646,8 @@ function scoreLabel(view) {
   return "fixture synced";
 }
 
-async function fetchApiMatches(dateRange) {
-  const url = `https://api.football-data.org/v4/competitions/${COMP}/matches${dateRange}`;
+async function fetchApiMatches(query) {
+  const url = `https://api.football-data.org/v4/competitions/${COMP}/matches${query}`;
 
   const res = await fetch(url, {
     headers: {
@@ -556,19 +660,20 @@ async function fetchApiMatches(dateRange) {
     throw new Error(`API error ${res.status}: ${body}`);
   }
 
-  const data = await res.json();
-  return data.matches || [];
+  return await res.json();
 }
 
 async function main() {
   const ours = JSON.parse(fs.readFileSync("matches.json", "utf8")).matches || [];
-  const dateRange = matchDateRange(ours);
+  const apiQuery = matchApiQuery(ours);
+  let apiPayload = { matches: [] };
   let api = [];
   let apiFailed = false;
 
   try {
-    api = await fetchApiMatches(dateRange);
-    console.log(`API returned ${api.length} matches for ${COMP}${dateRange}`);
+    apiPayload = await fetchApiMatches(apiQuery);
+    api = apiPayload.matches || [];
+    logApiDiagnostics(apiQuery, apiPayload);
   } catch (error) {
     apiFailed = true;
     console.error(error.message);
@@ -576,6 +681,15 @@ async function main() {
   }
 
   const indexes = createApiIndexes(api);
+  const apiCoverageErrors = validateApiCoverage(ours, api, indexes);
+
+  if (apiCoverageErrors.length) {
+    apiFailed = true;
+    console.error("API COVERAGE CHECK FAILED:");
+    for (const error of apiCoverageErrors) console.error(`- ${error}`);
+    console.error("The Action is marked failed on purpose so RESULT PENDING cannot hide a broken API feed.");
+  }
+
   let writes = 0;
   let apiMatches = 0;
   let apiScoreWrites = 0;
