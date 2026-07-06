@@ -968,7 +968,7 @@
       "awayFlag": "🇪🇸",
       "kickoff": "2026-07-06T19:00:00Z",
       "venue": "Seattle",
-      "status": "scheduled",
+      "status": "live",
       "homeSource": {
         "matchId": "53452549",
         "type": "winner"
@@ -978,7 +978,11 @@
         "type": "winner"
       },
       "winnerTo": "53452527",
-      "winnerSlot": "home"
+      "winnerSlot": "home",
+      "homeScore": 0,
+      "awayScore": 1,
+      "liveMinute": "90+",
+      "liveText": "90+'"
     },
     {
       "id": "53452515",
