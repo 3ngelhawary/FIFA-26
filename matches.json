@@ -942,7 +942,7 @@
       "awayFlag": "🏴",
       "kickoff": "2026-07-06T01:00:00Z",
       "venue": "Dallas",
-      "status": "live",
+      "status": "finished",
       "homeSource": {
         "matchId": "53452563",
         "type": "winner"
@@ -953,10 +953,9 @@
       },
       "winnerTo": "53452529",
       "winnerSlot": "away",
-      "homeScore": 0,
-      "awayScore": 0,
-      "liveMinute": 24,
-      "liveText": "24'"
+      "homeScore": 2,
+      "awayScore": 3,
+      "advance": "away"
     },
     {
       "id": "53452513",
@@ -1102,9 +1101,9 @@
       "group": "KO",
       "round": "Quarterfinal",
       "home": "Norway",
-      "away": "Winner of 53452519",
+      "away": "England",
       "homeFlag": "🇳🇴",
-      "awayFlag": "",
+      "awayFlag": "🏴",
       "kickoff": "2026-07-11T21:00:00Z",
       "venue": "Miami",
       "status": "scheduled",
