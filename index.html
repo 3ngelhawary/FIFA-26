@@ -1072,18 +1072,18 @@ function actualAdvancer(m){
   return m.advance==="home"||m.advance==="away"?m.advance:null; // organizer shootout result
 }
 function advanceScore(pick,m){
-  // The advance bonus is earned by naming the team that goes through. It fires when:
-  //  (a) the tie went to penalties (a draw after 120', decided on pens), OR
-  //  (b) the tie was settled inside 120' but the USER predicted a draw and relied on
-  //      their shootout pick to name the advancer — that pick is honored even though
-  //      no shootout happened. This never double-pays: a draw prediction always scores
-  //      0 on the result bonus in a decisive match (a draw is not a win), so there is
-  //      no correctOutcome +3 for this +3 to stack on top of.
+  // The advance bonus (+3) rewards ONLY players who predicted a DRAW and correctly
+  // named the team that goes through. It is awarded when the match is a finished
+  // knockout with a determinable advancer, the player's predicted score was a draw,
+  // and their shootout pick matches the team that actually advanced — whether the tie
+  // was decided on penalties OR won inside 120 minutes by that team.
+  // A player who predicted a WIN never earns the advance bonus: predicting a decisive
+  // winner is precisely predicting there is no shootout, and their "who goes through"
+  // call is already captured by the correct-outcome part of the scoreline score.
+  if(!isKnockout(m)||m.status!=="finished"||m.homeScore==null||m.awayScore==null)
+    return{pts:0,kind:"none",predicted:null,actual:null};
   const p=effectivePick(pick);
-  const predictedDraw=(+p.h===+p.a);
-  const decisiveWithDrawPick=isKnockout(m)&&m.status==="finished"
-    &&m.homeScore!=null&&m.awayScore!=null&&m.homeScore!==m.awayScore&&predictedDraw;
-  if(!wentToPenalties(m)&&!decisiveWithDrawPick)return{pts:0,kind:"none",predicted:null,actual:null};
+  if(+p.h!==+p.a)return{pts:0,kind:"none",predicted:null,actual:null}; // only draw predictions qualify
   const pa=predictedAdvancer(pick),aa=actualAdvancer(m);
   if(!pa||!aa)return{pts:0,kind:"none",predicted:pa,actual:aa};
   const hit=pa===aa;
@@ -1218,7 +1218,7 @@ const HELP={
       ["🔐 Register & login code","Sign up with your full name and you'll get a 6-character code. That code is your login on any device — screenshot it. Lost it? Your organizer can find it in the Players list."],
       ["⚽ Predict scorelines","On each match card, set the score you expect with the + / – steppers. You can edit freely until the pick locks. Picks lock "+CFG.lockOffsetMinutes+" minutes before kickoff. Don't predict? A default 0-0 is applied so you still play."],
       ["🏅 Scoring","Exact score = "+CFG.scoring.exactScore+" points. Correct result (right winner or draw) = "+CFG.scoring.correctOutcome+" points. Plus +"+CFG.scoring.correctGoalsBonus+" for each team whose goal count you got exactly right."],
-      ["🥅 Knockouts & penalties","From the Round of 32 on, your scoreline is judged on the result after 120 minutes, scored exactly as above. When you predict a draw, a popup asks which team you think advances. You earn an extra +"+CFG.scoring.advanceBonus+" for naming the team that goes through — whether the tie is decided on penalties, or your predicted-draw match is actually won inside 120 minutes by the team you picked. No exact penalty score is ever needed."],
+      ["🥅 Knockouts & penalties","From the Round of 32 on, your scoreline is judged on the result after 120 minutes, scored exactly as above. When you predict a draw, a popup asks which team you think will go through — and you earn an extra +"+CFG.scoring.advanceBonus+" if that team does advance, whether it wins the penalty shootout or wins the match inside 120 minutes. Predicting a decisive winner earns no separate advance bonus (your winner is already rewarded by the correct-result points), and no exact penalty score is ever needed."],
       ["🏆 Top 3 winners","During the Top 3 window, predict the final 1st, 2nd and 3rd places. Worth "+CFG.top3.firstPts+" / "+CFG.top3.secondPts+" / "+CFG.top3.thirdPts+" points, with a +"+CFG.top3.exactOrderBonus+" bonus if you get the exact order."],
       ["👤 Player profile","Tap any name on the leaderboard (or your points up top) to open a profile: total points, accuracy, current and best streak, and a full prediction history."],
       ["📊 Live leaderboard","Ranks everyone by points in real time. Turn on “Include live” to see projected points from matches in progress — the board reshuffles as goals go in."],
@@ -1236,7 +1236,7 @@ const HELP={
       ["🔐 التسجيل وكود الدخول","سجّل باسمك الكامل وستحصل على كود من ٦ أحرف. هذا الكود هو وسيلة دخولك على أي جهاز — التقط له صورة. فقدته؟ يمكن للمنظّم إيجاده في قائمة اللاعبين."],
       ["⚽ توقع النتائج","في كل بطاقة مباراة، اضبط النتيجة المتوقعة بأزرار + / –. يمكنك التعديل بحرية حتى يُغلق التوقع. تُغلق التوقعات قبل "+CFG.lockOffsetMinutes+" دقيقة من انطلاق المباراة. لم تتوقع؟ تُطبَّق نتيجة افتراضية ٠-٠ لتبقى مشاركاً."],
       ["🏅 النقاط","النتيجة المضبوطة = "+CFG.scoring.exactScore+" نقاط. النتيجة الصحيحة (الفائز الصحيح أو التعادل) = "+CFG.scoring.correctOutcome+" نقاط. بالإضافة إلى +"+CFG.scoring.correctGoalsBonus+" لكل فريق أصبت عدد أهدافه بالضبط."],
-      ["🥅 الأدوار الإقصائية والركلات","من دور الـ32 فصاعداً تُحتسب نتيجتك بعد 120 دقيقة بنفس القواعد أعلاه. وعند توقعك للتعادل تظهر نافذة لتحديد الفريق الذي تراه متأهلاً. تحصل إضافياً على +"+CFG.scoring.advanceBonus+" عند تحديد الفريق المتأهل بشكل صحيح — سواءٌ حُسمت المباراة بركلات الترجيح، أو فاز الفريق الذي اخترته داخل 120 دقيقة في مباراة توقعت تعادلها. ولا حاجة أبداً لتوقع نتيجة الركلات بالضبط."],
+      ["🥅 الأدوار الإقصائية والركلات","من دور الـ32 فصاعداً تُحتسب نتيجتك بعد 120 دقيقة بنفس القواعد أعلاه. وعند توقعك للتعادل تظهر نافذة لتحديد الفريق الذي تراه متأهلاً — وتحصل إضافياً على +"+CFG.scoring.advanceBonus+" إذا تأهّل ذلك الفريق فعلاً، سواءٌ فاز بركلات الترجيح أو حسم المباراة داخل 120 دقيقة. أما توقُّع فوز فريق بنتيجة حاسمة فلا يمنح نقاط تأهل إضافية (فالفائز محتسَب أصلاً ضمن نقاط النتيجة الصحيحة)، ولا حاجة أبداً لتوقع نتيجة الركلات بالضبط."],
       ["🏆 المراكز الثلاثة","خلال فترة التوقع، توقّع المركز الأول والثاني والثالث النهائي. القيمة "+CFG.top3.firstPts+" / "+CFG.top3.secondPts+" / "+CFG.top3.thirdPts+" نقطة، مع مكافأة +"+CFG.top3.exactOrderBonus+" إذا أصبت الترتيب بالضبط."],
       ["👤 الملف الشخصي","اضغط على أي اسم في لوحة المتصدرين (أو على نقاطك بالأعلى) لفتح الملف: مجموع النقاط، الدقة، السلسلة الحالية والأفضل، وسجل التوقعات الكامل."],
       ["📊 لوحة المتصدرين المباشرة","ترتّب الجميع بالنقاط لحظياً. فعّل «تضمين المباشر» لرؤية النقاط المتوقعة من المباريات الجارية — تتغيّر اللوحة مع كل هدف."],
