@@ -1061,9 +1061,13 @@ function penaltyDisplay(m){
 }
 function predictedAdvancer(pick){
   const p=effectivePick(pick);
-  if(+p.h>+p.a)return"home";
-  if(+p.a>+p.h)return"away";
-  return p.pen==="home"||p.pen==="away"?p.pen:null; // draw -> needs a shootout pick
+  // The advance bonus is earned ONLY by naming the shootout winner, which the
+  // app only lets you do when you predicted a level (draw) scoreline. A decisive
+  // prediction (a win/loss after 120') is NOT eligible for the advance bonus —
+  // even if its regulation winner happens to match the penalty winner. Such a
+  // pick simply keeps its scoreline points (e.g. an exact-goals bonus).
+  if(+p.h!==+p.a)return null;                        // decisive pick -> no advance bonus
+  return p.pen==="home"||p.pen==="away"?p.pen:null;  // draw -> needs a shootout pick
 }
 function actualAdvancer(m){
   if(m.homeScore==null||m.awayScore==null)return null;
