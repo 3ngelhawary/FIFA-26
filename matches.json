@@ -994,7 +994,7 @@
       "awayFlag": "🇧🇪",
       "kickoff": "2026-07-07T00:00:00Z",
       "venue": "Atlanta",
-      "status": "live",
+      "status": "finished",
       "homeSource": {
         "matchId": "53452553",
         "type": "winner"
@@ -1006,9 +1006,8 @@
       "winnerTo": "53452527",
       "winnerSlot": "away",
       "homeScore": 1,
-      "awayScore": 2,
-      "liveMinute": 69,
-      "liveText": "69'"
+      "awayScore": 4,
+      "advance": "away"
     },
     {
       "id": "53452521",
@@ -1085,9 +1084,9 @@
       "group": "KO",
       "round": "Quarterfinal",
       "home": "Spain",
-      "away": "Winner of 53452515",
+      "away": "Belgium",
       "homeFlag": "🇪🇸",
-      "awayFlag": "",
+      "awayFlag": "🇧🇪",
       "kickoff": "2026-07-10T19:00:00Z",
       "venue": "Los Angeles",
       "status": "scheduled",
