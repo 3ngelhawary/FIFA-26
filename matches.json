@@ -1020,7 +1020,7 @@
       "awayFlag": "🇪🇬",
       "kickoff": "2026-07-07T16:00:00Z",
       "venue": "Vancouver",
-      "status": "scheduled",
+      "status": "finished",
       "homeSource": {
         "matchId": "53452569",
         "type": "winner"
@@ -1030,7 +1030,10 @@
         "type": "winner"
       },
       "winnerTo": "53452531",
-      "winnerSlot": "home"
+      "winnerSlot": "home",
+      "homeScore": 3,
+      "awayScore": 2,
+      "advance": "home"
     },
     {
       "id": "53452523",
@@ -1129,9 +1132,9 @@
       "externalId": "53452531",
       "group": "KO",
       "round": "Quarterfinal",
-      "home": "Winner of 53452521",
+      "home": "Argentina",
       "away": "Winner of 53452523",
-      "homeFlag": "",
+      "homeFlag": "🇦🇷",
       "awayFlag": "",
       "kickoff": "2026-07-12T01:00:00Z",
       "venue": "Kansas City",
