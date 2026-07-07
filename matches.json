@@ -994,7 +994,7 @@
       "awayFlag": "🇧🇪",
       "kickoff": "2026-07-07T00:00:00Z",
       "venue": "Atlanta",
-      "status": "scheduled",
+      "status": "live",
       "homeSource": {
         "matchId": "53452553",
         "type": "winner"
@@ -1004,7 +1004,11 @@
         "type": "winner"
       },
       "winnerTo": "53452527",
-      "winnerSlot": "away"
+      "winnerSlot": "away",
+      "homeScore": 1,
+      "awayScore": 2,
+      "liveMinute": 69,
+      "liveText": "69'"
     },
     {
       "id": "53452521",
