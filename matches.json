@@ -1046,7 +1046,7 @@
       "awayFlag": "🇨🇴",
       "kickoff": "2026-07-07T20:00:00Z",
       "venue": "San Francisco Bay Area",
-      "status": "scheduled",
+      "status": "live",
       "homeSource": {
         "matchId": "53452505",
         "type": "winner"
@@ -1056,7 +1056,11 @@
         "type": "winner"
       },
       "winnerTo": "53452531",
-      "winnerSlot": "away"
+      "winnerSlot": "away",
+      "homeScore": 0,
+      "awayScore": 0,
+      "liveMinute": 25,
+      "liveText": "25'"
     },
     {
       "id": "53452525",
