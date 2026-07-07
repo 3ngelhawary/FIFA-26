@@ -1059,8 +1059,8 @@
       "winnerSlot": "away",
       "homeScore": 0,
       "awayScore": 0,
-      "liveMinute": 25,
-      "liveText": "25'"
+      "liveMinute": "90+",
+      "liveText": "90+'"
     },
     {
       "id": "53452525",
