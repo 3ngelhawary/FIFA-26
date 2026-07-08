@@ -1058,7 +1058,10 @@
       "winnerTo": "53452531",
       "winnerSlot": "away",
       "homeScore": 0,
-      "awayScore": 0
+      "awayScore": 0,
+      "homePenScore": 4,
+      "awayPenScore": 3,
+      "advance": "home"
     },
     {
       "id": "53452525",
@@ -1131,13 +1134,13 @@
     },
     {
       "id": "53452531",
-      "externalId": "53452531",
+      "externalId": "537386",
       "group": "KO",
       "round": "Quarterfinal",
       "home": "Argentina",
-      "away": "Winner of 53452523",
+      "away": "Switzerland",
       "homeFlag": "🇦🇷",
-      "awayFlag": "",
+      "awayFlag": "🇨🇭",
       "kickoff": "2026-07-12T01:00:00Z",
       "venue": "Kansas City",
       "status": "scheduled",
