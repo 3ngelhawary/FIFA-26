@@ -1074,7 +1074,7 @@
       "awayFlag": "🇲🇦",
       "kickoff": "2026-07-09T20:00:00Z",
       "venue": "Boston",
-      "status": "live",
+      "status": "finished",
       "homeSource": {
         "matchId": "53452509",
         "type": "winner"
@@ -1087,8 +1087,7 @@
       "winnerSlot": "home",
       "homeScore": 2,
       "awayScore": 0,
-      "liveMinute": "90+",
-      "liveText": "90+'"
+      "advance": "home"
     },
     {
       "id": "53452527",
@@ -1164,9 +1163,9 @@
       "externalId": "53452533",
       "group": "KO",
       "round": "Semifinal",
-      "home": "Winner of 53452525",
+      "home": "France",
       "away": "Winner of 53452527",
-      "homeFlag": "",
+      "homeFlag": "🇫🇷",
       "awayFlag": "",
       "kickoff": "2026-07-14T19:00:00Z",
       "venue": "Dallas",
