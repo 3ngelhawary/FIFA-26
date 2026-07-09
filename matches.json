@@ -1074,7 +1074,7 @@
       "awayFlag": "🇲🇦",
       "kickoff": "2026-07-09T20:00:00Z",
       "venue": "Boston",
-      "status": "scheduled",
+      "status": "live",
       "homeSource": {
         "matchId": "53452509",
         "type": "winner"
@@ -1084,7 +1084,11 @@
         "type": "winner"
       },
       "winnerTo": "53452533",
-      "winnerSlot": "home"
+      "winnerSlot": "home",
+      "homeScore": 0,
+      "awayScore": 0,
+      "liveMinute": 17,
+      "liveText": "17'"
     },
     {
       "id": "53452527",
