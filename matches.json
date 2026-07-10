@@ -1100,7 +1100,7 @@
       "awayFlag": "🇧🇪",
       "kickoff": "2026-07-10T19:00:00Z",
       "venue": "Los Angeles",
-      "status": "scheduled",
+      "status": "live",
       "homeSource": {
         "matchId": "53452513",
         "type": "winner"
@@ -1110,7 +1110,11 @@
         "type": "winner"
       },
       "winnerTo": "53452533",
-      "winnerSlot": "away"
+      "winnerSlot": "away",
+      "homeScore": 1,
+      "awayScore": 1,
+      "liveMinute": 87,
+      "liveText": "87'"
     },
     {
       "id": "53452529",
