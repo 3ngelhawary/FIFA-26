@@ -1100,7 +1100,7 @@
       "awayFlag": "🇧🇪",
       "kickoff": "2026-07-10T19:00:00Z",
       "venue": "Los Angeles",
-      "status": "live",
+      "status": "finished",
       "homeSource": {
         "matchId": "53452513",
         "type": "winner"
@@ -1111,10 +1111,9 @@
       },
       "winnerTo": "53452533",
       "winnerSlot": "away",
-      "homeScore": 1,
+      "homeScore": 2,
       "awayScore": 1,
-      "liveMinute": 87,
-      "liveText": "87'"
+      "advance": "home"
     },
     {
       "id": "53452529",
@@ -1168,9 +1167,9 @@
       "group": "KO",
       "round": "Semifinal",
       "home": "France",
-      "away": "Winner of 53452527",
+      "away": "Spain",
       "homeFlag": "🇫🇷",
-      "awayFlag": "",
+      "awayFlag": "🇪🇸",
       "kickoff": "2026-07-14T19:00:00Z",
       "venue": "Dallas",
       "status": "scheduled",
