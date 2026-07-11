@@ -1126,7 +1126,7 @@
       "awayFlag": "🏴",
       "kickoff": "2026-07-11T21:00:00Z",
       "venue": "Miami",
-      "status": "scheduled",
+      "status": "live",
       "homeSource": {
         "matchId": "53452517",
         "type": "winner"
@@ -1136,7 +1136,11 @@
         "type": "winner"
       },
       "winnerTo": "53452535",
-      "winnerSlot": "home"
+      "winnerSlot": "home",
+      "homeScore": 1,
+      "awayScore": 1,
+      "liveMinute": 51,
+      "liveText": "51'"
     },
     {
       "id": "53452531",
