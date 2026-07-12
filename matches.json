@@ -1152,7 +1152,7 @@
       "awayFlag": "🇨🇭",
       "kickoff": "2026-07-12T01:00:00Z",
       "venue": "Kansas City",
-      "status": "scheduled",
+      "status": "finished",
       "homeSource": {
         "matchId": "53452521",
         "type": "winner"
@@ -1162,7 +1162,10 @@
         "type": "winner"
       },
       "winnerTo": "53452535",
-      "winnerSlot": "away"
+      "winnerSlot": "away",
+      "homeScore": 3,
+      "awayScore": 1,
+      "advance": "home"
     },
     {
       "id": "53452533",
@@ -1195,9 +1198,9 @@
       "group": "KO",
       "round": "Semifinal",
       "home": "England",
-      "away": "Winner of 53452531",
+      "away": "Argentina",
       "homeFlag": "🏴",
-      "awayFlag": "",
+      "awayFlag": "🇦🇷",
       "kickoff": "2026-07-15T19:00:00Z",
       "venue": "Atlanta",
       "status": "scheduled",
