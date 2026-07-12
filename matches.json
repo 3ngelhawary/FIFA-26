@@ -1126,7 +1126,7 @@
       "awayFlag": "🏴",
       "kickoff": "2026-07-11T21:00:00Z",
       "venue": "Miami",
-      "status": "live",
+      "status": "finished",
       "homeSource": {
         "matchId": "53452517",
         "type": "winner"
@@ -1138,8 +1138,8 @@
       "winnerTo": "53452535",
       "winnerSlot": "home",
       "homeScore": 1,
-      "awayScore": 1,
-      "liveText": "LIVE"
+      "awayScore": 2,
+      "advance": "away"
     },
     {
       "id": "53452531",
@@ -1194,9 +1194,9 @@
       "externalId": "53452535",
       "group": "KO",
       "round": "Semifinal",
-      "home": "Winner of 53452529",
+      "home": "England",
       "away": "Winner of 53452531",
-      "homeFlag": "",
+      "homeFlag": "🏴",
       "awayFlag": "",
       "kickoff": "2026-07-15T19:00:00Z",
       "venue": "Atlanta",
