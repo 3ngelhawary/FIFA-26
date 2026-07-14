@@ -1178,7 +1178,7 @@
       "awayFlag": "🇪🇸",
       "kickoff": "2026-07-14T19:00:00Z",
       "venue": "Dallas",
-      "status": "scheduled",
+      "status": "live",
       "homeSource": {
         "matchId": "53452525",
         "type": "winner"
@@ -1190,7 +1190,11 @@
       "winnerTo": "53452537",
       "winnerSlot": "home",
       "loserTo": "53452539",
-      "loserSlot": "home"
+      "loserSlot": "home",
+      "homeScore": 0,
+      "awayScore": 1,
+      "liveMinute": "45+",
+      "liveText": "45+'"
     },
     {
       "id": "53452535",
