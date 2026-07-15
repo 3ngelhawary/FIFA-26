@@ -1206,7 +1206,7 @@
       "awayFlag": "🇦🇷",
       "kickoff": "2026-07-15T19:00:00Z",
       "venue": "Atlanta",
-      "status": "live",
+      "status": "finished",
       "homeSource": {
         "matchId": "53452529",
         "type": "winner"
@@ -1220,9 +1220,8 @@
       "loserTo": "53452539",
       "loserSlot": "away",
       "homeScore": 1,
-      "awayScore": 1,
-      "liveMinute": "90+",
-      "liveText": "90+'"
+      "awayScore": 2,
+      "advance": "away"
     },
     {
       "id": "53452539",
@@ -1230,9 +1229,9 @@
       "group": "KO",
       "round": "3rd Place Playoff",
       "home": "France",
-      "away": "Loser of 53452535",
+      "away": "England",
       "homeFlag": "🇫🇷",
-      "awayFlag": "",
+      "awayFlag": "🏴",
       "kickoff": "2026-07-18T21:00:00Z",
       "venue": "Miami",
       "status": "scheduled",
@@ -1251,9 +1250,9 @@
       "group": "KO",
       "round": "Final",
       "home": "Spain",
-      "away": "Winner of 53452535",
+      "away": "Argentina",
       "homeFlag": "🇪🇸",
-      "awayFlag": "",
+      "awayFlag": "🇦🇷",
       "kickoff": "2026-07-19T19:00:00Z",
       "venue": "New York/New Jersey",
       "status": "scheduled",
