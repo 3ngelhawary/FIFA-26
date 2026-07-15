@@ -1219,10 +1219,10 @@
       "winnerSlot": "away",
       "loserTo": "53452539",
       "loserSlot": "away",
-      "homeScore": 0,
-      "awayScore": 0,
-      "liveMinute": "45+",
-      "liveText": "45+'"
+      "homeScore": 1,
+      "awayScore": 1,
+      "liveMinute": "90+",
+      "liveText": "90+'"
     },
     {
       "id": "53452539",
