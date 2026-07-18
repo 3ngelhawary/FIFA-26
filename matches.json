@@ -1234,7 +1234,7 @@
       "awayFlag": "🏴",
       "kickoff": "2026-07-18T21:00:00Z",
       "venue": "Miami",
-      "status": "live",
+      "status": "finished",
       "homeSource": {
         "matchId": "53452533",
         "type": "loser"
@@ -1243,10 +1243,9 @@
         "matchId": "53452535",
         "type": "loser"
       },
-      "homeScore": 2,
-      "awayScore": 4,
-      "liveMinute": 76,
-      "liveText": "76'"
+      "homeScore": 4,
+      "awayScore": 6,
+      "advance": "away"
     },
     {
       "id": "53452537",
