@@ -2667,11 +2667,13 @@ function top3HistoryHtml(code,name){
   const d=Store.predsAll()[code]||{},top3=d.top3||{},isSelf=ME&&code===ME.code;
   const reveal=hasCompleteTop3(top3)&&(top3State()==="closed"||isSelf||isAdmin);
   const sc=scoreTop3(top3);
+  const officialSet=hasCompleteTop3(Store.top3Result());
+  const ptsLabel=officialSet?`${sc.pts} pts`:`<span style="color:var(--muted);font-weight:600">pending official result</span>`;
   let body="<span class='hidden'>No Top 3 prediction saved.</span>";
   if(hasCompleteTop3(top3)&&reveal)body=`${esc(top3.first)} · ${esc(top3.second)} · ${esc(top3.third)}`;
   else if(hasCompleteTop3(top3))body="<span class='hidden'>Saved — hidden until Top 3 closes.</span>";
   return `<div class="top3-history">
-    <div class="line"><span>Top 3 prediction</span><b>${sc.pts} pts</b></div>
+    <div class="line"><span>Top 3 prediction</span><b>${ptsLabel}</b></div>
     <div class="top3-pick-text">${body}</div>
   </div>`;
 }
