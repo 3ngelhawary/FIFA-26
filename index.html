@@ -576,21 +576,25 @@
   .boost-btn{width:100%;cursor:pointer;font-family:"Oswald";font-weight:700;font-size:16px;letter-spacing:.5px;
     border:0;border-radius:12px;padding:13px;color:#1a1407;background:linear-gradient(180deg,#ffe24a,#e8b400)}
   .boost-btn:hover{filter:brightness(1.06)}
-  /* WhatsApp group invite notice */
-  .wa-card{width:100%;max-width:420px;text-align:center;border-radius:20px;padding:26px 22px;
-    background:linear-gradient(180deg,#0d1f16,#0c0e1a);border:1px solid rgba(37,211,102,.5);
-    box-shadow:0 24px 70px rgba(0,0,0,.6),0 0 44px rgba(37,211,102,.22)}
-  .wa-icon{line-height:0;display:flex;justify-content:center;margin-bottom:2px}
-  .wa-title{font-family:"Oswald";font-size:30px;font-weight:700;letter-spacing:1px;margin:8px 0 4px;
-    color:#25d366;text-shadow:0 0 16px rgba(37,211,102,.45)}
-  .wa-copy{font-size:14px;color:var(--ink);line-height:1.7;margin:6px 0 18px}
-  .wa-btn{width:100%;cursor:pointer;font-family:"Oswald";font-weight:700;font-size:16px;letter-spacing:.5px;
-    display:flex;align-items:center;justify-content:center;gap:9px;text-decoration:none;
-    border:0;border-radius:12px;padding:13px;color:#052e16;background:linear-gradient(180deg,#2ee06f,#1eae55)}
-  .wa-btn:hover{filter:brightness(1.06)}
-  .wa-skip{margin-top:12px;display:inline-block;cursor:pointer;background:none;border:0;
-    color:var(--muted);font-size:12.5px;letter-spacing:.3px}
-  .wa-skip:hover{color:var(--ink)}
+  /* Tournament winner congratulations popup */
+  .winner-card{width:100%;max-width:440px;text-align:center;border-radius:22px;padding:28px 22px;position:relative;overflow:hidden;
+    background:radial-gradient(circle at 50% 0%,rgba(255,215,0,.16),transparent 60%),linear-gradient(180deg,#171226,#0c0e1a);
+    border:1px solid rgba(255,215,0,.55);
+    box-shadow:0 24px 70px rgba(0,0,0,.6),0 0 48px rgba(255,215,0,.22)}
+  .winner-trophy{font-size:56px;line-height:1;filter:drop-shadow(0 0 18px rgba(255,215,0,.5));animation:winnerPop .6s ease}
+  @keyframes winnerPop{0%{transform:scale(.4);opacity:0}70%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}
+  .winner-kicker{font-size:11px;letter-spacing:2.4px;text-transform:uppercase;color:var(--muted);margin-top:8px}
+  .winner-title{font-family:"Oswald";font-size:32px;font-weight:700;letter-spacing:1px;margin:6px 0 2px;
+    color:#ffd700;text-shadow:0 0 18px rgba(255,215,0,.45)}
+  .winner-name{font-family:"Oswald";font-size:24px;color:var(--ink);margin:4px 0 2px}
+  .winner-pts{font-family:"Oswald";font-size:16px;color:var(--cyan);margin-bottom:6px}
+  .winner-copy{font-size:14px;color:var(--ink);line-height:1.7;margin:6px 0 18px}
+  .winner-btn{width:100%;cursor:pointer;font-family:"Oswald";font-weight:700;font-size:16px;letter-spacing:.5px;
+    border:0;border-radius:12px;padding:13px;color:#1a1407;background:linear-gradient(180deg,#ffe24a,#e8b400)}
+  .winner-btn:hover{filter:brightness(1.06)}
+  .winner-confetti{position:absolute;inset:0;pointer-events:none}
+  .winner-confetti span{position:absolute;top:-12px;width:8px;height:8px;border-radius:2px;opacity:.9;animation:confettiFall linear infinite}
+  @keyframes confettiFall{to{transform:translateY(560px) rotate(540deg);opacity:.15}}
   /* my-picks rows */
   .mp-row{border-left:3px solid var(--rc,var(--line))}
   /* organizer rows */
@@ -1583,7 +1587,7 @@ function renderApp(){
   renderHero();
   renderTop3Reminder();
   renderTop3HomePopup();
-  maybeShowWhatsAppNotice();
+  maybeShowWinnerPopup();
   const view=$("#view");
   if(activeTab!=="tree")treeTabOpen=false;
   if(activeTab==="board"){view.appendChild(renderBoard());return;}
@@ -1700,33 +1704,55 @@ function maybeShowBoostNotice(){
   const ok=$("#boostOk");if(ok)ok.onclick=close;
 }
 
-/* ---- WhatsApp group invite (shown once per login session) ---- */
-const WA_GROUP_URL="https://chat.whatsapp.com/IicvhpoyWXD7FOnNSN0vup?mode=gi_t";
-function whatsappIcon(px){
-  return `<svg width="${px}" height="${px}" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" aria-label="WhatsApp" role="img" style="vertical-align:middle">
-    <path fill="#25D366" d="M16 0a16 16 0 0 0-13.8 24l-2.2 8 8.2-2.1A16 16 0 1 0 16 0z"/>
-    <path fill="#fff" d="M23.6 19.1c-.4-.2-2.4-1.2-2.7-1.3-.4-.1-.6-.2-.9.2s-1 1.3-1.2 1.5-.4.3-.8.1a10.9 10.9 0 0 1-3.2-2 12 12 0 0 1-2.2-2.8c-.2-.4 0-.6.2-.8l.6-.7c.2-.2.2-.4.4-.6s.1-.5 0-.7-.9-2.1-1.2-2.9c-.3-.8-.6-.7-.9-.7h-.7c-.3 0-.7.1-1 .5a4 4 0 0 0-1.3 3c0 1.8 1.3 3.5 1.5 3.7s2.6 4 6.3 5.6c2.2 1 3.1 1 4.2.9.7 0 2.4-1 2.7-1.9.3-.9.3-1.7.2-1.9s-.3-.2-.7-.4z"/>
-  </svg>`;
+/* ---- Tournament winner congratulations (shown once per session per user,
+   once the Final is finished and the official Top 3 result is published) ---- */
+function tournamentOver(){
+  const finalM=allEffectiveMatches().find(m=>m.round==="Final");
+  const finalDone=!!(finalM&&finalM.status==="finished"&&finalM.homeScore!=null&&finalM.awayScore!=null);
+  return finalDone&&hasCompleteTop3(Store.top3Result());
 }
-function whatsappNoticeKey(){return "egec_wa_notice_"+(ME?ME.code:"");}
-function maybeShowWhatsAppNotice(){
-  if(!ME)return;
-  if(sessionStorage.getItem(whatsappNoticeKey())==="1")return; // once per login session
+function winnerPopupKey(){return "egec_winner_popup_"+(ME?ME.code:"");}
+function maybeShowWinnerPopup(){
+  if(!ME||!Store.ready)return;
+  if(!tournamentOver())return;
+  if(sessionStorage.getItem(winnerPopupKey())==="1")return; // once per login session
   if(document.querySelector(".boost-modal"))return;
+
+  // Standings: same math as the leaderboard (confirmed points only)
+  const rows=Object.values(Store.players()).map(p=>{
+    const d=Store.predsAll()[p.code]||{};
+    const c=computeScore(d.picks||{},d.top3||{},{});
+    return{name:p.name,code:p.code,total:c.total,scorePts:c.scorePts,played:c.played};
+  }).sort((a,b)=>b.total-a.total||b.scorePts-a.scorePts||b.played-a.played||a.name.localeCompare(b.name));
+  if(!rows.length)return;
+  const top=rows[0];
+  const champs=rows.filter(r=>r.total===top.total&&r.scorePts===top.scorePts&&r.played===top.played);
+  const youWon=champs.some(c=>ME&&c.code===ME.code);
+  const names=champs.map(c=>esc(c.name)).join(" & ");
+
   const modal=el("div","boost-modal");modal.setAttribute("role","dialog");modal.setAttribute("aria-modal","true");
-  const close=()=>{sessionStorage.setItem(whatsappNoticeKey(),"1");document.removeEventListener("keydown",escClose);modal.remove();};
+  const close=()=>{sessionStorage.setItem(winnerPopupKey(),"1");document.removeEventListener("keydown",escClose);modal.remove();};
   const escClose=e=>{if(e.key==="Escape")close();};document.addEventListener("keydown",escClose);
   modal.onclick=e=>{if(e.target===modal)close();};
-  modal.innerHTML=`<div class="wa-card">
-    <div class="wa-icon">${whatsappIcon(56)}</div>
-    <div class="wa-title">Maximize the fun! 🎉</div>
-    <p class="wa-copy">${whatsappIcon(15)} Join our WhatsApp group today!</p>
-    <a class="wa-btn" id="waJoin" href="${WA_GROUP_URL}" target="_blank" rel="noopener noreferrer">${whatsappIcon(20)} Join the group</a>
-    <button class="wa-skip" id="waSkip" type="button">Maybe later</button>
+  const colors=["#ffd700","#00e5ff","#ff2e97","#2ee06f","#ffe24a","#d0d6e0"];
+  const confetti=Array.from({length:26},(_,i)=>{
+    const l=(i*37)%100, d=(1.8+(i%7)*.5).toFixed(2), del=((i%9)*.35).toFixed(2), c=colors[i%colors.length];
+    return `<span style="left:${l}%;background:${c};animation-duration:${d}s;animation-delay:${del}s"></span>`;
+  }).join("");
+  modal.innerHTML=`<div class="winner-card">
+    <div class="winner-confetti">${confetti}</div>
+    <div class="winner-trophy">🏆</div>
+    <div class="winner-kicker">${esc(CFG.seasonLabel)} · Final standings</div>
+    <div class="winner-title">${youWon?"YOU ARE THE CHAMPION!":"We have a champion!"}</div>
+    <div class="winner-name">${names}</div>
+    <div class="winner-pts">${top.total} points</div>
+    <p class="winner-copy">${youWon
+      ?"Incredible predicting all tournament long — you finished top of the leaderboard. Take a bow! 🎉"
+      :`Congratulations to <b>${names}</b> for topping the ${esc(CFG.orgName)} leaderboard! 👏 Thanks to everyone for playing.`}</p>
+    <button class="winner-btn" id="winnerOk" type="button">${youWon?"Celebrate 🎉":"Congratulations! 👏"}</button>
   </div>`;
   document.body.appendChild(modal);
-  const join=$("#waJoin");if(join)join.onclick=close;
-  const skip=$("#waSkip");if(skip)skip.onclick=close;
+  const ok=$("#winnerOk");if(ok)ok.onclick=close;
 }
 
 function top3PopupKey(){return "egec_top3_popup_"+ME.code+"_"+top3CloseAt();}
