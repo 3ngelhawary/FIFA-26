@@ -748,7 +748,11 @@ const Store={
 
   myPicks(code){const all=this.predsAll();return (all[code]&&all[code].picks)||{};},
   myTop3(code){const all=this.predsAll();return (all[code]&&all[code].top3)||{};},
-  top3Result(){return this.resultsAll()[TOP3_DOC_ID]||{};},
+  top3Result(){
+    const saved=this.resultsAll()[TOP3_DOC_ID];
+    if(saved&&saved.first&&saved.second&&saved.third)return saved;
+    return deriveTop3Result();
+  },
 
   async savePick(code,name,matchId,h,a,extra){
     const cur=(this.cache.preds[code]&&this.cache.preds[code].picks)||{};
@@ -1085,6 +1089,25 @@ function advanceScore(pick,m){
   if(!pa||!aa)return{pts:0,kind:"none",predicted:pa,actual:aa};
   const hit=pa===aa;
   return{pts:hit?(CFG.scoring.advanceBonus||0):0,kind:hit?"hit":"miss",predicted:pa,actual:aa};
+}
+
+/* Automatically derive the official podium from the completed Final and
+   3rd Place Playoff. A manually saved organizer result still has priority. */
+function deriveTop3Result(){
+  const final=allEffectiveMatches().find(m=>m.round==="Final");
+  const thirdMatch=allEffectiveMatches().find(m=>m.round==="3rd Place Playoff");
+  if(!final||!thirdMatch||final.status!=="finished"||thirdMatch.status!=="finished")return{};
+
+  const finalWinner=actualAdvancer(final),thirdWinner=actualAdvancer(thirdMatch);
+  if(!finalWinner||!thirdWinner)return{};
+
+  const first=finalWinner==="home"?final.home:final.away;
+  const second=finalWinner==="home"?final.away:final.home;
+  const third=thirdWinner==="home"?thirdMatch.home:thirdMatch.away;
+  if(!first||!second||!third||isPlaceholderTeam(first)||isPlaceholderTeam(second)||isPlaceholderTeam(third))return{};
+  if(new Set([first,second,third]).size!==3)return{};
+
+  return{first,second,third,status:"final",source:"matches"};
 }
 
 /* ---- Team boost (e.g. Egypt ×2 in the knockouts) ---- */
