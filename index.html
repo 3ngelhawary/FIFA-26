@@ -2853,6 +2853,28 @@ function renderOrg(){
   const resNote=el("div","top3-note");resNote.style.padding="12px 15px";
   resNote.innerHTML=hasCompleteTop3(actual)?`Official result: <b>${esc(actual.first)}</b> · <b>${esc(actual.second)}</b> · <b>${esc(actual.third)}</b>`:"Official Top 3 result not set yet.";
   tPanel.appendChild(resNote);
+
+  /* ---- Official Top 3 result editor (organizer only) ----
+     Writes results/__top3__ via Store.setTop3Result(). Until that doc exists,
+     scoreTop3() returns 0 for everyone and no Top 3 points reach the totals. */
+  const resEditor=el("div");resEditor.style.padding="0 15px 14px";
+  const teamOpts=sel=>'<option value="">— select team —</option>'+top3Teams().map(t=>`<option value="${esc(t.name)}"${sel===t.name?" selected":""}>${esc(t.name)}</option>`).join("");
+  resEditor.innerHTML=`
+    <div class="top3-grid" style="padding:0 0 12px">
+      <div class="top3-slot rank-1"><label>🥇 Official 1st</label><select id="orgT3First">${teamOpts(actual.first||"")}</select></div>
+      <div class="top3-slot rank-2"><label>🥈 Official 2nd</label><select id="orgT3Second">${teamOpts(actual.second||"")}</select></div>
+      <div class="top3-slot rank-3"><label>🥉 Official 3rd</label><select id="orgT3Third">${teamOpts(actual.third||"")}</select></div>
+    </div>
+    <div class="top3-actions" style="padding:0">
+      <button class="top3-save" id="orgT3Save" type="button">${hasCompleteTop3(actual)?"Update Official Result":"Set Official Result"}</button>
+      ${hasCompleteTop3(actual)?'<button class="top3-save" id="orgT3Clear" type="button" style="background:rgba(255,255,255,.08);color:var(--muted);box-shadow:none;border:1px solid var(--line-2)">Clear Result</button>':""}
+    </div>
+    <div class="top3-note" style="padding:10px 0 0">Saving publishes the podium and instantly adds Top 3 points (${CFG.top3.firstPts}/${CFG.top3.secondPts}/${CFG.top3.thirdPts} + ${CFG.top3.exactOrderBonus} exact-order bonus) to every player's total.</div>`;
+  tPanel.appendChild(resEditor);
+  setTimeout(()=>{
+    const sv=$("#orgT3Save");if(sv)sv.onclick=saveOfficialTop3;
+    const cl=$("#orgT3Clear");if(cl)cl.onclick=clearOfficialTop3;
+  },0);
   if(players.length){
     players.forEach(p=>{
       const t=Store.myTop3(p.code);
@@ -2866,6 +2888,31 @@ function renderOrg(){
   wrap.appendChild(tPanel);
 
   return wrap;
+}
+
+/* Organizer: publish / clear the official Top 3 podium. Team names come from
+   the same top3Teams() list players picked from, so string matching in
+   scoreTop3() (strict ===) is guaranteed to line up. */
+async function saveOfficialTop3(){
+  if(!isAdmin){toast("Organizer only");return;}
+  const first=($("#orgT3First")||{}).value||"",second=($("#orgT3Second")||{}).value||"",third=($("#orgT3Third")||{}).value||"";
+  const t={first,second,third};
+  if(!hasCompleteTop3(t)){toast("Select all three official places");return;}
+  if(!hasUniqueTop3(t)){toast("Each place must be a different team");return;}
+  try{
+    await Store.setTop3Result(first,second,third);
+    toast("Official Top 3 published — points added to totals");
+    renderApp();
+  }catch(e){toast("Could not save: "+((e&&e.message)||e));}
+}
+async function clearOfficialTop3(){
+  if(!isAdmin){toast("Organizer only");return;}
+  if(!confirm("Clear the official Top 3 result? Everyone's Top 3 points will be removed from the totals until you set it again."))return;
+  try{
+    await Store.clearTop3Result();
+    toast("Official Top 3 cleared");
+    renderApp();
+  }catch(e){toast("Could not clear: "+((e&&e.message)||e));}
 }
 
 /* Secret organizer entry: 3 taps/clicks on the hidden "lock" word within a
