@@ -1258,7 +1258,7 @@
       "awayFlag": "🇦🇷",
       "kickoff": "2026-07-19T19:00:00Z",
       "venue": "New York/New Jersey",
-      "status": "live",
+      "status": "finished",
       "homeSource": {
         "matchId": "53452533",
         "type": "winner"
@@ -1267,9 +1267,9 @@
         "matchId": "53452535",
         "type": "winner"
       },
-      "homeScore": 0,
+      "homeScore": 1,
       "awayScore": 0,
-      "liveText": "LIVE"
+      "advance": "home"
     }
   ]
 }
