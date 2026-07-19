@@ -1539,7 +1539,7 @@ function renderApp(){
 
   root.innerHTML=`
   <header class="app"><div class="head-inner">
-    <div class="brand"><div class="bolt">${worldCupLogo()}</div>
+    <div class="brand"><div class="bolt" id="brandTrigger">${worldCupLogo()}</div>
       <div><h1>${esc(CFG.orgName)} Predictor</h1><div class="s">${esc(CFG.seasonLabel)}</div></div></div>
     <div class="head-spacer"></div>
     <div class="me-chip">
@@ -1573,6 +1573,7 @@ function renderApp(){
   const _ol=$("#orgLink");if(_ol)_ol.onclick=toggleAdmin;
   $("#helpBtn").onclick=showHelp;
   const mp=$("#meProfile");if(mp)mp.onclick=()=>showMemberHistory(ME.code);
+  const bt=$("#brandTrigger");if(bt)attachSecretTrigger(bt); // organizer entry survives after the tournament (hero trigger disappears)
 
   const tabsEl=$("#tabs");
   tabs.forEach(t=>{
