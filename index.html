@@ -1705,11 +1705,9 @@ function maybeShowBoostNotice(){
 }
 
 /* ---- Tournament winner congratulations (shown once per session per user,
-   once the Final is finished and the official Top 3 result is published) ---- */
+   as soon as the organizer publishes the official Top 3 result) ---- */
 function tournamentOver(){
-  const finalM=allEffectiveMatches().find(m=>m.round==="Final");
-  const finalDone=!!(finalM&&finalM.status==="finished"&&finalM.homeScore!=null&&finalM.awayScore!=null);
-  return finalDone&&hasCompleteTop3(Store.top3Result());
+  return hasCompleteTop3(Store.top3Result());
 }
 function winnerPopupKey(){return "egec_winner_popup_"+(ME?ME.code:"");}
 function maybeShowWinnerPopup(){
