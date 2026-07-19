@@ -1116,11 +1116,15 @@ function scoreTop3(top3){
   const a=Store.top3Result();
   if(!hasCompleteTop3(a))return{pts:0,kind:"none",bonus:false};
   if(!hasCompleteTop3(top3))return{pts:0,kind:"none",bonus:false};
+  // Tolerant name match: strict === breaks on stray whitespace or case edits
+  // made to matches.json after players saved their picks.
+  const nm=s=>String(s||"").trim().toLowerCase();
+  const same=(x,y)=>nm(x)===nm(y);
   let pts=0;
-  if(top3.first===a.first)pts+=CFG.top3.firstPts;
-  if(top3.second===a.second)pts+=CFG.top3.secondPts;
-  if(top3.third===a.third)pts+=CFG.top3.thirdPts;
-  const bonus=top3.first===a.first&&top3.second===a.second&&top3.third===a.third;
+  if(same(top3.first,a.first))pts+=CFG.top3.firstPts;
+  if(same(top3.second,a.second))pts+=CFG.top3.secondPts;
+  if(same(top3.third,a.third))pts+=CFG.top3.thirdPts;
+  const bonus=same(top3.first,a.first)&&same(top3.second,a.second)&&same(top3.third,a.third);
   if(bonus)pts+=CFG.top3.exactOrderBonus;
   return{pts,kind:pts>0?"hit":"miss",bonus};
 }
@@ -2575,7 +2579,7 @@ function renderBoard(){
     const proj=liveOn?computeScore(picks,top3,{projected:true}):conf;
     const predicted=Object.values(picks).filter(x=>x&&x.h!=null).length;
     return{name:p.name,code:p.code,pts:conf.total,projPts:proj.total,delta:proj.total-conf.total,
-      played:conf.played,predicted,scorePts:conf.scorePts,bonus:conf.top3Bonus,streak:conf.currentStreak,exacts:conf.exacts};
+      played:conf.played,predicted,scorePts:conf.scorePts,top3Pts:conf.top3Pts,bonus:conf.top3Bonus,streak:conf.currentStreak,exacts:conf.exacts};
   });
   const maxExact=rows.reduce((mx,r)=>Math.max(mx,r.exacts||0),0);
   const cmp=k=>(a,b)=>b[k]-a[k]||b.scorePts-a.scorePts||b.played-a.played||a.name.localeCompare(b.name);
@@ -2611,7 +2615,8 @@ function renderBoard(){
     const topExact=maxExact>0&&p.exacts===maxExact;
     const extras=`${ME&&p.code===ME.code?'<span class="tag you">YOU</span>':''}${topExact?`<span class="tag exact-tag" title="Most exact scores">🎯 ${p.exacts}</span>`:''}${p.bonus?'<span class="tag me-tag">TOP 3 BONUS</span>':''}${p.streak>=3?`<span class="tag streak-tag">🔥 ${p.streak}</span>`:''}`;
     nm.innerHTML=`<span class="n">${esc(p.name)}</span>${extras}`;
-    const sub=el("div","lb-sub");sub.textContent="🔮 "+p.predicted+" predicted";
+    const sub=el("div","lb-sub");
+    sub.textContent="🔮 "+p.predicted+" predicted"+(hasCompleteTop3(Store.top3Result())?" · 🏅 +"+(p.top3Pts||0)+" Top 3":"");
     const pt=el("div","lb-pts");
     pt.innerHTML=`${boardProjected?p.projPts:p.pts}${liveOn&&p.delta>0?`<span class="lb-delta">▲ +${p.delta}</span>`:""}`;
     row.appendChild(rk);row.appendChild(nm);row.appendChild(sub);row.appendChild(pt);panel.appendChild(row);
